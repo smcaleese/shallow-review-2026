@@ -1,0 +1,3 @@
+data/bodies*.json
+.env
+__pycache__/
