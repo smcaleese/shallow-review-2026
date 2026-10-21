@@ -1,0 +1,12 @@
+[project]
+name = "facets-shared"
+version = "0.1.0"
+description = "Tag the 2026 arXiv shortlist and notable LW/AF posts with one vocabulary and build a combined site"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.13.0",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.3",
+    "python-dotenv>=1.0.0",
+    "pyyaml>=6.0",
+]
