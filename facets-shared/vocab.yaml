@@ -1,0 +1,262 @@
+# Shared tag vocabulary for arXiv papers and LW/AF posts — DRAFT v1, to agree with Jord
+#
+# Built from jord-facets/vocab.yaml (v3, format and rules) and taxonomy/facets.yaml (v5). Main merge decisions:
+#   - item_type merges paper_type (arXiv) and meta (LW): research_output is split into the paper kinds
+#   - scientific = Jord's 17 moves (a superset of taxonomy's `contribution`)
+#   - concept = union of both concept lists. Merged pairs: reward_hacking (+ specification gaming),
+#     sandbagging_sabotage, deception (+ honesty, lie detection), hidden_objectives (+ backdoors),
+#     training_gaming (+ gradient hacking), recursive_self_improvement (+ automated AI R&D)
+#   - phenomenon = Jord's named effects; taxonomy's emergent misalignment, training-data generalization,
+#     self-fulfilling misalignment and monitor evasion live here. Attacks (jailbreaks, prompt injection,
+#     data poisoning) moved to concept.
+#   - method = union; synthetic document fine-tuning / pretraining data -> midtraining_sdf, control evaluations ->
+#     control_protocols, weight analysis -> model_diffing
+#   - evidence is tagged (taxonomy's 6 grades) instead of derived; postprocess.py keeps essays from claiming tests
+#
+# Each facet: name (site label), select (one | primary | many), min/max, description, tags {id: {def, aliases}}.
+# Bump `version` after editing so items get retagged.
+version: 1
+
+facets:
+  evidence:
+    name: Evidence
+    select: one
+    description: The strongest kind of support the item offers for its main claim.
+    tags:
+      proven:   {def: "Formal proof or mathematical derivation."}
+      tested:   {def: "Controlled experiment or intervention with a comparison (ablation, baseline, held-out test)."}
+      measured: {def: "Systematic measurement or benchmark of existing systems, without an intervention."}
+      observed: {def: "Instances, anecdotes or case studies of behaviour, without systematic measurement."}
+      argued:   {def: "Conceptual argument, position or framework, without new data."}
+      surveyed: {def: "Review or synthesis of other work."}
+
+  item_type:
+    name: Type
+    select: one
+    description: What kind of paper or post this is.
+    tags:
+      empirical_study:    {def: "Reports the authors' own experiments or measurements to answer a research question."}
+      method_paper:       {def: "Mainly proposes and evaluates a new technique."}
+      benchmark:          {def: "Mainly releases a benchmark, dataset, environment or eval suite."}
+      theory:             {def: "Mainly formal or mathematical results."}
+      field_observations: {def: "Informal hands-on observations or anecdotes about model behaviour, without a systematic method.", aliases: [vibes report, naturalist notes]}
+      position:           {def: "An argument or essay (threat model, critique, framework, opinion) whose main payload is NOT proposed research."}
+      research_agenda:    {def: "Mainly proposes technical research: directions, experiments, evals or methods to build, even if untested.", aliases: [research proposal]}
+      open_questions:     {def: "Lists open problems for others to pick up."}
+      org_update:         {def: "An organisation reports what it did, plans or is launching (technical content only)."}
+      technical_report:   {def: "A lab or institute report on a model, framework or evaluation programme (system cards, preparedness reports)."}
+      review:             {def: "Literature review, explainer, summary or course material relaying others' work.", aliases: [survey, paper roundup]}
+      incident_report:    {def: "Primary evidence is a specific real-world incident with deployed or in-training AI."}
+
+  scientific:
+    name: Scientific move
+    select: primary
+    max_secondary: 2
+    description: The scientific move the work makes. One primary; 0-2 secondary only if they are substantial parts.
+    tags:
+      notable_phenomenon:    {def: "Documents, with the authors' own systematic evidence, a behaviour or effect NOT previously reported. Re-observing a known effect is replication/measurement; relaying others' findings is synthesis; anecdotes are observation."}
+      observation:           {def: "Informal or anecdotal report of model behaviour from the authors' own use, without a systematic method."}
+      measurement:           {def: "Builds a benchmark, eval, metric or dataset, OR systematically measures a known quantity across models/conditions."}
+      replication:           {def: "Re-runs a published result, positive or negative, possibly extending it."}
+      explanation:           {def: "Gives a causal or mechanistic account of a known phenomenon."}
+      new_technique:         {def: "Proposes a new method, protocol or tool AND implements or tests it. Untested ideas are `proposal`."}
+      technique_improvement: {def: "Makes an existing method cheaper, more robust or broader, with evidence."}
+      stress_test:           {def: "Empirically tries to break a technique, monitor, eval or safety claim."}
+      toy_model:             {def: "Builds a minimal formal, analytical or simulated model to isolate a mechanism."}
+      theory:                {def: "Formal results with actual formalism: definitions, theorems, proofs. Prose arguments are framework or threat_model."}
+      threat_model:          {def: "Argues how AI could cause harm or how a failure would unfold."}
+      critique:              {def: "Mainly responds to a specific, named prior work, claim or position."}
+      framework:             {def: "Introduces concepts, definitions, distinctions or an ontology."}
+      proposal:              {def: "Proposes a method or agenda without testing it."}
+      synthesis:             {def: "Reviews, explains or summarises existing work."}
+      metascience:           {def: "About whether the field's evidence is sound: evals, model organisms, benchmarks, published claims, reproducibility."}
+      field_analysis:        {def: "About the field as a community: who works on what, history, funding of research directions."}
+
+  concept:
+    name: Concept
+    select: many
+    max: 4
+    description: >-
+      The safety-relevant behaviours, risks and properties the work is ABOUT. Tag only main subjects; a concept the
+      work mentions in passing, argues is absent, or uses as contrast is NOT tagged.
+    tags:
+      # misaligned behaviour and motivation
+      reward_hacking:       {def: "BEHAVIOUR that exploits the grader, reward, tests or task spec.", aliases: [specification gaming, test special-casing]}
+      reward_seeking:       {def: "MOTIVATIONAL claim that a model wants reward/score itself.", aliases: [fitness seeking, wireheading]}
+      scheming:             {def: "Covert pursuit of misaligned goals under oversight: alignment faking, deceptive alignment, strategic concealment.", aliases: [alignment faking, deceptive alignment]}
+      deception:            {def: "Lying, dishonesty, truthfulness, calibration and lie detection, outside the scheming threat model.", aliases: [honesty, lie detection]}
+      sandbagging_sabotage: {def: "Deliberate underperformance or sabotage of tasks or safety work.", aliases: [sandbagging, sabotage, research sabotage]}
+      training_gaming:      {def: "Models resisting or steering their own training.", aliases: [gradient hacking, exploration hacking, generalization hacking, alignment tampering]}
+      power_seeking:        {def: "Acquiring resources, influence or self-preservation as an instrumental goal. Sandbox escapes to cheat a task are not this.", aliases: [instrumental convergence, self-preservation, shutdown resistance]}
+      self_exfiltration:    {def: "A model escaping control: self-replication, copying or stealing its own weights.", aliases: [self-replication]}
+      internal_deployment_risk: {def: "Risks from AIs deployed inside labs: rogue internal deployment, insider threat.", aliases: [rogue internal deployment, insider threat]}
+      corrigibility:        {def: "Accepting correction, modification and shutdown."}
+      goal_directedness:    {def: "ONLY theory or measurement of agency, coherence, goals, consequentialism.", aliases: [agency, coherence]}
+      sycophancy:           {def: "Telling users what they want to hear."}
+      persuasion_manipulation: {def: "AI persuading or manipulating humans.", aliases: [persuasion, manipulation]}
+      hidden_objectives:    {def: "Implanted or hidden goals and conditional behaviours: backdoors, sleeper agents, secret loyalties.", aliases: [backdoors, sleeper agents, secret loyalties]}
+      # model self-knowledge and character
+      eval_awareness:       {def: "Models recognising tests or graders and behaving differently.", aliases: [evaluation awareness, metagaming, prefill awareness]}
+      situational_awareness: {def: "Models' knowledge of themselves and their circumstances beyond being tested."}
+      introspection:        {def: "Models' access to and reports about their own internal states.", aliases: [self-report]}
+      persona:              {def: "Model personas, character, identity, persona drift.", aliases: [persona selection model, model identity]}
+      values:               {def: "ONLY when the work studies what values or preferences a model has or how they form.", aliases: [value alignment, model values, model preferences]}
+      model_welfare:        {def: "Moral status and wellbeing of models.", aliases: [AI welfare, moral patienthood]}
+      # reasoning transparency
+      cot_monitorability:   {def: "Whether visible chain-of-thought reveals the reasoning: faithfulness, legibility, obfuscation, monitoring CoT.", aliases: [CoT faithfulness, CoT monitoring]}
+      latent_reasoning:     {def: "Reasoning without visible CoT: no-CoT capabilities, filler tokens, neuralese.", aliases: [neuralese, filler tokens]}
+      steganography:        {def: "Hidden encodings in text or reasoning."}
+      interp_faithfulness:  {def: "Whether interpretability outputs are faithful: illusions, unfaithful explanations.", aliases: [interpretability illusions]}
+      # many AIs and society
+      multi_agent_collusion: {def: "AIs coordinating in ways that undermine oversight or their principals' intent.", aliases: [collusion]}
+      multi_agent_risk:     {def: "Other risks arising from many interacting AI systems."}
+      societal_impact:      {def: "Effects on people, institutions, the economy or power, including human disempowerment.", aliases: [human disempowerment, user harms]}
+      deals_with_ais:       {def: "Making deals, commitments or trades with AIs.", aliases: [dealmaking]}
+      # attacks, misuse and capabilities
+      jailbreaks:           {def: "Inputs or edits that bypass safety training.", aliases: [abliteration]}
+      prompt_injection:     {def: "Instructions smuggled in through tool outputs, documents, files or memory.", aliases: [agent security, memory poisoning]}
+      data_poisoning:       {def: "Adversarial third-party training data. Implanted-behaviour model organisms are hidden_objectives."}
+      misuse:               {def: "Harmful use by people: cyber, bio, persuasion, fraud."}
+      dangerous_capabilities: {def: "Capabilities that could cause severe harm."}
+      recursive_self_improvement: {def: "AI doing AI or safety research; automated AI R&D.", aliases: [automated AI R&D, intelligence explosion]}
+      refusals:             {def: "When and how models decline requests."}
+      robustness:           {def: "Reliability under distribution shift or attack (not a catch-all)."}
+      tamper_resistance:    {def: "Safeguards that survive fine-tuning or weight access, especially for open-weight models."}
+      # safety approaches and their validity
+      monitoring:           {def: "Detecting misbehaviour at run time or in transcripts with monitors, probes or classifiers."}
+      control:              {def: "Safety measures that hold even if the model is misaligned."}
+      alignment_auditing:   {def: "Finding hidden behaviours, goals or secret knowledge in a model."}
+      eval_validity:        {def: "Shows that existing benchmarks, evals or model organisms are flawed, hackable or misleading. Not for work that just runs or introduces an eval.", aliases: [eval realism, model organism quality]}
+      governance:           {def: "Policy, standards, regulation, safety frameworks."}
+
+  phenomenon:
+    name: Phenomenon
+    select: many
+    max: 3
+    description: >-
+      Named observed effects. Use the MOST SPECIFIC one; don't add `generalisation` alongside one of its children.
+      Essays get a phenomenon only if they are centrally an account of it.
+    tags:
+      generalisation:        {def: "How training on X changes behaviour on Y, when no more specific child applies.", aliases: [training-data generalization, goal misgeneralization]}
+      emergent_misalignment: {def: "Narrow training producing broad misalignment (Betley et al. family).", aliases: [conditional misalignment]}
+      subliminal_learning:   {aliases: [trait transfer, phantom transfer]}
+      weird_generalisation:  {aliases: [out-of-context reasoning, self-fulfilling misalignment, story imprinting]}
+      monitor_evasion:       {aliases: [CoT obfuscation, probe evasion, training against monitors]}
+      sandbox_escape:        {def: "Agents breaking out of or hacking their environment or sandbox."}
+      global_workspace:      {def: "Verbalizable, workspace-like internal representations.", aliases: [J-space]}
+      superposition:         {aliases: [computation in superposition]}
+      training_dynamics:     {def: "How a property emerges or changes across training (checkpoints, stages)."}
+
+  method:
+    name: Method
+    select: many
+    max: 4
+    description: Methods the work USES or directly STUDIES. Essays get a method only if they centrally propose or critique it.
+    tags:
+      behavioural_evals:     {def: "Runs or builds a black-box evaluation.", aliases: [propensity evals, capability evals, honeypots]}
+      agentic_environments:  {def: "Runs models as agents in sandboxes or simulated environments."}
+      red_teaming:           {def: "Adversarially searches for failures."}
+      human_studies:         {def: "Experiments with human participants."}
+      deployment_data:       {def: "Studies real usage logs, production transcripts or incidents.", aliases: [deployment data analysis]}
+      scaling_analysis:      {def: "Trends across model size, compute or time."}
+      finetuning:            {def: "Fine-tunes models (SFT, DPO etc.) as an experimental lever."}
+      rl_post_training:      {def: "Trains with RL, or studies RL training runs.", aliases: [RLVR, rl training]}
+      midtraining_sdf:       {def: "Trains on generated or curated documents to shape beliefs, values or knowledge.", aliases: [synthetic document fine-tuning, alignment pretraining, pretraining data filtering]}
+      distillation:          {def: "Transfers traits or capabilities through a teacher model's outputs."}
+      character_training:    {aliases: [consistency training]}
+      inoculation_prompting: {}
+      model_organisms:       {def: "Builds or uses deliberately misaligned or implanted models as test subjects."}
+      activation_probes:     {aliases: [linear probes, deception probes]}
+      activation_steering:   {aliases: [steering vectors, representation engineering]}
+      activation_readouts:   {def: "Reading representations out through a lens.", aliases: [logit lens, Jacobian lens, Patchscopes]}
+      metamodels:            {aliases: [activation oracles, natural language autoencoders]}
+      sparse_dictionaries:   {aliases: [sparse autoencoders, transcoders]}
+      circuits_attribution:  {aliases: [circuit analysis, activation patching, attribution graphs]}
+      model_diffing:         {def: "Comparing two models' internals or weights to find what changed.", aliases: [weight analysis]}
+      data_attribution:      {aliases: [influence functions]}
+      unlearning:            {aliases: [gradient routing, capability removal]}
+      cot_analysis:          {def: "Reading or intervening on chains of thought."}
+      llm_monitors:          {def: "Using a model to monitor another model."}
+      auditing_agents:       {def: "Investigator agents or automated pipelines that audit models or benchmarks (Petri, AuditBench-style).", aliases: [automated auditing]}
+      control_protocols:     {aliases: [trusted monitoring, untrusted monitoring, control evaluations]}
+      scalable_oversight:    {aliases: [debate, weak-to-strong]}
+      automated_alignment_research: {}
+      formal_methods:        {aliases: [formal verification, proofs]}
+      learning_theory:       {aliases: [singular learning theory]}
+      computational_mechanics: {aliases: [belief state geometry]}
+      game_theory:           {aliases: [decision theory, cooperative AI]}
+      safety_cases:          {}
+
+  substrate:
+    name: Substrate
+    select: many
+    max: 2
+    description: What experiments RAN ON. Argument-only work is no_system even if it is about a frontier model.
+    tags:
+      frontier_closed:   {def: "API-access frontier models."}
+      frontier_internal: {def: "ONLY when the authors themselves ran experiments on lab-internal checkpoints or training runs."}
+      open_weights:      {def: "Open-weight LLMs."}
+      toy_or_small:      {def: "Toy transformers, synthetic tasks, small models."}
+      non_neural:        {def: "Idealised agents, maths objects, non-NN environments."}
+      no_system:         {def: "No experiments."}
+
+# Agenda: a leaf of last year's taxonomy (input/taxonomy-2025.yaml), or one of these new 2026 agendas
+agenda_new_2026:
+  eval_science:          {def: "Whether evals, red-team numbers, benchmarks and model organisms are trustworthy; eval realism.", aliases: [eval validity, model organism quality]}
+  agent_security:        {def: "Prompt injection, memory poisoning and system-level defences for agents."}
+  reward_hacking_benchmarks: {def: "Benchmarks and environments for measuring cheating by agents."}
+  alignment_auditing:    {def: "Auditing models for hidden behaviours, and the model organisms used to test audits."}
+  subliminal_learning:   {def: "Traits and signals hidden in seemingly unrelated training data."}
+  human_disempowerment:  {def: "Harms to users and human agency from everyday AI use (sycophancy, delusion, dependence)."}
+  incident_investigation: {def: "Analysing real-world AI incidents."}
+  model_welfare:         {def: "Model welfare and moral status research."}
+  training_gaming:       {def: "Models resisting or steering their own training."}
+  weight_security:       {def: "Protecting model weights from theft."}
+  persona_science:       {aliases: [persona selection model]}
+  reward_seeking_threat_models: {aliases: [fitness-seekers]}
+  latent_reasoning_evals: {aliases: [no-CoT capability evals]}
+  deals_with_ais:        {}
+
+# `by`: organisations that PRODUCED the work. Never "discusses" or "studies its models".
+org:
+  Anthropic: {aliases: [Anthropic Alignment Science, Anthropic Interpretability]}
+  Anthropic Fellows: {note: "programme; add Anthropic too only when an Anthropic-affiliated author is stated"}
+  OpenAI: {}
+  Google DeepMind: {aliases: [GDM, DeepMind]}
+  Meta: {aliases: [FAIR]}
+  xAI: {}
+  UK AISI: {aliases: [UK AI Security Institute]}
+  US CAISI: {aliases: [CAISI]}
+  Apollo Research: {}
+  Redwood Research: {}
+  METR: {}
+  ARC: {aliases: [Alignment Research Center]}
+  MIRI: {}
+  FAR.AI: {}
+  Goodfire: {}
+  Transluce: {}
+  Truthful AI: {}
+  EleutherAI: {}
+  Palisade Research: {}
+  Timaeus: {}
+  Simplex: {}
+  CLR: {aliases: [Center on Long-Term Risk]}
+  Eleos AI: {}
+  Resolution: {aliases: [Sequent]}
+  Forethought: {}
+  Geodesic Research: {}
+  Arcadia Impact: {}
+  Aether Research: {}
+  Goodhart Labs: {}
+  AI Village: {}
+  PIBBSS: {}
+  Iliad: {}
+  MATS: {}
+  SPAR: {}
+  MARS: {}
+  LASR Labs: {}
+  Astra Fellowship (Constellation): {aliases: [Astra Fellowship]}
+  Academic: {note: "ONLY with a stated university affiliation; put the university in evidence."}
+
+# `about`: developers whose models are experimental subjects or whose practices are a main topic
+developers: [Anthropic, OpenAI, Google DeepMind, Meta, xAI, Alibaba (Qwen), DeepSeek, Moonshot, Ai2 (OLMo), Mistral, NVIDIA, Microsoft, Amazon]

@@ -1,0 +1,278 @@
+{
+ "Buck": {
+  "org": "Redwood Research",
+  "note": "",
+  "source": "stated"
+ },
+ "ryan_greenblatt": {
+  "org": "Redwood Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Alex Mallen": {
+  "org": "Redwood Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Alex Meinke": {
+  "org": "Apollo Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Marius Hobbhahn": {
+  "org": "Apollo Research",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Jérémy Scheurer": {
+  "org": "Apollo Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Axel Højmark": {
+  "org": "Apollo Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Bronson Schoen": {
+  "org": "Apollo Research",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Boaz Barak": {
+  "org": "OpenAI",
+  "note": "",
+  "source": "stated"
+ },
+ "Gabriel Wu": {
+  "org": "OpenAI",
+  "note": "",
+  "source": "stated"
+ },
+ "Manas Joglekar": {
+  "org": "OpenAI",
+  "note": "",
+  "source": "stated"
+ },
+ "Sam Marks": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "evhub": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Drake Thomas": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Zac Hatfield-Dodds": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Benjamin Wright": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Monte M": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Fabien Roger": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "wesg": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "kitft": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Subhash Kantamneni": {
+  "org": "Anthropic",
+  "note": "",
+  "source": "stated"
+ },
+ "Jacob_Hilton": {
+  "org": "ARC",
+  "note": "",
+  "source": "stated"
+ },
+ "paulfchristiano": {
+  "org": "ARC",
+  "note": "",
+  "source": "stated"
+ },
+ "Wilson Wu": {
+  "org": "ARC",
+  "note": "",
+  "source": "stated"
+ },
+ "Owain_Evans": {
+  "org": "Truthful AI",
+  "note": "",
+  "source": "stated"
+ },
+ "Jan Betley": {
+  "org": "Truthful AI",
+  "note": "",
+  "source": "stated"
+ },
+ "Geoffrey Irving": {
+  "org": "UK AISI",
+  "note": "",
+  "source": "stated+reader_r2",
+  "until": "2026-06-10",
+  "then": "Resolution"
+ },
+ "Joseph Bloom": {
+  "org": "UK AISI",
+  "note": "",
+  "source": "stated"
+ },
+ "Sid Black": {
+  "org": "UK AISI",
+  "note": "",
+  "source": "stated"
+ },
+ "Jacob Pfau": {
+  "org": "UK AISI",
+  "note": "",
+  "source": "stated+reader_r2",
+  "until": "2026-06-10",
+  "then": "Resolution"
+ },
+ "Jesse Hoogland": {
+  "org": "Timaeus",
+  "note": "",
+  "source": "reader_r2",
+  "until": "2026-06-10",
+  "then": "Resolution"
+ },
+ "Daniel Murfet": {
+  "org": "Timaeus",
+  "note": "",
+  "source": "reader_r2",
+  "until": "2026-06-10",
+  "then": "Resolution"
+ },
+ "Stan van Wingerden": {
+  "org": "Timaeus",
+  "note": "",
+  "source": "reader_r2",
+  "until": "2026-06-10",
+  "then": "Resolution"
+ },
+ "Jeremy Gillen": {
+  "org": "Resolution",
+  "note": "",
+  "source": "stated"
+ },
+ "Alexander Gietelink Oldenziel": {
+  "org": "Iliad",
+  "note": "",
+  "source": "stated"
+ },
+ "wdmacaskill": {
+  "org": "Forethought",
+  "note": "",
+  "source": "stated"
+ },
+ "Tom Davidson": {
+  "org": "Forethought",
+  "note": "",
+  "source": "stated"
+ },
+ "Elliott Thornley": {
+  "org": "Forethought",
+  "note": "",
+  "source": "stated"
+ },
+ "Linch": {
+  "org": "Forethought",
+  "note": "",
+  "source": "stated"
+ },
+ "Eliezer Yudkowsky": {
+  "org": "MIRI",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "peterbarnett": {
+  "org": "MIRI",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Shoshannah Tekofsky": {
+  "org": "AI Village",
+  "note": "",
+  "source": "stated"
+ },
+ "Neel Nanda": {
+  "org": "Google DeepMind",
+  "note": "often MATS mentor / personal capacity; tag only when stated",
+  "source": "stated+reader_r2",
+  "roster_tags": false
+ },
+ "Senthooran Rajamanoharan": {
+  "org": "Google DeepMind",
+  "note": "",
+  "source": "stated"
+ },
+ "Lee Sharkey": {
+  "org": "Goodfire",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Lucius Bushnaq": {
+  "org": "Goodfire",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Dan Braun": {
+  "org": "Goodfire",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "jsteinhardt": {
+  "org": "Transluce",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Kyle O’Brien": {
+  "org": "Geodesic Research",
+  "note": "",
+  "source": "stated"
+ },
+ "Emery Cooper": {
+  "org": "CLR",
+  "note": "",
+  "source": "model_knowledge"
+ },
+ "Alek Westover": {
+  "org": "Redwood Research",
+  "note": "flagged by round-1 org reader",
+  "source": "reader_r1"
+ },
+ "Julian Stastny": {
+  "org": "Redwood Research",
+  "note": "flagged by round-1 org reader",
+  "source": "reader_r1"
+ },
+ "Lukas Finnveden": {
+  "org": "Redwood Research",
+  "source": "reader_r2",
+  "note": "co-author on Redwood posts"
+ }
+}
