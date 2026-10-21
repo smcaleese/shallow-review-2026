@@ -1,0 +1,101 @@
+# Shallow Review 2026 — faceted tag schema (draft v0, Jord + Claude)
+#
+# Idea: every item gets tags on several independent facets. A "taxonomy"
+# is a choice of which facet is the top level and which is the second
+# level. The LW post picks one view; the website lets readers switch.
+#
+# Facets:
+#   motivation  — WHY: what scientific move the work makes (1 primary + 0-2 secondary)
+#   object      — WHAT it is about (phenomenon / property / risk), 1-3
+#   method      — HOW: the main tools used, 1-3
+#   substrate   — WHERE: what system the work is done on, 1-2
+#   agenda      — continuity with the 2025 review taxonomy (leaf ids), 0-2
+#   org         — affiliations visible in the item, 0-n (free text, normalised later)
+
+motivation:
+  # Note: "toy models" from the original list moved to `substrate`. Toy models
+  # are a place you do science, not a reason for doing it: a toy-model paper
+  # still discovers, explains or stress-tests something.
+  discover:
+    def: Reports a new phenomenon, behaviour or property not previously documented.
+    edge: First demo of X in a new model counts only if X itself is new. Showing a known phenomenon in a new setting is `discover` only if the setting changes what we believe about it; otherwise `replicate`.
+  explain:
+    def: Gives a causal or mechanistic account of an already-known phenomenon — why it happens, what drives it, when it appears.
+    edge: Ablations that only map where a phenomenon occurs without a proposed mechanism lean `discover`/`measure`.
+  build:
+    def: Proposes a new safety technique, protocol, training method or tool.
+  improve:
+    def: Makes an existing technique work better (cheaper, more robust, wider scope).
+  stress_test:
+    def: Tries to break a technique, eval, monitor or safety claim — red-teaming, adversarial evaluation, finding failure modes of a METHOD.
+    edge: Breaking a model's safety training (jailbreaks) is `stress_test` of that training. Finding a failure of a model that isn't framed as testing a method is `discover`.
+  replicate:
+    def: Re-runs or re-tests a published result, positive or negative.
+  measure:
+    def: Builds a benchmark, eval suite, metric, dataset or measurement methodology; or reports measurements across models where the measurement apparatus is the contribution.
+  theory:
+    def: Formal / mathematical results — definitions, theorems, proofs, formal models.
+  conceptual:
+    def: Non-formal arguments, frameworks, threat models, ontologies, distinctions, critiques of ideas (not of a specific empirical result).
+  synthesis:
+    def: Reviews, literature maps, explainers, retrospectives, "state of X" posts.
+  strategy:
+    def: Proposes or prioritises a TECHNICAL research agenda — what alignment researchers should work on next and why.
+    edge: If the post mainly argues about the nature of a problem (what could go wrong, how to think about it), that is `conceptual` even if it ends with recommendations. Non-technical plans (governance, slowdowns, careers) are out of scope entirely.
+  incident:
+    def: Reports or analyses a specific real-world event involving deployed AI systems.
+
+object:
+  # Controlled vocabulary; extend in review. Derived from the 2,479 free-form
+  # llm_tags on the 1,154 annotated LW posts (merged synonyms).
+  - reward_hacking            # incl. specification gaming, reward-seeking, fitness-seekers
+  - emergent_misalignment     # incl. conditional misalignment
+  - scheming                  # incl. deceptive alignment, alignment faking
+  - sandbagging               # incl. exploration hacking
+  - eval_awareness            # incl. situational awareness relevant to evals
+  - cot_monitorability        # faithfulness, legibility, obfuscation
+  - latent_reasoning          # no-CoT reasoning, filler tokens, neuralese, recurrence
+  - steganography_collusion
+  - honesty_deception         # lying, sycophancy, lie detection targets
+  - personas_character        # persona selection model, character training, self-models
+  - values_preferences        # model values, utility engineering, constitutions
+  - introspection_self_knowledge
+  - generalization            # weird generalization, OOD, subliminal learning, goal misgeneralization
+  - data_poisoning_backdoors  # incl. secret loyalties
+  - corrigibility_shutdown
+  - power_seeking_autonomy    # instrumental convergence, self-replication, sandbox escape
+  - jailbreaks_misuse
+  - dangerous_capabilities    # cyber, bio, AI R&D
+  - multi_agent
+  - training_dynamics         # how properties emerge over training
+  - representations_features  # what is represented, geometry
+  - automated_alignment_research
+  - oversight_scaling         # debate, W2S, scalable oversight
+  - model_welfare
+  - other                     # put a short free-text in object_other
+
+method:
+  - mech_interp          # circuits, attribution, SAEs, transcoders
+  - probes_steering      # linear probes, steering vectors, activation oracles
+  - behavioural_eval     # prompting, black-box evals, LLM-as-judge
+  - finetuning_sft       # SFT / SDF / midtraining interventions
+  - rl_training          # RL / RLVR training experiments
+  - pretraining_data     # pretraining / data filtering interventions
+  - control_protocols    # monitors, trusted/untrusted setups
+  - formal_math
+  - argument             # verbal reasoning, no experiments
+  - simulation_agents    # multi-agent / environment simulations
+  - other
+
+substrate:
+  - frontier_closed      # API-only frontier models
+  - open_weights_llm     # open models, any size >= ~1B
+  - small_or_toy_model   # toy transformers, synthetic tasks, compmech-style generators
+  - non_neural           # idealised agents, math objects, RL gridworlds without NNs
+  - none                 # no system studied (pure argument / strategy)
+  - humans               # human studies
+
+agenda:
+  # 2025 Shallow Review leaf ids (main-pipeline/data/taxonomy.yaml), or
+  # "new:<short_name>" when nothing fits. Lets us diff 2025 vs 2026.
+  source: main-pipeline/data/taxonomy.yaml

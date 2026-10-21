@@ -1,0 +1,32 @@
+{"id": "3uJqhrC2idf4eNj5h", "changes": {"concept": ["corrigibility"]}, "rejected": [], "n_findings": 1}
+{"id": "5ro9kSxhP8mHXGmn4", "changes": {}, "rejected": ["CLR org tag not applied: the post text states no CLR affiliation for Emery Cooper. The roster link rests on model knowledge only, and the 'by' rules require stated evidence or a verified roster. A topic being a CLR research area is not evidence of authorship."], "n_findings": 1}
+{"id": "6cb7qd3RSkgnviCpf", "changes": {"substrate": ["no_system"]}, "rejected": [], "n_findings": 1}
+{"id": "AP7YDke5jjY4v3X9Z", "changes": {"by": [{"org": "Resolution", "basis": "stated", "evidence": "We are starting a large nonprofit research organization, Resolution"}]}, "rejected": [], "n_findings": 1}
+{"id": "CMWivoHeRNNErEykc", "changes": {"scientific_primary": "synthesis", "scientific_secondary": []}, "rejected": [], "n_findings": 1}
+{"id": "Dw8mskAvBX37MxvXo", "changes": {"phenomenon": []}, "rejected": [], "n_findings": 1}
+{"id": "H6DDSEvrtCk8Sehfd", "changes": {"concept": ["reward_seeking", "recursive_self_improvement", "multi_agent_collusion"]}, "rejected": [], "n_findings": 1}
+{"id": "J76LZCC55RdHeqEhz", "changes": {"concept": ["reward_hacking", "reward_seeking"]}, "rejected": [], "n_findings": 1}
+{"id": "KGcE7eAdfxHchk25X", "changes": {}, "rejected": ["Transluce tag not supported: the post text states no Transluce affiliation for the author, and the org rule requires stated evidence or a roster. The finding offers no verbatim snippet and the post gives no basis for one."], "n_findings": 1}
+{"id": "Kben8CzS4awCwNw5c", "changes": {"method": []}, "rejected": [], "n_findings": 1}
+{"id": "KctxwGKxm9fHtwh6u", "changes": {"concept": ["internal_deployment_risk", "reward_hacking"]}, "rejected": [], "n_findings": 1}
+{"id": "LZGuqoYHphet9sfZs", "changes": {}, "rejected": ["The post argues for four safety-case claims and the access third-party evaluators need. This is a policy and safety-case position. It does not mainly propose technical experiments, evals or methods to build, so it does not fit research_agenda. The meta tag stays as position."], "n_findings": 1}
+{"id": "LqSZZAriGqgsGDQe3", "changes": {"by": [{"org": "Aether Research", "basis": "author_roster", "evidence": "roster: Rauno Arike"}]}, "rejected": [], "n_findings": 1}
+{"id": "QH86EzNsjRw3wtCGs", "changes": {}, "rejected": ["The experiments ran on open-weight GLM-4.5-Air with a public-method reimplementation. The post says it \"may not capture how the technique is implemented at frontier labs\", so it does not study Anthropic's own models or practice. Anthropic is quoted as motivation only."], "n_findings": 1}
+{"id": "QKDoZe6EKhxnFjLWK", "changes": {"scientific_secondary": ["critique"]}, "rejected": [], "n_findings": 1}
+{"id": "QQQAcKuWK6k98FivY", "changes": {"method": ["metamodels", "activation_steering"]}, "rejected": [], "n_findings": 1}
+{"id": "WpuRdcMfFeiLeXkxL", "changes": {"scientific_primary": "synthesis", "concept": ["reward_hacking", "internal_deployment_risk"]}, "rejected": [], "n_findings": 2}
+{"id": "cWuqxF7qB2eGSkkS4", "changes": {"concept": ["reward_hacking"]}, "rejected": ["Did not add goal_directedness: the post does not theorize or measure agency or coherence, so the reviewer's 'or none' option fits better."], "n_findings": 1}
+{"id": "eAQZaiC3PcBhS4HjM", "changes": {"method": ["sparse_dictionaries", "circuits_attribution"]}, "rejected": [], "n_findings": 1}
+{"id": "fMnC6ZD37qrnZAFYz", "changes": {"by": []}, "rejected": [], "n_findings": 1}
+{"id": "hLPGv8QjPcNLtDp3A", "changes": {"about": []}, "rejected": [], "n_findings": 1}
+{"id": "hfNBEKaStASAYMLiu", "changes": {"concept": ["values"]}, "rejected": [], "n_findings": 1}
+{"id": "mMERyrvEJ4xbiozie", "changes": {"method": ["circuits_attribution"]}, "rejected": [], "n_findings": 1}
+{"id": "mu7eJdesBkKuBycnY", "changes": {"about": ["Meta"]}, "rejected": ["Anthropic not added: the experiments run only on Meta's Llama models. Anthropic's Sleeper Agents paper is the replication target, but its models are not the ones studied."], "n_findings": 1}
+{"id": "nB8KKapnWGBXtKKiM", "changes": {}, "rejected": ["Substrate already lists frontier_internal, which the finding proposes. The text supports it: METR/Redwood analysed about 1,300 OpenAI-provided internal-agent transcripts with raw CoT, and the primary model is internal-only. The finding's 'current=frontier_closed' doesn't match the current tags, so no change is needed."], "n_findings": 1}
+{"id": "noXXv7PwwFqauTBFQ", "changes": {"substrate": ["no_system"]}, "rejected": [], "n_findings": 1}
+{"id": "ntKx9YHWCwxSeGbRB", "changes": {}, "rejected": ["The post text gives no organisational affiliation for Francis Rhys Ward or Dewi Gould. The 'by' field needs stated evidence or a roster entry that can be checked, and the reviewer's claim rests on outside knowledge of the 2026 orgs and on the Think Fast tags. The UK AISI mention is only a cited estimate from another source, so it doesn't count as authorship."], "n_findings": 1}
+{"id": "tN5mgBAinwFe5c67c", "changes": {"scientific_primary": "synthesis", "concept": ["scheming", "sandbagging_sabotage", "internal_deployment_risk", "cot_monitorability"]}, "rejected": [], "n_findings": 2}
+{"id": "tkLSeGeemcabAmLkv", "changes": {"by": [{"org": "Redwood Research", "basis": "author_roster", "evidence": "roster: Alex Mallen"}]}, "rejected": [], "n_findings": 1}
+{"id": "tz5AmWbEcMBQpiEjY", "changes": {"concept": ["persuasion_manipulation"]}, "rejected": [], "n_findings": 1}
+{"id": "uDAWPNwPJfEY7oroF", "changes": {"agenda_2025": ["control"]}, "rejected": [], "n_findings": 1}
+{"id": "vzHtHHBJoKATi5SeK", "changes": {"scientific_primary": "framework", "scientific_secondary": ["synthesis"]}, "rejected": [], "n_findings": 1}
