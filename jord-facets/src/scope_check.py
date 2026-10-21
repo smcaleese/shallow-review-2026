@@ -23,10 +23,13 @@ TOOL = {"name": "scope", "description": "Record the scope decision.",
             "reason": {"type": "string", "description": "One short sentence."}},
             "required": ["scope", "reason"]}}
 
-client = anthropic.Anthropic()
+client = None if os.environ.get("PRINT_PROMPT") else anthropic.Anthropic()
+
+def build_user(row):
+    return f"Title: {row['title']}\nAuthors: {row['authors']}\nForum tags: {row['tags']}\n\nExcerpt:\n{row['excerpt'][:2500]}"
 
 def check(row):
-    user = f"Title: {row['title']}\nAuthors: {row['authors']}\nForum tags: {row['tags']}\n\nExcerpt:\n{row['excerpt'][:2500]}"
+    user = build_user(row)
     err = None
     for attempt in range(5):
         try:
@@ -40,6 +43,12 @@ def check(row):
             err = str(e)
             time.sleep(20 * (attempt + 1) if "429" in err else 2)
     return {"id": row["id"], "title": row["title"], "error": err}
+
+
+# PRINT_PROMPT=1 python ... : print the exact prompt (system, tool schema, one example user turn) and exit.
+if os.environ.get("PRINT_PROMPT"):
+    print(json.dumps({"model": MODEL, "system": SYSTEM, "tool": TOOL, "example_user": build_user(next(iter(csv.DictReader(open(raw_p)))))}, ensure_ascii=False))
+    sys.exit(0)
 
 rated = {r["id"]: r["relevance"] for r in csv.DictReader(open(rated_p))}
 done = set()

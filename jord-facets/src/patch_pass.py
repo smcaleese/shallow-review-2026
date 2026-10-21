@@ -6,7 +6,7 @@ Usage: python patch_pass.py BASE_JSONL FINDINGS_GLOB BODIES_JSON VOCAB_YAML OUT_
 Writes one {"id", "changes": {field: new_value}, "notes"} per flagged post.
 Apply patches with apply_patches.py.
 """
-import glob, json, sys, time, concurrent.futures as cf
+import glob, json, os, sys, time, concurrent.futures as cf
 import anthropic
 
 base_p, fglob, bodies_p, vocab_p, out_p = sys.argv[1:6]
@@ -48,15 +48,19 @@ TOOL = {"name": "patch", "description": "Corrections for one post.", "input_sche
     "rejected": {"type": "array", "items": {"type": "string"}, "description": "short reasons for findings not applied"}},
     "required": ["changes", "rejected"]}}
 
-client = anthropic.Anthropic()
+client = None if os.environ.get("PRINT_PROMPT") else anthropic.Anthropic()
 
-def run(pid):
+def build_user(pid):
     rec = base[pid]
     cur = {k: rec.get(k) for k in FIELDS}
     fs = "\n".join(f"- [{f.get('facet')}] {f.get('type')}: current={f.get('current')} -> proposed={f.get('proposed')}. {f.get('reason')}"
                    for f in findings[pid])
     user = (f"Title: {rec['title']}\nAuthors: {rec['authors']}\n\nCurrent tags:\n{json.dumps(cur, ensure_ascii=False)}\n\n"
             f"Reviewer findings:\n{fs}\n\nPost text (start and end):\n{bodies.get(pid, '')}")
+    return user
+
+def run(pid):
+    user = build_user(pid)
     err = None
     for attempt in range(5):
         try:
@@ -74,6 +78,12 @@ def run(pid):
             err = str(e)
             time.sleep(20 * (attempt + 1) if "429" in err else 2)
     return {"id": pid, "error": err}
+
+
+# PRINT_PROMPT=1 python ... : print the exact prompt (system, tool schema, one example user turn) and exit.
+if os.environ.get("PRINT_PROMPT"):
+    print(json.dumps({"model": MODEL, "system": SYSTEM, "tool": TOOL, "example_user": build_user(sorted(findings)[0])}, ensure_ascii=False))
+    sys.exit(0)
 
 with cf.ThreadPoolExecutor(4) as ex, open(out_p, "w") as f:
     for res in ex.map(run, sorted(findings)):

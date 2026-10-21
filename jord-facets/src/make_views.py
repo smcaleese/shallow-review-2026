@@ -13,7 +13,7 @@ data = json.loads(re.search(r"const DATA = (\{.*?\});\n", s, re.S).group(1).repl
 items, names = data["items"], data["agendaNames"]
 json.dump(items, open(f"{out}/items.json", "w"), indent=1, ensure_ascii=False)
 
-FACETS = ["scientific", "meta", "concept", "phenomenon", "method", "substrate", "agenda", "org", "about"]
+FACETS = ["evidence", "scientific", "meta", "concept", "phenomenon", "method", "substrate", "agenda", "org", "about"]
 def vals(it, f):
     if f == "scientific":
         return [it["mp"]] + [f"{m} (secondary)" for m in it["ms"]]

@@ -30,47 +30,72 @@ The vocabulary, with definitions, aliases and rules, is in `vocab.yaml`.
 ## Layout
 
 ```
+run_pipeline.sh         one command: tag new posts, re-apply reviewed corrections, rebuild site + CSV
 vocab.yaml              tag vocabulary v3 (definitions, aliases, rules)
 roster.json             author -> org roster, date-aware (until/then); DRAFT, needs human check
 scope_overrides.json    include/exclude decisions on borderline posts (from reviewer rounds)
-src/                    the pipeline (below)
-data/                   outputs of each stage
+prompts/                the exact prompts every Claude call uses (rendered from the code) + reader-review prompts
+src/                    the pipeline scripts
+data/                   outputs of each stage; data/lw-posts-tagged.csv is the main export
 review/r1..r4/          findings from each round of simulated-reader review (JSONL)
 review/final-views/     final tags as markdown, grouped by each facet (easy to skim on GitHub)
-site/index.html         the interactive prototype
+site/index.html         the interactive page (self-contained)
 archive/pilot/          earlier schema/tagger versions, kept for reference
 ```
 
-## Pipeline
-
-All scripts take explicit paths. Steps 1 and 3–5 call Claude and need `ANTHROPIC_API_KEY`.
-Input is Stephen's scrape: `../scraping-scripts/AF-and-LW-scraper/results/1-lw-posts-raw.csv`
-and `2-lw-posts-rated.csv`.
+## Running it
 
 ```bash
-R=../scraping-scripts/AF-and-LW-scraper/results
-T=../main-pipeline/data/taxonomy.yaml
-
-# 1. strict technical-AI-safety scope check on everything Stephen's filter kept (Sonnet)
-python src/scope_check.py $R/1-lw-posts-raw.csv $R/2-lw-posts-rated.csv data/1-scope-first-pass.jsonl
-# 2. notable = union of top-N by karma, AF karma, comments, karma/month, among in-scope AI-tagged posts
-python src/select_notable.py $R/1-lw-posts-raw.csv data/2-notable-posts.csv 2026-10-10 data/1-scope-first-pass.jsonl
-# 3. fetch post text (start + end, so affiliations/acknowledgements survive) -- not committed, re-fetch
-python src/fetch_bodies.py data/2-notable-posts.csv data/bodies.json
-# 4. tag every facet (Sonnet), with optional reviewer notes from a previous round
-python src/tag.py data/2-notable-posts.csv data/bodies.json vocab.yaml $T roster.json - data/3-tags-raw.jsonl
-# 5. targeted corrections for posts with reviewer findings (only flagged fields change)
-python src/patch_pass.py data/3-tags-raw.jsonl 'review/r3/findings_*.jsonl' data/bodies.json vocab.yaml data/4a-patches-round3.jsonl
-# 6. apply patches + scope decisions, then enforce rules in code (each change is logged in `pp`)
-python src/apply_patches.py data/3-tags-raw.jsonl /tmp/patched.jsonl scope_overrides.json data/4a-patches-round3.jsonl data/4b-patches-round4.jsonl
-python src/postprocess.py /tmp/patched.jsonl data/bodies.json roster.json data/5-tags-final.jsonl scope_overrides.json
-# 7. build the page and the per-facet markdown views
-python src/build_page.py data/5-tags-final.jsonl vocab.yaml $T src/template.html site/index.html
-python src/make_views.py site/index.html review/final-views
+./jord-facets/run_pipeline.sh            # tag any new notable posts, rebuild site + CSV + views
+./jord-facets/run_pipeline.sh --scrape   # first re-scrape LW and re-run the relevance filter (Stephen's scraper)
+./jord-facets/run_pipeline.sh --offline  # no API calls: re-apply corrections and rules, rebuild outputs
 ```
 
-`src/roster_pass.py` drafted `roster.json` (stated affiliations in the posts + Opus knowledge,
-high-confidence only); readers then corrected it by hand.
+Needs `ANTHROPIC_API_KEY` (env or `jord-facets/.env`, gitignored) and `pip install anthropic pyyaml`.
+Re-running is cheap: every Claude step skips posts it has already done, and corrected tags stay frozen
+because the patch files are re-applied on top. `AS_OF=YYYY-MM-DD` overrides the date used for karma/month.
+Post text is fetched from the LessWrong API into `data/bodies.json`, which is not committed.
+
+Steps, in order (each is a plain script with explicit paths; see `run_pipeline.sh`):
+
+| Step | Script | Claude? | What it does |
+|---|---|---|---|
+| 1 | `src/scope_check.py` | Sonnet 5.5 | Strict technical-AI-safety check on everything Stephen's filter rated relevant |
+| 2 | `src/select_notable.py` | – | Notable = union of top-N by karma, AF karma, comments, karma/month among in-scope AI-tagged posts |
+| 3 | `src/fetch_bodies.py` | – | Post text, start + end, so affiliations and acknowledgements survive |
+| 4 | `src/tag.py` | Sonnet 5.5 | All facets incl. by-org with evidence; prompt built from `vocab.yaml` |
+| 5 | `src/apply_patches.py`, `src/postprocess.py` | – | Reviewed corrections + scope decisions, then rules enforced in code (each change logged in `pp`) |
+| 6 | `src/build_page.py`, `src/export_csv.py`, `src/make_views.py` | – | Site, CSV, markdown views |
+
+One-off: `src/roster_pass.py` (Opus 5.5) drafted `roster.json`; readers then corrected it.
+
+### Prompts
+
+`prompts/1-scope-check.md`, `2-roster.md`, `3-tag.md`, `4-patch.md` show each call exactly as sent: the system
+prompt, the tool schema the output is forced through, and one example user turn. They are rendered from
+the code (`PRINT_PROMPT=1` makes any of those scripts print its prompt and exit without calling the API), so
+after editing `vocab.yaml` or a script, re-render with `python src/render_prompts.py`.
+`prompts/5-readers.md` has the simulated-reader prompts for all four review rounds.
+
+### Reviewing and correcting tags
+
+1. Someone (a human, or reader agents using `prompts/5-readers.md`) writes findings as JSON lines, one per
+   problem: `{"id": "<post id>", "facet": ..., "type": ..., "current": ..., "proposed": ..., "reason": ...}`.
+   Use `"type": "scope"` with `"proposed": "include"|"exclude"` for scope calls.
+2. `python src/patch_pass.py data/3-tags-raw.jsonl 'review/<round>/findings_*.jsonl' data/bodies.json vocab.yaml data/4c-patches-<round>.jsonl`
+   checks each finding against the post text and changes only the fields it concerns.
+3. Add scope decisions to `scope_overrides.json`; fix systematic problems in `vocab.yaml` or `src/postprocess.py`.
+4. `./run_pipeline.sh --offline` to rebuild.
+
+### CSV export
+
+`data/lw-posts-tagged.csv` has one row per in-scope post. Column names follow Stephen's
+`taxonomy/output/arxiv-papers-tagged.csv` where the meaning matches (`title, authors, published, url,
+summary, evidence, contribution_primary, contribution_secondary, paper_type, concept, method, agenda_2025,
+new_agenda, tags`), plus `source = lesswrong` and LW-only columns (`phenomenon, substrate, by_org,
+by_org_basis, by_org_evidence, about, karma, alignment_forum, scope, rule_changes`). Multi-valued cells
+are joined with `; `. **Tag values use this folder's vocabulary, not `taxonomy/facets.yaml`**, so the two
+CSVs stack row-wise but their facet values need mapping before they share one site.
 
 ## What we learned (short)
 

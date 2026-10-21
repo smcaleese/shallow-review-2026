@@ -96,7 +96,7 @@ TOOL = {"name": "tag_post", "description": "Record tags.", "input_schema": {"typ
     "required": ["scope", "scope_reason", "meta", "scientific_primary", "scientific_secondary", "concept", "phenomenon",
                  "method", "substrate", "agenda_2025", "by", "about", "why", "suggest"]}}
 
-client = anthropic.Anthropic()
+client = None if os.environ.get("PRINT_PROMPT") else anthropic.Anthropic()
 KEEP = ["id", "title", "url", "link_url", "authors", "posted", "karma", "af_karma", "comment_count", "af", "picked_by"]
 
 def org_at(a, date):
@@ -107,7 +107,7 @@ def org_at(a, date):
         return e.get("then")
     return e["org"]
 
-def tag(row):
+def build_user(row):
     auths = [a.strip() for a in row["authors"].split(",") if a.strip()]
     ro = [f"{a}: {org_at(a, row['posted'])}" for a in auths if org_at(a, row["posted"])]
     user = f"Title: {row['title']}\nAuthors (forum usernames): {row['authors']}\nForum tags: {row['tags']}\n"
@@ -118,6 +118,10 @@ def tag(row):
         user += ("\nReviewer notes from an earlier tagging round (they refer to older tag names and may be wrong; "
                  "check each against the text and follow it only where the text supports it):\n- " + "\n- ".join(notes[row["id"]]) + "\n")
     user += f"\nPost text (start and end; middle may be omitted):\n{bodies.get(row['id'], row.get('excerpt', ''))}"
+    return user
+
+def tag(row):
+    user = build_user(row)
     err = None
     for attempt in range(5):
         try:
@@ -131,6 +135,12 @@ def tag(row):
             err = str(e)
             time.sleep(20 * (attempt + 1) if "429" in err else 2)
     return {"id": row["id"], "title": row["title"], "error": err}
+
+
+# PRINT_PROMPT=1 python ... : print the exact prompt (system, tool schema, one example user turn) and exit.
+if os.environ.get("PRINT_PROMPT"):
+    print(json.dumps({"model": MODEL, "system": SYSTEM, "tool": TOOL, "example_user": build_user(next(iter(csv.DictReader(open(inp)))))}, ensure_ascii=False))
+    sys.exit(0)
 
 done = set()
 if os.path.exists(out_p):

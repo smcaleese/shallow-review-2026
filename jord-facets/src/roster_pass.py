@@ -3,7 +3,7 @@
 Usage: python roster_pass.py IN_CSV ROSTER_SEED_JSON VOCAB_YAML OUT_JSON
 Uses claude-opus-5-5. Output is a DRAFT for human review: only high-confidence entries.
 """
-import csv, json, sys, collections, yaml
+import csv, json, os, sys, collections, yaml
 import anthropic
 
 inp, seed_p, vocab_p, out_p = sys.argv[1:5]
@@ -42,8 +42,13 @@ TOOL = {"name": "roster", "description": "Author affiliations.", "input_schema":
         "author": {"type": "string"}, "org": {"type": "string"}, "note": {"type": "string"}},
         "required": ["author", "org"]}}}, "required": ["entries"]}}
 
+MODEL = "claude-opus-5-5"
+if os.environ.get("PRINT_PROMPT"):  # print the exact prompt and exit
+    print(json.dumps({"model": MODEL, "system": None, "tool": TOOL, "example_user": PROMPT}, ensure_ascii=False))
+    sys.exit(0)
+
 client = anthropic.Anthropic()
-r = client.messages.create(model="claude-opus-5-5", max_tokens=8000, tools=[TOOL],
+r = client.messages.create(model=MODEL, max_tokens=8000, tools=[TOOL],
                            messages=[{"role": "user", "content": PROMPT}])
 out = next(b.input for b in r.content if b.type == "tool_use")
 entries = out["entries"] if isinstance(out["entries"], list) else json.loads(out["entries"])
