@@ -77,3 +77,14 @@ Known gaps:
 - `by` for arXiv papers is only tagged when the abstract or comment names the org (no affiliations from the PDF yet).
 - Jord's reviewed tag patches use his old vocabulary, so they aren't applied here; his scope decisions are.
 - Tags come from Claude and haven't been checked by people.
+
+## Deployment
+
+The site is live at https://shallow-review-facets.netlify.app (it replaced the arXiv-only taxonomy site). The repo-root
+`netlify.toml` publishes `facets-shared/site` with no build command, so always run `src/build_site.py` before deploying.
+
+To deploy by hand without uploading anything else (such as `.env` files), deploy only the site folder:
+
+```bash
+netlify deploy --prod --dir facets-shared/site --site 1676552f-2894-46f1-a3f6-b673fd901536
+```

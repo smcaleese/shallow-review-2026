@@ -1,5 +1,5 @@
-# Netlify serves the taxonomy browsing site (see taxonomy/README.md).
+# Netlify serves the combined arXiv + LW/AF site (see facets-shared/README.md).
 # The site is prebuilt static files, so there is no build command: rebuild site/data.js locally and push.
 [build]
-  publish = "taxonomy/site"
+  publish = "facets-shared/site"
   command = ""
