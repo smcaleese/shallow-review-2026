@@ -1,0 +1,18 @@
+[project]
+name = "taxonomy-discovery"
+version = "0.1.0"
+description = "Compare automated ways of building a taxonomy for the 2026 shallow review"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+    "anthropic>=1.13.0",
+    "leidenalg>=0.10.2",
+    "matplotlib>=3.11.2",
+    "numpy>=2.0",
+    "pydantic>=2.12.3",
+    "python-dotenv>=1.0.0",
+    "python-igraph>=0.11.8",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.5",
+    "sentence-transformers>=3.0",
+    "squarify>=0.4.5",
+]
