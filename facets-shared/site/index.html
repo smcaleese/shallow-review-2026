@@ -160,9 +160,10 @@ details p { margin: 8px 0 0; max-width: 900px; }
 const DATA = window.SR_DATA;
 const FACETS = Object.fromEntries(DATA.facets.map(f => [f.id, f]));
 const NONE = "(none)";
-const FIXED_ORDER = new Set(["source", "scope", "evidence", "item_type", "substrate", "month"]);  // facets whose tag order is meaningful
+const FIXED_ORDER = new Set(["source", "scope", "evidence", "item_type", "substrate", "month", "area_2025", "subarea_2025"]);  // facets whose tag order is meaningful
 const PRESETS = [
-  ["Overview", "agenda", "source"], ["Sources", "source", "item_type"], ["Evidence", "evidence", "source"],
+  ["Overview", "agenda", "source"], ["2025 taxonomy", "subarea_2025", "source"],
+  ["Sources", "source", "item_type"], ["Evidence", "evidence", "source"],
   ["Scientific", "scientific", "source"], ["Concepts", "concept", "source"], ["Phenomena", "phenomenon", "method"],
   ["Methods", "method", "evidence"], ["Orgs", "by", "source"], ["By month", "month", "source"],
 ];
@@ -277,7 +278,7 @@ const BADGES = { arxiv: "arXiv", lesswrong: "LW", both: "arXiv+LW" };
 function paperCard(p) {
   const chips = [];
   for (const f of DATA.facets) {
-    if (["month", "source", "scope"].includes(f.id)) continue;
+    if (["month", "source", "scope", "subarea_2025"].includes(f.id)) continue;
     (p.tags[f.id] || []).forEach((t, i) => chips.push(chip(f.id, t, f.id === "scientific" && i > 0)));
   }
   if (p.tags.scope?.[0] === "borderline") chips.push(chip("scope", "borderline"));
