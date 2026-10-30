@@ -16,11 +16,12 @@ from datetime import date
 
 import yaml
 
-from common import ITEMS_CSV, ITEMS_DEDUPED, SITE_DATA, TAGS_FINAL, TAXONOMY_2025, VOCAB, read_jsonl
+from common import ITEMS_CSV, ITEMS_DEDUPED, SELECTED, SITE_DATA, TAGS_FINAL, TAXONOMY_2025, VOCAB, read_jsonl
 from tag import NEW_AGENDA_PREFIX, agenda_names, load_agendas
 
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-SOURCE_LABELS = {"arxiv": "arXiv", "lesswrong": "LW", "both": "arXiv+LW"}  # short, so filters read +source:arxiv+lw
+# short, so filters read +source:arxiv+lw; "org" is Lenz's list of AI safety organisations' research pages
+SOURCE_LABELS = {"arxiv": "arXiv", "lesswrong": "LW", "both": "arXiv+LW", "org": "Org", "safety_stack": "SafetyStack"}
 COLORS = {"source": "teal", "scope": "outline", "evidence": "ink", "item_type": "blue", "scientific": "violet",
           "concept": "green", "phenomenon": "olive", "method": "orange", "substrate": "grey", "agenda": "rose",
           "area_2025": "rose", "subarea_2025": "rose", "by": "outline", "about": "outline", "month": "grey"}
@@ -90,8 +91,9 @@ def build_facets(vocab: dict, agendas: list[dict], areas: list[dict], subareas: 
 
 
 def popularity_percentiles(items: list[dict]) -> dict[str, float]:
-    """Rank items within their own source (citations for papers, karma for posts) so the two can be sorted together."""
-    pct = {}
+    """Rank items within their own source (citations for papers, karma for posts) so the two can be sorted together.
+    Org and Safety Stack items have neither, so they sit in the middle."""
+    pct = {i["id"]: 0.5 for i in items if i["source"] in ("org", "safety_stack")}
     for source, key in (("arxiv", "citations"), ("lesswrong", "karma")):
         group = [i for i in items if i["source"] == source]
         ranked = sorted(group, key=lambda i: i["popularity"].get(key) or 0)
@@ -114,13 +116,14 @@ def item_record(item: dict, t: dict, pct: float, tree: dict[str, tuple[str, str]
         **{f: [label(x) for x in t[f]] for f in ("concept", "phenomenon", "method", "substrate")},
         "area_2025": area, "subarea_2025": subarea,
         "agenda": agendas, "by": [b["org"] for b in t["by"]], "about": list(t["about"]),
-        "month": [MONTHS[int(item["date"][5:7]) - 1]],
+        "month": [MONTHS[int(item["date"][5:7]) - 1]] if len(item["date"]) >= 7 else [],  # some org pages give only a year
     }
     return {
         "id": item["id"], "source": source, "title": item["title"], "authors": item["authors"], "date": item["date"],
         "url": item["url"], "links": item["links"], "popularity": item["popularity"], "pop_pct": round(pct, 4),
-        "summary": t["summary"], "text": item["text"], "text_label": "abstract" if item["source"] == "arxiv" else "excerpt",
+        "summary": t["summary"], "text": item["text"], "text_label": "abstract" if item["source"] in ("arxiv", "safety_stack") else "excerpt",
         "shortlist_reason": item.get("shortlist_reason", ""), "promoted": bool(item.get("promoted_by")),
+        "also_listed": item.get("also_listed", []),
         "by_evidence": [f"{b['org']}: {b['evidence']}" for b in t["by"]], "rule_changes": t["pp"], "tags": tags,
     }
 
@@ -147,6 +150,11 @@ def main():
     tags = {t["id"]: t for t in read_jsonl(TAGS_FINAL)}
     tagged = [i for i in items if i["id"] in tags]
     shown = [i for i in tagged if tags[i["id"]]["scope"] != "exclude"]
+    n_excluded = len(tagged) - len(shown)
+    if SELECTED.exists():  # the review's budget (src/select_budget.py); without it every in-scope item is shown
+        selected = set(json.loads(SELECTED.read_text())["ids"])
+        print(f"  {len(shown) - sum(i['id'] in selected for i in shown)} in-scope items outside the budget are left out")
+        shown = [i for i in shown if i["id"] in selected]
     pct = popularity_percentiles(shown)
     records = [item_record(i, tags[i["id"]], pct.get(i["id"], 0), tree) for i in shown]
 
@@ -166,8 +174,8 @@ def main():
           f"({', '.join(f'{v} {SOURCE_LABELS[k]}' for k, v in counts.items())})")
     if len(tagged) < len(items):
         print(f"  {len(items) - len(tagged)} items have no tags yet and are left out; run src/tag.py")
-    if len(shown) < len(tagged):
-        print(f"  {len(tagged) - len(shown)} items scoped exclude are left out")
+    if n_excluded:
+        print(f"  {n_excluded} items scoped exclude are left out")
 
 
 if __name__ == "__main__":

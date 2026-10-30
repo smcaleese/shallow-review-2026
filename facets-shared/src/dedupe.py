@@ -17,6 +17,9 @@ Then it decides:
   - anything else (critiques, roundups, work not on arXiv, no match) -> post kept as its own item
 Decisions can be forced in dedupe-overrides.json: {"lw:<post id>": "keep" | "arxiv:<id>"}.
 
+Then org (Lenz) and Safety Stack items that duplicate an item already kept (same arXiv ID, LW post ID, URL or title) are
+merged into it, in the order arXiv > LW > org > Safety Stack; the kept item gains their links and an "also_listed" note.
+
 Writes data/2-items-deduped.jsonl and data/2-dedupe-report.csv (one row per post) for checking.
 """
 
@@ -24,7 +27,9 @@ import argparse
 import csv
 import json
 import logging
+import re
 import threading
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from difflib import SequenceMatcher
 from typing import Literal
@@ -38,6 +43,7 @@ from common import (ARXIV_FILTERED_DIR, ARXIV_ID, DEDUPE_CLAIMS, DEDUPE_OVERRIDE
 from load_sources import arxiv_item
 
 load_dotenv(ROOT / ".env")
+load_dotenv(ROOT.parent / "taxonomy" / ".env")  # facets-shared/.env may be empty; reuse the repo's existing key
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger("dedupe")
 
@@ -243,6 +249,7 @@ def main():
             kept.append(post)
         report.append(row)
 
+    merged_extra = merge_listings(kept, [i for i in items if i["source"] in ("org", "safety_stack")])
     for item in kept:
         item["sources"] = sorted({item["source"]} | ({"lesswrong"} if item.get("merged_posts") else set()))
     write_jsonl(ITEMS_DEDUPED, kept)
@@ -253,10 +260,49 @@ def main():
         writer.writerows(sorted(report, key=lambda r: (r["decision"] == "kept", -(r["karma"] or 0))))
 
     counts = {d: sum(r["decision"] == d for r in report) for d in ("merged", "promoted", "kept")}
-    papers = sum(i["source"] == "arxiv" for i in kept)
+    by_source = Counter(i["source"] for i in kept)
     log.info(f"Posts: {counts['merged']} merged into shortlisted papers, {counts['promoted']} promoted a paper, "
-             f"{counts['kept']} kept. Items: {len(kept)} ({papers} papers, {len(kept) - papers} posts)")
+             f"{counts['kept']} kept. Items: {len(kept)} ({', '.join(f'{v} {k}' for k, v in by_source.items())})")
+    log.info(f"Org and Safety Stack items: {merged_extra} merged into an existing item")
     log.info(f"Wrote {ITEMS_DEDUPED.name} and {DEDUPE_REPORT.name}")
+
+
+LISTING_LABEL = {"org": "Lenz's org list", "safety_stack": "Safety Stack"}
+LW_POST = re.compile(r"(?:lesswrong\.com|alignmentforum\.org)/posts/([A-Za-z0-9]{17})")
+
+
+def keys_of(item: dict) -> set[str]:
+    """Identity keys: arXiv IDs, LW post IDs, URLs and the normalised title."""
+    urls = [item["url"]] + [l["url"] for l in item["links"]]
+    keys = {"t:" + norm_title(item["title"])}
+    for u in urls:
+        keys.add("u:" + re.sub(r"^https?://(www\.)?", "", u.lower()).rstrip("/"))
+        keys.update("a:" + base_arxiv_id(m) for m in ARXIV_ID.findall(u))
+        keys.update("p:" + m for m in LW_POST.findall(u))
+    if item["source"] == "arxiv":
+        keys.add("a:" + item["id"].removeprefix("arxiv:"))
+    if item["source"] == "lesswrong":
+        keys.add("p:" + item["extra"]["post_id"])
+    if item["extra"].get("arxiv_id"):
+        keys.add("a:" + base_arxiv_id(item["extra"]["arxiv_id"]))
+    return keys
+
+
+def merge_listings(kept: list[dict], extra: list[dict]) -> int:
+    """Append org and Safety Stack items to `kept`, merging any that duplicate an item already there."""
+    owner = {k: i for i in kept for k in keys_of(i)}
+    merged = 0
+    for item in extra:  # org items come before Safety Stack ones, so Lenz's copy wins
+        keys = keys_of(item)
+        match = next((owner[k] for k in keys if k in owner), None)
+        if match is None:
+            kept.append(item)
+            owner.update({k: item for k in keys})
+            continue
+        merged += 1
+        match["links"] += [l for l in item["links"] if l["url"] not in {x["url"] for x in match["links"]}]
+        match.setdefault("also_listed", []).append(LISTING_LABEL[item["source"]])
+    return merged
 
 
 if __name__ == "__main__":

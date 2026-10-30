@@ -114,6 +114,8 @@ details p { margin: 8px 0 0; max-width: 900px; }
 .badge.arxiv { background: #b31b1b; color: #fff; }
 .badge.lesswrong { background: #5f9b65; color: #fff; }
 .badge.both { background: linear-gradient(90deg, #b31b1b 50%, #5f9b65 50%); color: #fff; }
+.badge.org { background: #2f5d8a; color: #fff; }
+.badge.safety_stack { background: #8a5a2f; color: #fff; }
 .badge.promoted { background: var(--grey-bg); color: var(--grey-fg); font-weight: 500; }
 .links { font: 12.5px var(--mono); margin: -4px 0 8px; }
 .links a { color: var(--accent); margin-right: 12px; }
@@ -132,8 +134,9 @@ details p { margin: 8px 0 0; max-width: 900px; }
   <div class="top"><div class="kicker" id="kicker"></div>
     <button class="themebtn" id="theme" type="button">theme</button></div>
   <h1>Shallow Review: papers and posts</h1>
-  <p class="lede">The year's shortlisted arXiv papers and most notable LessWrong / Alignment Forum posts on technical AI
-    safety, tagged with one shared vocabulary. Pick what to group by and what to split by; the grid shows how the facets
+  <p class="lede">The year's top sources on technical AI safety, kept to a budget of about 500 by rank: arXiv papers,
+    notable LessWrong / Alignment Forum posts, research from AI safety organisations' sites (Org) and Safety Stack
+    documents the scrapes missed, tagged with one shared vocabulary. Pick what to group by and what to split by; the grid shows how the facets
     intersect, and every tag is a filter.</p>
 
   <div class="panel">
@@ -274,7 +277,7 @@ function authorsShort(a) {
   const list = String(a).split(",").map(s => s.trim());
   return list.length > 6 ? list.slice(0, 6).join(", ") + " et al." : list.join(", ");
 }
-const BADGES = { arxiv: "arXiv", lesswrong: "LW", both: "arXiv+LW" };
+const BADGES = { arxiv: "arXiv", lesswrong: "LW", both: "arXiv+LW", org: "Org", safety_stack: "Safety Stack" };
 function paperCard(p) {
   const chips = [];
   for (const f of DATA.facets) {
@@ -291,7 +294,7 @@ function paperCard(p) {
   const why = p.shortlist_reason ? `<p><b>Why selected:</b> ${esc(p.shortlist_reason)}</p>` : "";
   const byEv = p.by_evidence?.length ? `<p><b>Org evidence:</b> ${esc(p.by_evidence.join(" · "))}</p>` : "";
   return `<article class="paper">
-    <h3><span class="badge ${p.source}">${BADGES[p.source]}</span>${p.promoted ? `<span class="badge promoted" title="Not in the arXiv shortlist; added because a LW post writes it up">via LW</span>` : ""}<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></h3>
+    <h3><span class="badge ${p.source}">${BADGES[p.source]}</span>${p.promoted ? `<span class="badge promoted" title="Not in the arXiv shortlist; added because a LW post writes it up">via LW</span>` : ""}${(p.also_listed || []).map(l => `<span class="badge promoted" title="Also listed in ${esc(l)}">+${esc(l === "Safety Stack" ? "SS" : "Org")}</span>`).join("")}<a href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.title)}</a></h3>
     <div class="meta">${meta.join(" &nbsp;·&nbsp; ")}</div>
     ${links ? `<div class="links">${links}</div>` : ""}
     <p class="summary">${esc(p.summary)}</p>

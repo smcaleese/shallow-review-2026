@@ -141,7 +141,8 @@ def main():
         item = items.get(item_id)
         if item is None:
             continue  # item no longer in the inputs
-        body = item["text"] if item["source"] == "arxiv" else bodies.get(item["extra"]["post_id"], {}).get("text", "")
+        body = (bodies.get(item["extra"]["post_id"], {}).get("text", "") if item["source"] == "lesswrong"
+                else item["text"])
         out.append(process(tags, item, body, roster, scope_overrides))
     write_jsonl(TAGS_FINAL, out)
 

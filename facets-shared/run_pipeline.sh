@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the combined arXiv + LW/AF site in one go. Safe to re-run: every Claude step skips work it has already done,
+# Build the combined site (arXiv, LW/AF, Lenz's org list, Safety Stack) in one go. Safe to re-run: every Claude step skips work it has already done,
 # so only new items cost API calls.
 #
 # Usage (from anywhere):
@@ -22,6 +22,7 @@ for arg in "$@"; do
 done
 
 [ $SYNC = 1 ] && ./sync_inputs.sh
+echo "== 0b. fetch org pages";      uv run python src/fetch_lenz_pages.py
 echo "== 1. load sources";          uv run python src/load_sources.py
 echo "== 2. fetch LW post text";    uv run python src/fetch_lw_bodies.py
 if [ $OFFLINE = 1 ]; then
@@ -31,5 +32,11 @@ else
   echo "== 4. tag";                  uv run python src/tag.py
 fi
 echo "== 5. apply rules";            uv run python src/postprocess.py
-echo "== 6. build site and CSV";     uv run python src/build_site.py
+if [ $OFFLINE = 1 ]; then
+  echo "== 6. rank (existing scores)"; uv run python src/rank.py --offline
+else
+  echo "== 6. rank";                 uv run python src/rank.py
+fi
+echo "== 7. keep the budget";        uv run python src/select_budget.py
+echo "== 8. build site and CSV";     uv run python src/build_site.py
 echo "done: open site/index.html, or run: python3 -m http.server 8767 --directory facets-shared/site"

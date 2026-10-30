@@ -1,7 +1,19 @@
-# Shared facets: arXiv papers + LW/AF posts
+# Shared facets: the Shallow Review 2026 sources
 
-Tags the 2026 arXiv shortlist and the most notable LessWrong / Alignment Forum posts with **one vocabulary**, and builds
-**one site** where they appear together. Each item is badged as an arXiv paper, a LW/AF post, or both.
+Tags the review's candidate sources with **one vocabulary**, ranks them, keeps a fixed **budget of ~500**, and builds
+**one site** where they appear together. Four sources, each badged on the site:
+
+| Source | Candidates | Budget | Notes |
+|---|---|---|---|
+| arXiv | the top-20% shortlist (303) | 240 | plus papers promoted because a LW post writes them up |
+| LessWrong / Alignment Forum | Jord's notable list + the 60 highest-karma in-scope posts it missed | 140 | |
+| Org (Lenz's list) | links from 15 AI safety organisations' research pages (`input/lenz-org-sources.md`) | 80 | |
+| Safety Stack | dataset documents none of the scrapes had, rated relevant (`../safety-stack`) | 40 | covers Oct 10 onwards, after the scrapes stopped |
+
+Budgets live in `BUDGET` in `src/common.py`. The goal is as many sources as help build the taxonomy, but few enough that
+someone could read every source the review includes. Items that are both an arXiv paper and a LW post count as arXiv;
+an org or Safety Stack item that duplicates an earlier source is merged into it (badged `+Org` / `+SS`).
+`budget-overrides.json` keeps or drops items by hand on top of the budget (it keeps the three main system cards).
 
 This folder sits alongside `taxonomy/` (arXiv only) and `jord-facets/` (LW only), which keep working unchanged. It
 reads their outputs; the duplicated tagging and site code can be removed once this site covers both.
@@ -28,13 +40,16 @@ and open http://localhost:8767. Reruns are cheap: every Claude step skips items 
 
 | Step | Script | Claude? | What it does |
 |---|---|---|---|
-| 0 | `sync_inputs.sh` | – | Copies the latest source files into `input/` (see below) and records the time in `input/SYNCED_AT` |
-| 1 | `src/load_sources.py` | – | Converts papers and posts to one item format with a `source` field → `data/1-items.jsonl` |
+| 0 | `sync_inputs.sh` | – | Copies the latest source files into `input/` (see below), parses Lenz's list (`src/parse_lenz_orgs.py`) and records the time in `input/SYNCED_AT` |
+| 0b | `src/fetch_lenz_pages.py` | – | Fetches each org link's text (arXiv API, LW API or the page) → `data/1b-lenz-items.jsonl`; cached pages are skipped |
+| 1 | `src/load_sources.py` | – | Converts every source to one item format with a `source` field → `data/1-items.jsonl` |
 | 2 | `src/fetch_lw_bodies.py` | – | Fetches each post's text and links from the LessWrong API → `cache/lw-bodies.json` (not committed) |
-| 3 | `src/dedupe.py` | Sonnet, once per post | Merges LW posts that write up an arXiv paper into the paper → `data/2-items-deduped.jsonl`, `data/2-dedupe-report.csv` |
+| 3 | `src/dedupe.py` | Sonnet, once per post | Merges LW posts that write up an arXiv paper into the paper, then org and Safety Stack items that duplicate an earlier item → `data/2-items-deduped.jsonl`, `data/2-dedupe-report.csv` |
 | 4 | `src/tag.py` | Sonnet, once per item | Tags every facet in `vocab.yaml` → `data/3-tags-raw.jsonl` |
 | 5 | `src/postprocess.py` | – | Enforces rules the tagger doesn't follow reliably, logging each change → `data/4-tags-final.jsonl` |
-| 6 | `src/build_site.py` | – | Writes `site/data.js` (read by `site/index.html`) and `output/items-tagged.csv` |
+| 6 | `src/rank.py` | Opus, 2 passes per item | Scores impact, novelty and interest against the whole set, plus popularity → `output/rankings.csv`, `output/top-papers.md` |
+| 7 | `src/select_budget.py` | – | Keeps the top `BUDGET` items of each source → `data/6-selected.json`, `output/selected-sources.csv` |
+| 8 | `src/build_site.py` | – | Writes `site/data.js` (read by `site/index.html`) and `output/items-tagged.csv`, for the selected items only |
 
 `PRINT_PROMPT=1 uv run python src/tag.py` prints the tagging prompt and one example message without calling the API.
 
@@ -44,11 +59,14 @@ The pipeline only reads `input/`, so every site is built from a known snapshot. 
 
 | File | From |
 |---|---|
-| `arxiv-papers-shortlisted.csv` | `scraping-scripts/arxiv-scraper/results/shortlisted/2026/` (the top-10% shortlist) |
+| `arxiv-papers-shortlisted.csv` | `scraping-scripts/arxiv-scraper/results/shortlisted-20/2026/` (the top-20% shortlist) |
 | `arxiv-papers-filtered/<month>.csv` | `scraping-scripts/arxiv-scraper/results/filtered/2026/` (all relevant papers, for dedupe) |
 | `lw-notable-posts.csv` | `jord-facets/data/2-notable-posts.csv` |
 | `lw-scope-overrides.json` | `jord-facets/scope_overrides.json` (reviewer scope decisions) |
 | `lw-roster.json` | `jord-facets/roster.json` (author → org) |
+| `lw-posts-raw.csv`, `lw-scope-first-pass.jsonl` | `scraping-scripts/AF-and-LW-scraper/results/1-lw-posts-raw.csv`, `jord-facets/data/1-scope-first-pass.jsonl` (for the extra LW candidates) |
+| `safety-stack-filtered.csv` | `safety-stack/output/filtered-sources.csv` |
+| `lenz-org-sources.md` | added by hand; `lenz-org-sources.csv` is made from it |
 | `taxonomy-2025.yaml` | `taxonomy/input/taxonomy-2025.yaml` (last year's agendas) |
 
 ## Deduplication
@@ -77,6 +95,9 @@ Known gaps:
 - `by` for arXiv papers is only tagged when the abstract or comment names the org (no affiliations from the PDF yet).
 - Jord's reviewed tag patches use his old vocabulary, so they aren't applied here; his scope decisions are.
 - Tags come from Claude and haven't been checked by people.
+- Org and Safety Stack items have no citations or karma, so the ranker counts them as average popularity; their
+  text is a page opening or a substitute abstract, so their scores are rougher than arXiv's.
+- One PNAS paper on Lenz's list blocks downloads and is scored on its title alone.
 
 ## Deployment
 

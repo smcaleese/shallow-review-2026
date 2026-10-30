@@ -1,0 +1,9 @@
+{
+ "_note": "Hand decisions on top of the budget in src/common.py. include: kept even if ranked below the cut (the three main 2026 system cards score low on novelty but the review should cite them). exclude: dropped even if within the budget.",
+ "include": [
+  "ss:sncqngh6ayxxr",
+  "ss:svhyb3jssjhe6",
+  "ss:sq7v68zx1eqwx"
+ ],
+ "exclude": []
+}
