@@ -20,8 +20,9 @@ copy() {
 }
 
 echo "Syncing inputs:"
-# arXiv: the top-10% shortlist, plus every filtered paper (to match LW posts against papers that weren't shortlisted)
-copy "$ARXIV/shortlisted/2026/arxiv-papers-shortlisted.csv" input/arxiv-papers-shortlisted.csv
+# arXiv: the top-20% shortlist (more candidates than the budget, so ranking decides the cut), plus every filtered
+# paper (to match LW posts against papers that weren't shortlisted)
+copy "$ARXIV/shortlisted-20/2026/arxiv-papers-shortlisted.csv" input/arxiv-papers-shortlisted.csv
 for month_dir in "$ARXIV"/filtered/2026/*/; do
   month_dir=${month_dir%/}
   copy "$month_dir/arxiv-papers-filtered.csv" "input/arxiv-papers-filtered/$(basename "$month_dir").csv"
@@ -30,6 +31,13 @@ done
 copy "$REPO/jord-facets/data/2-notable-posts.csv" input/lw-notable-posts.csv
 copy "$REPO/jord-facets/scope_overrides.json" input/lw-scope-overrides.json
 copy "$REPO/jord-facets/roster.json" input/lw-roster.json
+# ...and the raw scrape with Jord's first-pass scope check, to add in-scope posts his notable list missed
+copy "$REPO/scraping-scripts/AF-and-LW-scraper/results/1-lw-posts-raw.csv" input/lw-posts-raw.csv
+copy "$REPO/jord-facets/data/1-scope-first-pass.jsonl" input/lw-scope-first-pass.jsonl
+# Safety Stack: dataset documents none of the scrapes had, rated relevant by the arXiv filter (safety-stack/README.md)
+copy "$REPO/safety-stack/output/filtered-sources.csv" input/safety-stack-filtered.csv
+# Org sources: input/lenz-org-sources.md is added by hand; turn it into a CSV
+uv run python src/parse_lenz_orgs.py
 # Last year's agendas (the copy in taxonomy/input is the one tracked in git)
 copy "$REPO/taxonomy/input/taxonomy-2025.yaml" input/taxonomy-2025.yaml
 

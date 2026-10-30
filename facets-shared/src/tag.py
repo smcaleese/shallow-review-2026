@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Step 3: tag every item (arXiv papers and LW/AF posts) along the facets in vocab.yaml with Claude.
+Step 3: tag every item (arXiv papers, LW/AF posts, org pages, Safety Stack docs) along vocab.yaml's facets with Claude.
 
 Usage (from facets-shared/):
     uv run python src/tag.py                 # tag items not yet tagged with the current vocab version
@@ -26,6 +26,7 @@ from pydantic import BaseModel, Field, create_model
 from common import ITEMS_DEDUPED, LW_BODIES, LW_ROSTER, ROOT, TAGS_RAW, TAXONOMY_2025, VOCAB, read_jsonl
 
 load_dotenv(ROOT / ".env")
+load_dotenv(ROOT.parent / "taxonomy" / ".env")  # facets-shared/.env may be empty; reuse the repo's existing key
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger("tag")
 
@@ -171,6 +172,12 @@ def user_message(item: dict, bodies: dict, roster: dict) -> str:
             body = bodies.get(post_id.removeprefix("lw:"), {}).get("text", "")
             msg += f"\n\nA LessWrong write-up of this paper (\"{title}\"), opening:\n{body[:3000]}"
         return msg
+    if item["source"] in ("org", "safety_stack"):
+        extra = item["extra"]
+        where = (f"research post on {extra['orgs']}'s website" if item["source"] == "org"
+                 else f"{extra.get('doc_type') or 'document'} from {extra.get('domain')}")
+        return (f"Source: {where}\nTitle: {item['title']}\nAuthors: {item['authors'] or 'not given'}\n"
+                f"Published: {item['date']}\nURL: {item['url']}\n\nText (start of the page or abstract):\n{item['text']}")
     authors = [a.strip() for a in item["authors"].split(",") if a.strip()]
     matches = [f"{a}: {org_at(roster, a, item['date'])}" for a in authors if org_at(roster, a, item["date"])]
     link = item["extra"].get("link_url")
@@ -205,7 +212,7 @@ def tag_item(client, item, schema, system_prompt, user, model, effort) -> dict |
 def main():
     parser = argparse.ArgumentParser(description="Tag arXiv papers and LW posts along vocab.yaml with Claude")
     parser.add_argument("--limit", type=int, help="Only tag the first N untagged items")
-    parser.add_argument("--only", choices=["arxiv", "lesswrong"], help="Only tag items from one source")
+    parser.add_argument("--only", choices=["arxiv", "lesswrong", "org", "safety_stack"], help="Only tag items from one source")
     parser.add_argument("--overwrite", action="store_true", help="Retag items that already have tags")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--effort", default=DEFAULT_EFFORT, choices=["low", "medium", "high", "xhigh", "max"])
