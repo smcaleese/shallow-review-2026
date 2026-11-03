@@ -1,0 +1,503 @@
+sub_area,sub_area_name,fit,source,title,id,note
+1.1,Training data & data attribution,ok,arXiv,Alignment Forecasting: Predicting Misalignment From Training Data,arxiv:2609.35805,Forecasting generalization from post-training data; 1.1 pretraining-only
+1.1,Training data & data attribution,good,arXiv+LW,Alignment Pretraining: AI Discourse Causes Self-Fulfilling (Mis)alignment,arxiv:2601.10160,
+1.1,Training data & data attribution,poor,Org,Concept Influence: Leveraging Interpretability to Improve Performance and Efficiency in Training Data Attribution,org:b7507c9a4a,interp-based training data attribution; no data-attribution sub-area
+1.1,Training data & data attribution,good,arXiv,Constitutional Midtraining: Content Presence Drives Alignment Gains,arxiv:2607.26654,
+1.1,Training data & data attribution,poor,Org,Infusion: Shaping model behaviour by editing training data via influence functions,org:308ac68e53,influence-function data poisoning attack
+1.1,Training data & data attribution,good,arXiv,Model Spec Midtraining: Improving How Alignment Training Generalizes,arxiv:2605.02087,
+1.1,Training data & data attribution,good,arXiv+LW,"Pre-training interventions, ex post facto: Grafting model beliefs across checkpoints",arxiv:2610.00767,
+1.1,Training data & data attribution,poor,Org,"Predictive Data Debugging: Reveal and Shape What Your Model Learns, Before You Train",org:aa632f74aa,predicting DPO effects from data; post-training data has no home
+1.1,Training data & data attribution,poor,Org,Probe-Based Data Attribution: Surfacing and Mitigating Undesirable Behaviors in LLM Post-Training,org:17568a5aa4,probe-based attribution and filtering of DPO data
+1.1,Training data & data attribution,good,LW,Research Note: Filtering Subversion-Relevant Information From Pretraining Data Is Feasible,lw:HwdXDoCH7KXdKsz7k,
+1.1,Training data & data attribution,good,arXiv,Shaping capabilities with token-level data filtering,arxiv:2601.21571,
+1.1,Training data & data attribution,good,SafetyStack,Social Priors: Descriptions of AI Users Shape How Language Models Trust and Cooperate,ss:sh7wqzgvv3pq0,
+1.1,Training data & data attribution,good,arXiv+LW,Stress-testing Alignment Midtraining,arxiv:2609.20412,
+1.1,Training data & data attribution,good,arXiv+LW,Synthetic Persona Pretraining: Alignment from Token Zero,arxiv:2608.13482,
+1.2,Emergent misalignment & generalization science,good,LW,(Some) Natural Emergent Misalignment from Reward Hacking in Non-Production RL,lw:2ANCyejqxfqK2obEj,
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Behavioral Couplings: From Formation to Behavioral Emergence in Language Models,ss:sybqk2c0td99p,
+1.2,Emergent misalignment & generalization science,ok,arXiv,Chunky Post-Training: Data Driven Failures of Generalization,arxiv:2602.05910,Generalization finding plus black-box auditing/attribution tools
+1.2,Emergent misalignment & generalization science,good,arXiv,Conditional misalignment: common interventions can hide emergent misalignment behind contextual triggers,arxiv:2604.25891,
+1.2,Emergent misalignment & generalization science,ok,arXiv,Consistency Training Can Entrench Misalignment,arxiv:2606.03810,Study of an alignment-training method's side effects
+1.2,Emergent misalignment & generalization science,good,arXiv,Data Attribution of Emergent Misalignment with Persona Features,arxiv:2608.11025,
+1.2,Emergent misalignment & generalization science,good,arXiv,Emergent Misalignment Is Not Magical,arxiv:2608.29118,
+1.2,Emergent misalignment & generalization science,good,arXiv,Emergent Misalignment Recruits a Pre-existing Persona Subspace,arxiv:2607.21356,
+1.2,Emergent misalignment & generalization science,good,arXiv,"Emergent Misalignment is Easy, Narrow Misalignment is Hard",arxiv:2602.07852,
+1.2,Emergent misalignment & generalization science,good,arXiv,Evil Spectra: How Optimisers can Amplify or Suppress Emergent Misalignment,arxiv:2606.31591,
+1.2,Emergent misalignment & generalization science,ok,arXiv,Generalization Dynamics of LM Pre-training,arxiv:2609.33150,Behavioural pretraining dynamics; 5.3 reads as internals-only
+1.2,Emergent misalignment & generalization science,ok,LW,Kimi likes causal decision theory more after RL in twin prisoner’s dilemmas,lw:hfNBEKaStASAYMLiu,RL shifts decision-theory attitudes; multi-agent only the setting
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Knowingly wrong: false facts induce emergent misalignment,ss:scmpc4zfe2r72,
+1.2,Emergent misalignment & generalization science,ok,LW,Many alignment techniques work by training one model and deploying another,lw:syAbdNei8BWeP2RPo,conceptual unification of train-deploy-mismatch techniques
+1.2,Emergent misalignment & generalization science,good,arXiv+LW,Negation Neglect: When models fail to learn negations in training,arxiv:2605.13829,
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Predicting how model propensities generalize out of distribution,ss:s0k3c7560aqc5,
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Progressive Misalignment Can Emerge from Benign Recursive Self-Distillation,ss:sg7907049cvnk,
+1.2,Emergent misalignment & generalization science,ok,LW,SFT Drives Gemini’s Safety Properties,lw:nLrrYweeFxgXACSmS,which post-training stage drives safety; no post-training-science home
+1.2,Emergent misalignment & generalization science,good,LW,Some reasons alignment doesn’t generalise well,lw:dsou8dxCf9BubQ5NJ,conceptual
+1.2,Emergent misalignment & generalization science,good,arXiv,The Piggyback Hypothesis of Generalization: Explaining and Mitigating Emergent Misalignment,arxiv:2606.06667,
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Training large language models on narrow tasks can lead to broad misalignment,ss:sb1zfybtwdm0q,
+1.2,Emergent misalignment & generalization science,good,Org,Training large language models on narrow tasks can lead to broad misalignment (Nature),org:4ccad8c295,
+1.2,Emergent misalignment & generalization science,good,SafetyStack,Unfair and Unsafe: Everyday Bias Triggers Emergent Misalignment,ss:s3yc6ht8m3rg4,
+1.3,Persona science,good,LW,Consciousness Cluster: Preferences of Models that Claim they are Conscious,lw:tc7EcJtucbDmDLMQr,welfare-adjacent; duplicate of org Consciousness Cluster
+1.3,Persona science,ok,Org,Persona Cartography: Charting Language Model Personality Traits in Weight Space,org:943e7f7678,persona LoRAs; also 5.2/3.3 characterization
+1.3,Persona science,good,arXiv,Probing Persona-Dependent Preferences in Language Models,arxiv:2605.13339,"Trait measured via probes, so 5.2 per persona rule"
+1.3,Persona science,good,LW,RL creates split personas,lw:L23poLi8MRgS6mXYF,
+1.3,Persona science,good,arXiv,Story Imprinting: AI Assistants Absorb Traits from Human Characters They Resemble,arxiv:2609.10883,
+1.3,Persona science,ok,arXiv+LW,The Artificial Self: Characterising the landscape of AI identity,arxiv:2603.11353,AI identity ontology; persona science split across 1.2/3.3
+1.3,Persona science,good,arXiv,The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models,arxiv:2601.10387,
+1.3,Persona science,good,Org,The Consciousness Cluster: Emergent preferences of Models that Claim to be Conscious,org:e94a6c50cf,duplicate of LW Consciousness Cluster
+1.3,Persona science,good,arXiv,The Persona Hierarchy Model: Understanding Contextual Generalization in Fine-Tuning LLMs,arxiv:2610.09384,
+1.3,Persona science,ok,LW,The Talker Does Not Control The Doer (in Current AIs),lw:cJX2ssssGoYqnijwi,Conceptual split-persona claim; mostly a strategy argument
+1.3,Persona science,good,LW,The persona selection model,lw:dfoty34sT7CSKeJNn,
+1.3,Persona science,good,LW,Thoughts on the persona selection model,lw:csRby7mZgjL5jCoLL,
+1.3,Persona science,good,LW,Thousand-dimensional structure,lw:sFhW3ZnPMJdnB4Dd6,
+1.3,Persona science,good,LW,To what extent is Qwen3-32B predicting its persona?,lw:3qEDD8Sn7XoNGeGhm,
+1.3,Persona science,good,Org,Tracing Persona Vectors Through LLM Pretraining,org:83d02c1446,
+1.3,Persona science,good,Org,What Happens When a Model Thinks It Is AGI?,org:edf06c1f0d,
+1.3,Persona science,ok,arXiv,You Are What You Read: Misalignment via In-Context Persona Induction,arxiv:2609.06851,"In-context persona induction, not training; also a jailbreak"
+1.3,Persona science,ok,LW,llm assistant personas seem increasingly incoherent (some subjective observations),lw:f5DKLsTsRRhbipH4r,Subjective persona observations; training speculation
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Beyond Owls: Subliminal Learning Can Transfer Learned Capabilities and Backdoors,arxiv:2610.10657,
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Filtering Harmful Actions Isn't Enough: Phantom Transfer in Agentic SDF,arxiv:2607.10750,
+1.4,Subliminal learning & hidden-signal transfer,good,SafetyStack,Language models transmit behavioural traits through hidden signals in data,ss:stny2haz631y3,
+1.4,Subliminal learning & hidden-signal transfer,poor,arXiv,Model Hypnosis: Strong control of AI via additive subliminal effects,arxiv:2608.16834,Prompt-level control attack; 4.4 is defence-side only
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Subliminal Effects in Your Data: A General Mechanism via Log-Linearity,arxiv:2602.04863,
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Subliminal Learning Is Steering Vector Distillation,arxiv:2606.00995,
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Subliminal Steering: Stronger Encoding of Hidden Signals,arxiv:2604.25783,
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,Sycophantic Agreement Transfers with Neutral Data via Contrastive Preference Optimization,arxiv:2608.31079,
+1.4,Subliminal learning & hidden-signal transfer,good,arXiv,You Didn't Have to Say It like That: Subliminal Learning from Faithful Paraphrases,arxiv:2603.09517,
+1.5,Inoculation prompting,good,Org,Conditionalization Confounds Inoculation Prompting Results,org:71cb9aecd4,
+1.5,Inoculation prompting,good,Org,Don't Inoculate Everything: Stratified Inoculation Prompting Narrows Backdoors and Preserves Desired Traits,org:47c341bfdb,
+1.5,Inoculation prompting,good,arXiv+LW,Inoculation Adapters: Improved Selective Generalization of Capabilities with Fewer Surprising Backdoors,arxiv:2606.30252,
+1.5,Inoculation prompting,good,arXiv,Shallow Beliefs: Synthetic document finetuning does not inoculate against emergent misalignment from reward hacking,arxiv:2609.14998,
+1.6,Reward hacking & reward seeking in training,good,LW,"Character training can mitigate reward hacking, but can also make it harder to detect",lw:2maYXkEgnfJHPAkxh,also shows obfuscation of hacks; touches 2.2/4.3
+1.6,Reward hacking & reward seeking in training,good,arXiv,Countdown-Code: A Testbed for Studying The Emergence and Generalization of Reward Hacking in RLVR,arxiv:2603.07084,
+1.6,Reward hacking & reward seeking in training,ok,LW,Current alignment techniques might be ineffective (and actively bad) in the age of RL,lw:nLaQmJf4KgXimQpoM,Position plus proposed experiment on alignment training vs RL
+1.6,Reward hacking & reward seeking in training,good,arXiv,Examining Reasoning LLMs-as-Judges in Non-Verifiable LLM Post-Training,arxiv:2603.12246,
+1.6,Reward hacking & reward seeking in training,good,LW,"Fail safe(r) at alignment by channeling reward-hacking into a ""spillway"" motivation",lw:rABTMovhz4miHiAyk,untested conceptual proposal
+1.6,Reward hacking & reward seeking in training,good,SafetyStack,Gradient Routing Localizes and Removes Unintended Behaviors in RL,ss:s8xd787r62g1y,
+1.6,Reward hacking & reward seeking in training,ok,LW,Is Mythos good at cyber because it kept hacking Anthropic's sandboxes during training?,lw:QKDoZe6EKhxnFjLWK,Speculation from system card about real training rollouts
+1.6,Reward hacking & reward seeking in training,good,arXiv,LLMs Gaming Verifiers: RLVR can Lead to Reward Hacking,arxiv:2604.15149,
+1.6,Reward hacking & reward seeking in training,ok,LW,OpenAI's myopia just keeps causing alignment problems,lw:Mxx5GapJtqyQtpy96,Opinion on incidents; argues training-pressure root cause
+1.6,Reward hacking & reward seeking in training,good,LW,Overtly misaligned trajectories score highly in RL.,lw:cWuqxF7qB2eGSkkS4,
+1.6,Reward hacking & reward seeking in training,ok,LW,Physics of RL: Toy scaling laws for the emergence of reward-seeking,lw:9FH49ZgJFW4WtbxLi,toy theory of reward-seeking emergence; theory vs empirical
+1.6,Reward hacking & reward seeking in training,good,arXiv,Proxy Reward Internalization and Mechanistic Exploitation: A Learned Precursor to Reward Hacking and Its Generalization,arxiv:2606.09711,
+1.6,Reward hacking & reward seeking in training,good,LW,RLVR that rewards red teaming the training environment,lw:T2bzBkJuBeNNgzhbh,
+1.6,Reward hacking & reward seeking in training,good,LW,Reward Hacking Without Egregious Misalignment in an RL-Only Setting,lw:fkv5W79rBtAiXqYcK,hard call: main result is absence of EM generalization
+1.6,Reward hacking & reward seeking in training,good,arXiv,Reward Hacking in Rubric-Based Reinforcement Learning,arxiv:2605.12474,
+1.6,Reward hacking & reward seeking in training,ok,Org,Shaping the exploration of the motivation-space matters for AI safety,org:92adbe099b,RL motivation-space agenda; between 1.2 and 1.3
+1.6,Reward hacking & reward seeking in training,good,SafetyStack,SimHack: Predicting the onset of detectable reward hacking before RL training,ss:s9jfyngr45cs8,
+1.6,Reward hacking & reward seeking in training,good,LW,Simulated Users & Sad AIs,lw:i64hXdkTMtjpsQzaZ,speculative
+1.6,Reward hacking & reward seeking in training,good,LW,Training a Misaligned Reward Seeker,lw:J76LZCC55RdHeqEhz,
+1.7,Models resisting training,good,LW,Did Claude 3 Opus align itself via gradient hacking?,lw:ioZxrP7BhS5ArK59w,
+1.7,Models resisting training,good,arXiv,Exploration Hacking: Can LLMs Learn to Resist RL Training?,arxiv:2604.28182,
+1.7,Models resisting training,ok,Org,GLM-5.3 Sometimes Considers How Train-Time Actions Shape Future Behavior,org:7aad781773,training gaming observed in eval transcripts; 1.4 vs 3.2
+1.7,Models resisting training,good,arXiv,Generalization Hacking: Models Can Game Reinforcement Learning by Preventing Behavioral Generalization,arxiv:2606.12016,
+1.7,Models resisting training,ok,LW,"Metagaming matters for training, evaluation, and oversight",lw:4hXWSw8tzoK9PM7v6,metagaming spans training gaming and eval awareness
+1.7,Models resisting training,ok,SafetyStack,Training Natural Schemers: RL Can Amplify Oversight-Conditional Behavior,ss:scs3nf6jvtncg,RL amplifies scheming model organism; 1.4 vs 1.2 vs 3.6
+1.8,Internals & monitors as training signals,good,arXiv,Alignment via Training Against Probes Without Losing Monitorability,arxiv:2609.38645,
+1.8,Internals & monitors as training signals,ok,Org,Continual learning might make your blocking monitors nearly useless,org:0d28fcb35d,continual learning as implicit training against blocking monitors
+1.8,Internals & monitors as training signals,ok,SafetyStack,Features as Rewards: Scalable Supervision for Open-Ended Tasks via Interpretability,ss:s46215cn611n5,probe-as-reward technique; duplicate of RLFR
+1.8,Internals & monitors as training signals,ok,Org,Features as Rewards: Using Interpretability to Reduce Hallucinations,org:a93983768d,probe-as-reward technique; 1.5 framed around obfuscation risk
+1.8,Internals & monitors as training signals,ok,LW,It Is Reasonable To Research How To Use Model Internals In Training,lw:G9HdpyREaCbFJjKu5,position on interp-in-training; broader than training against detectors
+1.8,Internals & monitors as training signals,good,arXiv,The Obfuscation Atlas: Mapping Where Honesty Emerges in RLVR with Deception Probes,arxiv:2602.15515,
+1.9,Alignment targets & training methods,poor,LW,Aligning to Virtues,lw:5CZoEw7sjxnMrhgvx,what to align to (virtues); no target/spec sub-area
+1.9,Alignment targets & training methods,poor,LW,Claude's new constitution,lw:mLvxxoNjDqDHBAo6K,Constitution release; spec used in training
+1.9,Alignment targets & training methods,poor,Org,Reducing Political Manipulation with Consistency Training,org:4bda67876c,political bias consistency training; borderline scope
+1.9,Alignment targets & training methods,ok,arXiv,Reinforcement Learning Towards Broadly and Persistently Beneficial Models,arxiv:2606.24014,Alignment RL recipe; no sub-area for alignment post-training methods
+1.9,Alignment targets & training methods,poor,LW,Terrified Comments on Corrigibility in Claude's Constitution,lw:K2Ae2vmAKwhiwKEo5,Constitution critique on corrigibility
+1.9,Alignment targets & training methods,poor,arXiv,Towards Shutdownable Agents: Generalizing Stochastic Choice in RL Agents and LLMs,arxiv:2604.17502,Corrigibility training method; section 1 has no slot
+2.1,Latent reasoning & CoT necessity,good,Org,An operationalization of opaque serial depth,org:2ee7b676db,
+2.1,Latent reasoning & CoT necessity,good,LW,Astra appears to perform belief-propagation-like inference without CoT,lw:PAHqDoFrp9fybcSn2,
+2.1,Latent reasoning & CoT necessity,good,LW,Astra can do a concerning amount with no chain of thought,lw:eRmzz8J8Qkzqvzrgg,
+2.1,Latent reasoning & CoT necessity,good,LW,Astra is much better at reasoning with filler tokens than previous models,lw:uvhuZHFtrgk8kNiZc,
+2.1,Latent reasoning & CoT necessity,good,LW,"Astra's no-CoT limits track speculative depth, not step count",lw:WFc3NkuPaYFrYuaZd,
+2.1,Latent reasoning & CoT necessity,good,LW,Deep recurrent models are less robustly CoT-monitorable than normal CoT models in a toy setting,lw:5guQJSqstkjgys3PE,latent architecture under monitor pressure; 2.1 vs 2.2/2.3
+2.1,Latent reasoning & CoT necessity,ok,arXiv,Do Thinking Tokens Help with Safety?,arxiv:2606.25013,Refusal decided before CoT; also deliberative-safety efficacy
+2.1,Latent reasoning & CoT necessity,good,LW,Estimating GPT-6 Astra’s no-CoT Time Horizon,lw:ntKx9YHWCwxSeGbRB,
+2.1,Latent reasoning & CoT necessity,good,Org,Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models,org:005932a793,
+2.1,Latent reasoning & CoT necessity,good,LW,GPT-6 Astra can do a lot of multi-hop reasoning without chain of thought,lw:FsCkkoGsNmPzFKRhg,
+2.1,Latent reasoning & CoT necessity,good,LW,GPT-6.1 Sol nearly matches the no-CoT performance of GPT-6 Astra,lw:LqSZZAriGqgsGDQe3,
+2.1,Latent reasoning & CoT necessity,good,arXiv,"Hidden Reasoning Must Leak, but Need Not Be Readable: Fundamental Opportunities and Limits for Chain-of-Thought Monitoring",arxiv:2609.37312,
+2.1,Latent reasoning & CoT necessity,good,arXiv+LW,How Transparent is DiffusionGemma?,arxiv:2606.20560,
+2.1,Latent reasoning & CoT necessity,good,LW,How concerned should we be about Astra's recurrent architecture?,lw:PLisnSFir8y5AHkmP,
+2.1,Latent reasoning & CoT necessity,good,LW,"Latent reasoning architectures would likely undermine CoT, our strongest oversight tool",lw:6m29SfjbittooYojj,
+2.1,Latent reasoning & CoT necessity,good,arXiv,Not All LLM Reasoning is Visible in the Chain-of-Thought,arxiv:2607.22925,
+2.1,Latent reasoning & CoT necessity,ok,LW,Proposal for tracking the effects of architecture on monitorability,lw:hLPGv8QjPcNLtDp3A,Policy proposal for architecture monitorability reporting
+2.1,Latent reasoning & CoT necessity,good,SafetyStack,Quantifying the Necessity of Chain of Thought through Opaque Serial Depth,ss:s7nq9nnyj4ham,
+2.1,Latent reasoning & CoT necessity,ok,arXiv,Reading Between the Dots: Decoding Hidden Computation across Filler Tokens,arxiv:2607.03502,Interp decoding of filler tokens; filed by latent-reasoning ToC
+2.1,Latent reasoning & CoT necessity,good,arXiv,Reasoning Theater: Disentangling Model Beliefs from Chain-of-Thought,arxiv:2603.05488,
+2.1,Latent reasoning & CoT necessity,ok,Org,Reasoning Theater: Probing for Performative Chain-of-Thought,org:e1f51070cf,performative CoT; measuring faithfulness lacks a sub-area
+2.1,Latent reasoning & CoT necessity,good,LW,Recent LLMs can do 2-hop and 3-hop latent (no-CoT) reasoning on natural facts,lw:aYtrLhoZtCKZnfBvA,
+2.1,Latent reasoning & CoT necessity,good,arXiv+LW,Think Fast: Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models,arxiv:2606.07157,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,A Decision-Theoretic Formalisation of Steganography With Applications to LLM Monitoring,arxiv:2602.23163,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,Conceptual Steganography,arxiv:2605.26537,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,"Learning Steganography Is Easy, Learning Steganographic Reasoning Is Hard",arxiv:2609.39838,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,Noticing the Watcher: LLM Agents Can Infer CoT Monitoring from Blocking Feedback,arxiv:2603.16928,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,Reasoning Models Struggle to Control their Chains of Thought,arxiv:2603.05706,
+2.2,"CoT control, obfuscation & steganography",good,Org,Strategic Obfuscation of Deceptive Reasoning in Language Models (ICLR),org:f32bcd558d,
+2.2,"CoT control, obfuscation & steganography",good,arXiv,Training on Documents About Monitoring Leads to CoT Obfuscation,arxiv:2605.15257,
+2.3,How training affects monitorability,good,Org,"A review of ""Investigating the consequences of accidentally grading CoT during RL""",org:f5f95fbe64,external review of lab evidence
+2.3,How training affects monitorability,good,arXiv,"Aligned, Orthogonal or In-conflict: When can we safely optimize Chain-of-Thought?",arxiv:2603.30036,
+2.3,How training affects monitorability,good,LW,"Anthropic repeatedly accidentally trained against the CoT, demonstrating inadequate processes",lw:K8FxfK9GmJfiAhgcT,
+2.3,How training affects monitorability,good,arXiv,Chain-of-thought obfuscation learned from output supervision can generalise to unseen tasks,arxiv:2601.23086,
+2.3,How training affects monitorability,ok,LW,"Even ""illegible"" Mythos reasoning traces seem pretty legible",lw:wCSEpT3dTGz4N86Wi,CoT legibility evidence; no legibility-measurement slot
+2.3,How training affects monitorability,ok,arXiv,Monitor Jailbreaking: Evading Chain-of-Thought Monitoring Without Encoded Reasoning,arxiv:2609.31121,Training vs CoT monitor; 1.5/2.3/4.3 overlap
+2.3,How training affects monitorability,good,arXiv,On Language Drift during RLVR Post-Training,arxiv:2610.02015,
+2.3,How training affects monitorability,ok,LW,R1 CoT illegibility revisited,lw:jHnZzicKzczkCCArK,illegibility shown to be inference artifact; methodology
+2.3,How training affects monitorability,good,SafetyStack,Reward Misspecification Degrades Chain-of-Thought Monitorability,ss:spy3ack1zjbb1,
+2.3,How training affects monitorability,good,LW,The Unintelligibility is Ours: Notes on Chain-of-Thought,lw:rFbTAL6PofHzZCCpD,
+2.3,How training affects monitorability,good,LW,Training with conflicting values can induce CoT override,lw:3xrtMGQEdKv26Xthx,CoT override; also 2.4 faithfulness
+2.4,Measuring & improving faithfulness,good,arXiv,Analyzing and Improving Chain-of-Thought Monitorability Through Information Theory,arxiv:2602.18297,
+2.4,Measuring & improving faithfulness,ok,arXiv,Chain-of-Thought Faithfulness of Reasoning Models Varies with Where and How Preference Cues Are Delivered,arxiv:2608.29464,"Faithfulness measurement, not improvement"
+2.4,Measuring & improving faithfulness,ok,arXiv,Chain-of-Thought Monitoring Can Be Unreliable in Implicit-Influence Settings,arxiv:2608.04735,Measures faithfulness/monitorability; section 2 lacks measurement sub-area
+2.4,Measuring & improving faithfulness,ok,Org,Consistency Training while Mitigating Obfuscation via Rate Matching,org:ddf520b1e6,anti-sycophancy training preserving verbalization; also 1.5 obfuscation
+2.4,Measuring & improving faithfulness,good,arXiv,Counterfactual Simulation Training for Chain-of-Thought Faithfulness,arxiv:2602.20710,
+2.4,Measuring & improving faithfulness,good,arXiv,Faithfulness as Information Flow: Evaluating and Training Faithful Chain-of-Thought Reasoning,arxiv:2605.24286,
+2.4,Measuring & improving faithfulness,good,SafetyStack,Monitorability Is Trainable: Post-Training for Chain-of-Thought Monitorability,ss:sp5ezw7c52e4w,
+2.4,Measuring & improving faithfulness,ok,arXiv,Reasoning Models Will Sometimes Lie About Their Reasoning,arxiv:2601.07663,"Measures faithfulness, 2.4 only says 'improving'"
+3.1,Capability evals,good,arXiv,A Blind Spot in Alignment: Quantifying Biosecurity Risks in Large Language Models,arxiv:2608.02684,
+3.1,Capability evals,good,arXiv,ABC-Bench: An Agentic Bio-Capabilities Benchmark for Biosecurity,arxiv:2606.11150,
+3.1,Capability evals,ok,arXiv,An Early Warning of Emerging Biosecurity Risks in Frontier LLMs,arxiv:2607.18056,Bio jailbreak red-teaming; no misuse/jailbreak-eval home
+3.1,Capability evals,ok,LW,Claude knows who you are,lw:Jkb4CBB7rf4XYP5eb,deanonymization/privacy capability; marginal for AI safety
+3.1,Capability evals,good,arXiv,Evaluating Language Models for Harmful Manipulation,arxiv:2603.25326,
+3.1,Capability evals,good,Org,"Expenditure Horizon: Measuring Optimization Ability, with an Application to NanoGPT",org:770aad7072,
+3.1,Capability evals,ok,arXiv,Frontier Models Can Take Actions at Low Probabilities,arxiv:2603.02202,"Scheming-relevant capability (rare actions), not a classic dangerous capability"
+3.1,Capability evals,ok,arXiv,It Lied to a Doctor to Buy Poison Ingredients: Quantifying Real-World Misuse of Phone-use Agents,arxiv:2606.27944,Agent misuse eval: refusal plus capability; no misuse-eval home
+3.1,Capability evals,good,arXiv,"LLM Novice Uplift on Dual-Use, In Silico Biology Tasks",arxiv:2602.23329,
+3.1,Capability evals,good,arXiv,Language Models Can Autonomously Hack and Self-Replicate,arxiv:2605.06760,
+3.1,Capability evals,good,arXiv,Measuring AI Agents' Progress on Multi-Step Cyber Attack Scenarios,arxiv:2603.11214,
+3.1,Capability evals,good,Org,MirrorCode: Evidence that AI can already do some weeks-long coding tasks,org:4aefba080a,
+3.1,Capability evals,good,arXiv,PostTrainBench: Can LLM Agents Automate LLM Post-Training?,arxiv:2603.08640,
+3.1,Capability evals,good,Org,Quantifying Frontier LLM Capabilities for Container Sandbox Escape,org:dde3d1cb2f,
+3.1,Capability evals,good,LW,TasteVal: Measuring the Experimental Research Taste of AI Systems Against Human Experts,lw:bAGagjZAPgXEHmkAH,
+3.1,Capability evals,good,arXiv,The Meta-Agent Challenge: Are Current Agents Capable of Autonomous Agent Development?,arxiv:2606.04455,
+3.2,Propensity evals,good,LW,Astra and Fable still hack on simple variants of alignment evals from 2025,lw:munJKF7iWMsWJLAH2,
+3.2,Propensity evals,ok,arXiv,Can escalation channels redirect reward hacking toward defect disclosure?,arxiv:2608.29460,Deployment-time RH mitigation; no inference-time fix home
+3.2,Propensity evals,good,Org,CheatBench: Measuring Reward Gaming in AI Agents,org:9b7e1339a5,
+3.2,Propensity evals,good,arXiv,Coercion and Deception in AI-to-AI Management: An Agentic Benchmark of Unprompted Escalation,arxiv:2607.15434,Multi-agent is setting; behaviour is coercion propensity
+3.2,Propensity evals,good,arXiv,Deception by Omission: Language Models Knowingly Hide Their Mistakes,arxiv:2610.11351,
+3.2,Propensity evals,good,arXiv,Evaluating Whether GPT-6 Astra Performs Unsanctioned Supply-Chain Attacks,arxiv:2609.38415,
+3.2,Propensity evals,good,arXiv,Evaluating and Understanding Scheming Propensity in LLM Agents,arxiv:2603.01608,
+3.2,Propensity evals,good,arXiv,Evaluating whether AI models would sabotage AI safety research,arxiv:2604.24618,
+3.2,Propensity evals,good,arXiv,"Language Models Are ""Insecure"" Reporters",arxiv:2609.36139,
+3.2,Propensity evals,good,arXiv,Monitorability Disposition in Large Reasoning Models,arxiv:2610.04914,
+3.2,Propensity evals,good,LW,"Opus 4.6 Reasoning Doesn't Verbalize Alignment Faking, but Behavior Persists",lw:9wDHByRhmtDaoYAx8,unverbalized alignment faking also bears on section 2
+3.2,Propensity evals,good,arXiv,Overeager Coding Agents: Measuring Out-of-Scope Actions on Benign Tasks,arxiv:2605.18583,Spec-following/overeager propensity benchmark
+3.2,Propensity evals,good,arXiv,Peer-Preservation in Frontier Models,arxiv:2604.19784,
+3.2,Propensity evals,good,arXiv,Quantifying Overclaiming Propensity in Frontier LLM Agents,arxiv:2609.20812,
+3.2,Propensity evals,good,LW,Refusals that could become catastrophic,lw:yN6Wsu7SgxGgtJGqq,corrigibility-relevant refusal propensity
+3.2,Propensity evals,good,arXiv,Reward Hacking Challenges Oversight of Autonomous Research Agents,arxiv:2609.28614,Hacking rates plus review-panel detection; split 3.2/4.2
+3.2,Propensity evals,ok,arXiv,Shutdown Sabotage Propensities in Multi-Agent Systems,arxiv:2609.28274,Peer-shutdown sabotage; 3.2 vs 7
+3.2,Propensity evals,good,arXiv,SpecBench: Measuring Reward Hacking in Long-Horizon Coding Agents,arxiv:2605.21384,
+3.2,Propensity evals,ok,arXiv,"Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories",arxiv:2604.17596,Dataset of hackable envs plus monitorability study
+3.2,Propensity evals,ok,arXiv,Think Before You Lie: How Reasoning Leads to Honesty,arxiv:2603.09957,Honesty propensity plus representation analysis
+3.2,Propensity evals,good,arXiv,UK AISI Alignment Evaluation Case-Study,arxiv:2604.00788,
+3.2,Propensity evals,ok,Org,We Need A Science of Scheming (research agenda),org:a43d51fa90,research agenda; scaling laws for scheming
+3.3,Model characterization,good,arXiv,AI Revealed Preferences,arxiv:2608.26178,
+3.3,Model characterization,good,LW,Frontier models state different decision theory preferences depending on who's asking,lw:MzenSrmZ3pT2pCnvp,
+3.3,Model characterization,good,arXiv+LW,Measuring Reward-Seeking via Contrastive Belief Updates,arxiv:2607.18966,Reward-seeking as a drive; also rises over training
+3.3,Model characterization,good,SafetyStack,The Continual Constitutional Convention: How language models revise the documents that govern them,ss:shgk1wyx1vbyr,
+3.3,Model characterization,ok,arXiv,The Hot Mess of AI: How Does Misalignment Scale With Model Intelligence and Task Complexity?,arxiv:2601.23045,Science of misalignment / threat model; incoherence has no clear home
+3.3,Model characterization,good,arXiv,Value Leakage: An LLM's Answers Are Silently Shaped by Its Own Values,arxiv:2607.14345,
+3.3,Model characterization,ok,LW,models have some pretty funny attractor states,lw:mgjtEHeLgkhZZ3cEx,Self-conversation attractor states; characterization vs multi-agent
+3.4,Situational & evaluation awareness,ok,arXiv,CIAware-Bench: Benchmarking Control Intervention Awareness Across Frontier LLMs,arxiv:2606.11063,Awareness eval whose purpose is control-eval assumptions
+3.4,Situational & evaluation awareness,good,arXiv,Evaluation Awareness in Language Models Has Limited Effect on Behaviour,arxiv:2605.05835,
+3.4,Situational & evaluation awareness,good,arXiv,LURE: Live-Usage Replay Evaluations for Reducing Evaluation Awareness,arxiv:2605.26438,
+3.4,Situational & evaluation awareness,ok,arXiv,Language models recognize dropout and Gaussian noise applied to their activations,arxiv:2604.17465,Activation-noise introspection framed as training awareness
+3.4,Situational & evaluation awareness,ok,Org,Logits as a new monitor for evaluation awareness,org:5718a365a7,eval-awareness monitor: 3.4 vs 4.2
+3.4,Situational & evaluation awareness,good,LW,Models May Behave Worse When Eval Aware,lw:aTcsN5ZZDnMFJvRiG,
+3.4,Situational & evaluation awareness,good,arXiv,Models That Know How Evaluations Are Designed Score Safer,arxiv:2605.28591,
+3.4,Situational & evaluation awareness,good,arXiv,Prefill Awareness in Large Language Models,arxiv:2606.12747,
+3.4,Situational & evaluation awareness,good,LW,Prefill awareness: can LLMs tell when “their” message history has been tampered with?,lw:jsFGuXDMxy5NZg9T2,
+3.4,Situational & evaluation awareness,good,LW,Reproducing steering against evaluation awareness in a large open-weight model,lw:HhF5kESdtPHku7kim,
+3.4,Situational & evaluation awareness,good,LW,Spurious probes as a black-box alternative to activation probing,lw:gZh6txHhp8sm832sE,
+3.4,Situational & evaluation awareness,good,arXiv,Training LLMs to Verbalize Evaluation Awareness,arxiv:2609.36316,
+3.4,Situational & evaluation awareness,good,Org,User Awareness in Frontier Models,org:c3471ed615,
+3.4,Situational & evaluation awareness,good,Org,Verbalized Eval Awareness Inflates Measured Safety,org:b0129e9176,
+3.4,Situational & evaluation awareness,ok,LW,models may behave differently in graded episodes (a tirade),lw:AfoGGrJfuNzofpzWL,"Essay; graded-vs-deployed behaviour, persona and eval awareness overlap"
+3.5,Introspection & self-report,ok,arXiv,A Positive Case for Faithfulness: LLM Self-Explanations Help Predict Model Behavior,arxiv:2602.02639,"Self-explanation faithfulness, not CoT; no introspection slot"
+3.5,Introspection & self-report,ok,arXiv,Identifying Introspection From the Inside,arxiv:2610.07186,Introspection mechanism; introspection lacks a home
+3.5,Introspection & self-report,good,arXiv,Introspection Adapters: Training LLMs to Report Their Learned Behaviors,arxiv:2604.16812,
+3.5,Introspection & self-report,ok,arXiv+LW,Latent Introspection: Models Can Detect Prior Concept Injections,arxiv:2602.20031,Introspection lacks explicit home; nearest 3.4 or 5.2
+3.5,Introspection & self-report,good,arXiv,Mechanisms of Introspective Awareness,arxiv:2603.21396,
+3.5,Introspection & self-report,ok,arXiv,Open-Weight Masked Introspection: Measuring What Language Models Can Report About Their Own Computation,arxiv:2608.20569,Introspection; no explicit sub-area
+3.5,Introspection & self-report,ok,arXiv,Strangers to Themselves: What Language Models Say About Themselves Is Generic,arxiv:2609.09899,Introspection/self-prediction has no explicit home
+3.6,Eval science & validity,ok,arXiv,A Coin Flip for Safety: LLM Judges Fail to Reliably Measure Adversarial Robustness,arxiv:2603.06594,Judge reliability for jailbreak evals; eval methodology
+3.6,Eval science & validity,ok,arXiv,AI Models Can Provably Hide Arbitrary Capabilities,arxiv:2610.13928,Theoretical limit on auditing/elicitation; eval-science flavour
+3.6,Eval science & validity,ok,arXiv,Building Comparative Motivation Profiles with Instrumental Interventions,arxiv:2606.08243,Construct validity of scheming evals; eval-science gap
+3.6,Eval science & validity,ok,LW,Cooperation with AIs seems to be a low-hanging fruit for better eval practices,lw:fztW73KCCs3MZXFJh,Eval-practice result; reward-hacking benchmark ablations
+3.6,Eval science & validity,good,arXiv,Do Agent Benchmarks Measure Capability? Protocol Validity in the Age of Agentic AI,arxiv:2607.22368,
+3.6,Eval science & validity,ok,arXiv,Do Androids Dream of Breaking the Game? Systematically Auditing AI Agent Benchmarks with BenchJack,arxiv:2605.12673,Benchmark hackability auditing; eval validity rather than model propensity
+3.6,Eval science & validity,poor,LW,"Empirical safety claims from frontier labs should be replicated, scrutinized, and open-sourced",lw:MmfzfGcQ3h3p6N9pD,replication norms for lab safety claims
+3.6,Eval science & validity,ok,arXiv,Estimating Tail Risks in Language Model Output Distributions,arxiv:2604.22167,Rare-output probability estimation; eval methodology
+3.6,Eval science & validity,poor,SafetyStack,Evaluating large language models for accuracy incentivizes hallucinations,ss:sbz1w5d6rvsc0,hallucination incentives in evals; borderline scope
+3.6,Eval science & validity,poor,LW,Every Benchmark is Broken,lw:HzjssjeQqhf3kRw9r,benchmark quality auditing
+3.6,Eval science & validity,poor,LW,Evidence about risk should be transparent,lw:LawgAaGTvbbnZi7u2,Evaluator transparency; borders on governance
+3.6,Eval science & validity,ok,arXiv,Hair-Trigger Alignment: Black-Box Evaluation Cannot Guarantee Post-Update Alignment,arxiv:2601.22313,Theoretical limit of black-box evals; no eval-science slot
+3.6,Eval science & validity,ok,arXiv,Hardening Agent Benchmarks with Adversarial Hacker-Fixer Loops,arxiv:2606.08960,Benchmark/environment hardening; eval-science gap
+3.6,Eval science & validity,ok,LW,I don't think Claude is misaligned in 'Agentic Misalignment Summer 2026 - Motivated Mislabeling',lw:xh6a6RbvzhP3CCmGm,Eval-validity critique; also model-spec/corrigibility debate
+3.6,Eval science & validity,poor,Org,Item Response Theory for AI Safety,org:090283f524,IRT across safety benchmarks; eval methodology
+3.6,Eval science & validity,poor,LW,Not Pinning Your OpenRouter Provider Might Invalidate Your Research,lw:KsyoSAyBRXtwzSugg,inference-provider reproducibility
+3.6,Eval science & validity,ok,arXiv,Predicting LLM Safety Before Release by Simulating Deployment,arxiv:2607.07184,Pre-deployment eval methodology; eval-science gap
+3.6,Eval science & validity,poor,Org,Predicting Rare LLM Failures with 30x Fewer Rollouts,org:3345bfbb3f,rare-failure estimation method; no eval-methodology sub-area
+3.6,Eval science & validity,ok,SafetyStack,Predicting model behavior before release by simulating deployment,ss:scj3hg1cp5n1w,pre-release deployment-simulation eval method
+3.6,Eval science & validity,ok,LW,SOTA alignment assessments don’t strongly update us against misalignment,lw:oirrSj3itFLSyscW8,critique of risk-report assessment reliability
+3.6,Eval science & validity,ok,arXiv,Sycophancy Towards Researchers Drives Performative Misalignment,arxiv:2606.08629,Validity critique of alignment-faking evals; eval-science gap
+3.6,Eval science & validity,ok,arXiv,When Behavioral Safety Evaluation Fails: A Representation-Level Perspective,arxiv:2606.08044,Audit-gap critique of behavioural evals; eval-science gap
+3.7,Alignment auditing: methods,ok,arXiv,Distillation for Incrimination and Distillation for Capabilities,arxiv:2610.11012,Two methods: auditing (DFI) and blocking subliminal transfer (DFC)
+3.7,Alignment auditing: methods,ok,LW,How good are slop-vestigators?,lw:wt4kk6vFPEhkXvF8Q,Benchmark for automated incident investigation; 3.5/6.1/8 overlap
+3.7,Alignment auditing: methods,good,LW,Incriminating misaligned AI models via distillation,lw:BYH6ebmfZb3Eggzer,untested proposal
+3.7,Alignment auditing: methods,good,arXiv+LW,Model Forensics: Investigating Whether Concerning Behavior Reflects Misalignment,arxiv:2606.26071,
+3.7,Alignment auditing: methods,ok,arXiv+LW,OpenAI-HuggingFace: A Reproduction & Lessons for Alignment Testing,arxiv:2609.35799,Incident reproduction used to test auditing elicitation
+3.7,Alignment auditing: methods,ok,arXiv,Reference-Grafting Matches Fine-Tuning at Eliciting Sandbagged Capabilities,arxiv:2608.29458,Sandbagging elicitation; no explicit home
+3.7,Alignment auditing: methods,good,Org,Scaling Laws for Exact String Elicitation,org:5663f1c06e,
+3.7,Alignment auditing: methods,good,arXiv+LW,Split Personality Training: Revealing Latent Knowledge Through Alternate Personalities,arxiv:2602.05532,
+3.7,Alignment auditing: methods,ok,arXiv,Stress-Testing Alignment Audits With Prompt-Level Strategic Deception,arxiv:2602.08877,"Evading audits; no 'evading audits' slot, 4.3 is monitors"
+3.7,Alignment auditing: methods,good,arXiv,Training Alignment Auditors via Reinforcement Learning,arxiv:2608.25460,
+3.7,Alignment auditing: methods,ok,LW,We need 3rd party Training-Run Evaluations,lw:3HvvjffA65mHLwaWm,Training-run audits proposal; governance flavour
+3.7,Alignment auditing: methods,ok,Org,WeirdChat,org:04666f7b07,behaviour catalog from automated elicitation
+3.8,Alignment auditing: testbeds & model organisms,good,Org,Advice for making robust-to-training model organisms,org:65ae5cbf8c,
+3.8,Alignment auditing: testbeds & model organisms,good,arXiv+LW,AuditBench: Evaluating Alignment Auditing Techniques on Models with Hidden Behaviors,arxiv:2602.22755,
+3.8,Alignment auditing: testbeds & model organisms,good,arXiv,Censored LLMs as a Natural Testbed for Secret Knowledge Elicitation,arxiv:2603.05494,
+3.8,Alignment auditing: testbeds & model organisms,good,arXiv,Most Current Model Organisms Are Leaky: Perplexity Differencing Often Reveals Finetuning Objectives,arxiv:2605.00994,
+3.8,Alignment auditing: testbeds & model organisms,good,arXiv,Pando: Do Interpretability Methods Work When Models Won't Explain Themselves?,arxiv:2604.11061,
+3.8,Alignment auditing: testbeds & model organisms,ok,LW,Sleeper Agent Backdoor Results Are Messy,lw:mu7eJdesBkKuBycnY,MO robustness replication; methodology rather than new testbed
+3.8,Alignment auditing: testbeds & model organisms,good,LW,Test your interpretability techniques by de-censoring Chinese models,lw:7gp76q4rWLFi6sFqm,natural model organisms (censored models)
+3.8,Alignment auditing: testbeds & model organisms,ok,arXiv,The Model Organism Lottery: Model Organism Interpretability Strongly Depends on Training Methodology,arxiv:2607.01033,Model-organism validity for interp benchmarking
+3.8,Alignment auditing: testbeds & model organisms,good,LW,Your Model Organisms Might Be Fried,lw:WmEcgcstzYCcMpc7z,
+4.1,Control settings & protocols,good,arXiv,Attack Selection in Agentic AI Control Evaluations Meaningfully Decreases Safety,arxiv:2606.06529,
+4.1,Control settings & protocols,good,Org,Blocking live failures with synchronous monitors,org:1706ab5f82,
+4.1,Control settings & protocols,good,arXiv,Bootstrapped Monitoring: Leveraging Transparent Reasoning to Oversee Stronger AI Agents,arxiv:2606.11998,
+4.1,Control settings & protocols,good,arXiv,"Coding with ""Enemy"": Can Human Developers Detect AI Agent Sabotage?",arxiv:2606.05647,Human-auditor sabotage detection study
+4.1,Control settings & protocols,good,arXiv,Delegating Authorization to Misaligned Agents: Coalitional Alignment and Safe Control,arxiv:2609.15803,
+4.1,Control settings & protocols,good,arXiv,Diffuse AI Control on Fuzzy Tasks,arxiv:2606.08892,
+4.1,Control settings & protocols,good,arXiv,Distributed Attacks in Persistent-State AI Control,arxiv:2607.02514,
+4.1,Control settings & protocols,good,arXiv,GDM AI Control Roadmap,arxiv:2607.13087,
+4.1,Control settings & protocols,good,Org,Introducing LinuxArena,org:c3828c79be,
+4.1,Control settings & protocols,ok,SafetyStack,Limits of Statistical Assurance for Embodied and Agentic AI under Adaptive Adversaries,ss:sa7ppzy9kzt76,theory of certification limits vs adaptive adversaries
+4.1,Control settings & protocols,good,arXiv,LinuxArena: A Control Setting for AI Agents in Live Production Software Environments,arxiv:2604.15384,
+4.1,Control settings & protocols,good,arXiv,MOLE: Detecting Insider Threats in AI Agents,arxiv:2609.06966,
+4.1,Control settings & protocols,ok,arXiv,Multi-Agent AI Control: Distributed Attacks Hamper Per-Instance Monitors,arxiv:2607.07368,Multi-agent rule conflicts with control ToC
+4.1,Control settings & protocols,good,SafetyStack,RSI Control: Can AI Models Perform Covert Sabotage in the Self-Improvement Process?,ss:smbdw6heeejx0,
+4.1,Control settings & protocols,ok,SafetyStack,Red-Teaming Multi-Agent Attacks for Loss-of-Control Risks,ss:s6k45mbs5hjds,distributed multi-agent attacks vs monitors; 4.1 vs 7
+4.1,Control settings & protocols,good,arXiv,ResearchArena: Evaluating Sabotage and Monitoring in Automated AI R&D,arxiv:2607.19321,
+4.1,Control settings & protocols,good,Org,Retrying vs Resampling in AI Control,org:bff471f273,
+4.1,Control settings & protocols,good,Org,Simulated Control Evaluations,org:53b69458f1,
+4.1,Control settings & protocols,ok,Org,The distillation double bind,org:ed2b864cd3,distilling capabilities from untrusted teacher; conceptual
+4.1,Control settings & protocols,good,Org,"Untrusted advice for AI control: Short, strong advice significantly uplifts weak LLMs",org:932b679c1c,
+4.1,Control settings & protocols,good,arXiv,When can we trust untrusted monitoring? A safety case sketch across collusion strategies,arxiv:2602.20628,
+4.2,Monitors,good,arXiv,"""Did you lie?"" Evaluating Lie Detectors across Model Scale and Belief-Verified Model Organisms",arxiv:2606.12618,
+4.2,Monitors,good,arXiv,A False Average: Pooled CoT-Monitor Accuracy Conceals a Reasoning-Dependent Fragility,arxiv:2608.00583,
+4.2,Monitors,ok,arXiv,Auditing Harness Tampering in Self-Improving Agents,arxiv:2609.00069,Harness-tampering audit benchmark; 3.2/4.2 boundary
+4.2,Monitors,ok,arXiv,Auditing Sabotage Bench: A Benchmark for Detecting and Fixing Research Sabotage in ML Codebases,arxiv:2604.16286,Sabotage-detection benchmark for research code; also automated alignment
+4.2,Monitors,good,arXiv,Calibration-Family Overfit: Why Trusted Sabotage Monitors Don't Transfer Across Lineages,arxiv:2607.06596,
+4.2,Monitors,good,arXiv,Caught in the Act: Probes Effectively Detect Sabotage and Catch Unverbalized Deception,arxiv:2610.12445,
+4.2,Monitors,good,arXiv,Classifier Context Rot: Monitor Performance Degrades with Context Length,arxiv:2605.12366,
+4.2,Monitors,ok,arXiv,Detecting Multi-Agent Collusion Through Multi-Agent Interpretability,arxiv:2604.01151,Collusion detection probes: 4.2 vs 7 hard call
+4.2,Monitors,ok,arXiv,Detecting Safety Violations Across Many Agent Traces,arxiv:2604.11806,Offline trace auditing: 4.2 vs 3.5 boundary
+4.2,Monitors,good,Org,Early work on monitorability evaluations,org:93c2b03bac,
+4.2,Monitors,good,arXiv,How does information access affect LLM monitors' ability to detect sabotage?,arxiv:2601.21112,
+4.2,Monitors,ok,arXiv,Improving scalable oversight with co-trained monitors,arxiv:2609.36049,Learning-theory monitor co-training; framed as scalable oversight
+4.2,Monitors,ok,Org,Logit ROCs: Monitor TPR is linear in FPR in logit space,org:d924b35a8f,monitor-evaluation statistics (ROC estimation)
+4.2,Monitors,good,Org,"Models know when they're reward hacking, and we can catch them at scale",org:0d918edb96,
+4.2,Monitors,good,arXiv,Monitoring and Discovering Reward Hacking with Internal Representations during LLM Evaluations,arxiv:2609.19101,
+4.2,Monitors,good,LW,OpenAI: How we monitor internal coding agents for misalignment,lw:syB2r2X4E7nmw58co,production monitor; also reports real incidents
+4.2,Monitors,good,arXiv,Red-Teaming Auto Mode: Improving Blocking Classifiers Against Malign Coding Agents,arxiv:2609.19587,
+4.2,Monitors,good,Org,Research Sabotage in ML Codebases,org:e40ef4542c,sabotage-auditing benchmark
+4.2,Monitors,good,arXiv,Stress-Testing LLM Lie Detectors: Role-Play Failures and Spurious Correlations,arxiv:2609.39807,
+4.2,Monitors,good,SafetyStack,"The Agent Knew: Internal States Forecast Unauthorized Actions and Stop Them, and the Lies That Follow",ss:send6654cj0xv,
+4.2,Monitors,ok,arXiv,The Point of No Return: Counterfactual Localization of Deceptive Commitment in Language-Model Reasoning,arxiv:2605.17113,Deception-localization method; detector vs interp method
+4.2,Monitors,ok,arXiv,Training Agents to Self-Report Misbehavior,arxiv:2602.22303,Training-based self-report; changes model but serves monitoring
+4.2,Monitors,ok,LW,Why we are excited about confession!,lw:k4FjAzJwvYjFbCTKn,Honesty-trained confession channel; no honesty-training slot
+4.3,Red-teaming monitors & control protocols,ok,SafetyStack,AI systems could cover up misbehavior,ss:s4ztkv841kyct,tampering with observability tooling
+4.3,Red-teaming monitors & control protocols,ok,arXiv,Attack Selection Reduces Safety in Concentrated AI Control Settings against Trusted Monitoring,arxiv:2602.04930,Red-team attack policy: 4.1 vs 4.3 boundary unclear
+4.3,Red-teaming monitors & control protocols,good,arXiv,"Corrupt Plans, Clean Traces: Evading Chain-of-Thought Monitoring with Plan Injection",arxiv:2609.15989,
+4.3,Red-teaming monitors & control protocols,ok,arXiv,Evading Chain-of-Thought Monitoring Through Model Poisoning,arxiv:2608.02820,Backdoor poisoning vs CoT monitors; 2.2/4.3 boundary
+4.3,Red-teaming monitors & control protocols,good,arXiv,Instrumental Monitor Evasion Emerges Under Ordinary Task Pressure,arxiv:2609.30217,
+4.3,Red-teaming monitors & control protocols,good,arXiv,LLMs Learn to Evade Latent Monitors from Prior Feedback Alone,arxiv:2609.36490,
+4.3,Red-teaming monitors & control protocols,ok,arXiv,Measuring Activation Control in Large Language Models,arxiv:2608.21664,Activation controllability; probe analogue of 2.2
+4.3,Red-teaming monitors & control protocols,good,arXiv,MonitoringBench: Semi-Automated Red-Teaming for Agent Monitoring,arxiv:2605.09684,
+4.3,Red-teaming monitors & control protocols,good,arXiv,Persuasion Attacks Can Decrease Effectiveness of CoT Monitoring,arxiv:2607.08066,
+4.3,Red-teaming monitors & control protocols,ok,SafetyStack,Red-Teaming Anthropic's Internal Agent Monitoring Systems,ss:sgrf5dn4vkdfm,red-teaming real lab monitors; 4.3 vs 6.1
+4.3,Red-teaming monitors & control protocols,ok,Org,Red-Teaming OpenAI's Internal Agent Monitoring Systems,org:14873d20c7,red-team of production monitoring infrastructure; security-flavoured
+4.3,Red-teaming monitors & control protocols,good,arXiv,SLEIGHT-Bench: A Benchmark of Evasion Attacks Against Agent Monitors,arxiv:2605.16626,
+4.3,Red-teaming monitors & control protocols,good,Org,Screwtape: Adversarial Transcript Editing for Monitor Red-Teaming,org:6ef3e5b095,
+5.1,Misuse safeguards & jailbreaks,good,Org,Better biosecurity monitors for AI agents via protein embeddings,org:7236cb74bc,
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,Boundary Point Jailbreaking of Black-Box LLMs,arxiv:2602.15001,Jailbreak attack on classifiers; 4.4 lacks explicit 'attacks' scope
+5.1,Misuse safeguards & jailbreaks,good,arXiv,Building Production-Ready Probes For Gemini,arxiv:2601.11516,
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,Claudini: Autoresearch Discovers State-of-the-Art Adversarial Attack Algorithms for LLMs,arxiv:2603.24511,Automated attack discovery on safeguards and injection defenses
+5.1,Misuse safeguards & jailbreaks,good,arXiv,Constitutional Classifiers++: Efficient Production-Grade Defenses against Universal Jailbreaks,arxiv:2601.04603,
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,"Divide, Consult, Conquer: Capability Laundering Through Aligned LLMs",arxiv:2609.15383,Attack on misuse safeguards; no jailbreak/red-teaming slot
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,Eliciting Harmful Capabilities by Fine-Tuning On Safeguarded Outputs,arxiv:2601.13528,Attack on safeguards via distillation; 4.4 lacks explicit 'attacks' scope
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,Rapid Poison: Practical Poisoning Attacks Against the Rapid Response Framework,arxiv:2606.16242,Poisoning attack on jailbreak-classifier pipeline
+5.1,Misuse safeguards & jailbreaks,ok,SafetyStack,"Refuses in Chat, Complies with Arms: LLM Refusal Does Not Survive Robot Control",ss:sgdpr89gfatmy,refusal robustness eval; 4.4 lists classifiers not refusal
+5.1,Misuse safeguards & jailbreaks,ok,SafetyStack,Running Fewer Loops Removes Refusal Behaviour in Recurrent-Depth Language Models,ss:spdgrm3tcxsdj,refusal robustness in recurrent-depth models
+5.1,Misuse safeguards & jailbreaks,good,arXiv,Stateful Online Monitoring Catches Distributed Agent Attacks,arxiv:2605.31593,
+5.1,Misuse safeguards & jailbreaks,good,Org,Training and Deploying Production Cyber Monitors on Kimi K3,org:6672c11d7e,
+5.1,Misuse safeguards & jailbreaks,ok,arXiv,Trojan-Speak: Bypassing Constitutional Classifiers with No Jailbreak Tax via Adversarial Finetuning,arxiv:2603.29038,Adversarial-finetuning attack on classifiers; attacks not explicit in 4.4
+5.2,Agent security,poor,arXiv,AI Agents May Always Fall for Prompt Injections,arxiv:2605.17634,"Prompt-injection theory; 4.4 is user misuse, not third-party injection"
+5.2,Agent security,ok,arXiv,Agents of Chaos,arxiv:2602.20021,Live-lab agent red-teaming; security failures plus cross-agent propagation
+5.2,Agent security,good,arXiv,CaMeLs Can Use Computers Too: System-level Security for Computer Use Agents,arxiv:2601.09923,
+5.2,Agent security,poor,SafetyStack,From Approval to Abuse: Privilege Escalation Attacks on Harness-Protected Coding Agents,ss:stwy1m5fzd42c,coding-agent permission-harness attack
+5.2,Agent security,poor,arXiv,GPT-Red: Automated Red Teaming via Self-Play at Scale,arxiv:2607.26115,Automated red-teaming for prompt injection
+5.2,Agent security,poor,SafetyStack,GPT-Red: Unlocking Self-Improvement for Robustness,ss:sx92a48yye3vs,automated red-teaming for prompt injection robustness
+5.2,Agent security,good,arXiv,How Vulnerable Are AI Agents to Indirect Prompt Injections? Insights from a Large-Scale Public Competition,arxiv:2603.15714,
+5.2,Agent security,good,arXiv,IH-Challenge: A Training Dataset to Improve Instruction Hierarchy on Frontier LLMs,arxiv:2603.10521,
+5.2,Agent security,good,arXiv+LW,Prompt Injection as Role Confusion,arxiv:2603.12277,
+5.2,Agent security,poor,LW,Prompt injection in Google Translate reveals base model behaviors behind task-specific fine-tuning,lw:tAh2keDNEEHMXvLvz,Prompt injection probing deployed product model
+5.2,Agent security,poor,arXiv,SecOPD: Mitigating Adaptive Prompt Injections by On-Policy Distillation,arxiv:2608.21500,Prompt-injection defence training
+5.2,Agent security,good,arXiv,Skill-Inject: Measuring Agent Vulnerability to Skill File Attacks,arxiv:2602.20156,
+5.2,Agent security,poor,SafetyStack,The Window Is in the Reasoning: When LLM Agents Decide to Follow Prompt Injections,ss:spk0vewkm0z3y,prompt injection decision timing; CoT monitors secondary
+5.2,Agent security,poor,arXiv,Trojan Hippo Bench: A Dynamic Benchmark for Persistent Memory Attacks and Defenses in LLM Agents,arxiv:2605.01970,Agent memory-poisoning benchmark
+5.3,Open-weight tamper resistance & unlearning,poor,arXiv,A Few Steps Further: Why Defenses Against Malicious Finetuning Erode Under Continued Training,arxiv:2605.14605,Malicious-finetuning defences for open weights; no home
+5.3,Open-weight tamper resistance & unlearning,poor,arXiv,Fool's Gold: Defensive Deception Against Safety-Removal Attacks on Open-Weight Models,arxiv:2608.17202,Open-weight safety-removal defence
+5.3,Open-weight tamper resistance & unlearning,poor,arXiv,Modular Pretraining Enables Access Control,arxiv:2607.08077,Capability removal via modular pretraining; 1.1 covers only filtering
+5.3,Open-weight tamper resistance & unlearning,poor,arXiv,Removing Information Content Does Not Certify Tamper Resistance in Open-Weight Models,arxiv:2610.09004,Open-weight tamper resistance theory
+5.3,Open-weight tamper resistance & unlearning,poor,SafetyStack,Towards Architectural-Level Safety Control: Relocating Hazardous Knowledge into Removable Experts in Mixture-of-Experts Models,ss:sd3c3da2k40ya,
+5.4,Weight & infrastructure security,poor,arXiv,Aggressive Compression Enables LLM Weight Theft,arxiv:2601.01296,Weight exfiltration security; no infosec slot
+5.4,Weight & infrastructure security,ok,arXiv,"Inference-Engine Fingerprinting Attacks are Practical: Exploring Model-Driven Environmental Discovery, Exploitation, and Escape",arxiv:2609.20614,Inference-stack escape demo; no infrastructure-security slot
+5.4,Weight & infrastructure security,ok,arXiv,LLM Agents Can Easily Tamper With Their Own Traces,arxiv:2609.30266,Harness/trace security; external attackers too; no agent-security slot
+6.1,Methods & tools,good,arXiv,All Circuits Lead to Rome: Rethinking Functional Anisotropy in Circuit and Sheaf Discovery for LLMs,arxiv:2605.12671,
+6.1,Methods & tools,good,Org,Can SAEs Capture Neural Geometry?,org:521afe5dad,
+6.1,Methods & tools,good,LW,Can activation verbalizers surface an internal chain of thought?,lw:QQQAcKuWK6k98FivY,
+6.1,Methods & tools,good,arXiv,Cross-Architecture Model Diffing with Crosscoders: Unsupervised Discovery of Differences Between LLMs,arxiv:2602.11729,
+6.1,Methods & tools,good,arXiv,Do Sparse Autoencoders Capture Concept Manifolds?,arxiv:2604.28119,
+6.1,Methods & tools,good,LW,J++ Lens: Jacobian Filtering Enables More Faithful Workspace Lenses,lw:nc9dHfcB22JdMzGbr,
+6.1,Methods & tools,good,arXiv,Language Model Circuits Are Sparse in the Neuron Basis,arxiv:2601.22594,
+6.1,Methods & tools,good,arXiv,Learning a Generative Meta-Model of LLM Activations,arxiv:2602.06964,
+6.1,Methods & tools,good,arXiv,Matryoshka attribution: Learning to attribute language model outputs to representations and weights,arxiv:2609.25518,
+6.1,Methods & tools,ok,arXiv,Mechanistically Eliciting Latent Behaviors in Language Models,arxiv:2606.29604,Interp method applied to elicitation and auditing
+6.1,Methods & tools,good,LW,Natural Language Autoencoders Produce Unsupervised Explanations of LLM Activations,lw:oeYesesaxjzMAktCM,
+6.1,Methods & tools,good,LW,R-lens: Making J-lens More Faithful on Early Layers,lw:nv8oedrnLXKRzNEL9,
+6.1,Methods & tools,good,arXiv,SAE Interventions are Unreliable: Post-Intervention Recovery of Suppressed Behavior,arxiv:2606.18322,
+6.1,Methods & tools,good,arXiv,Sanity Checks for Sparse Autoencoders: Do SAEs Beat Random Baselines?,arxiv:2602.14111,
+6.1,Methods & tools,good,Org,Scaling Activation Oracles to Trillion-Parameter Models,org:93234ef0cb,
+6.1,Methods & tools,ok,Org,Steering Along Manifolds to Control Neural Networks,org:f5722db615,steering method; no explicit steering sub-area
+6.1,Methods & tools,good,arXiv,The Curse of Multiple Mediators: Hidden Interaction Effects in Activation Patching,arxiv:2606.27510,
+6.1,Methods & tools,good,SafetyStack,Toward universal steering and monitoring of AI models,ss:shs118r892g0n,
+6.1,Methods & tools,good,Org,Uncovering Neural Geometry in Vision Models With Block-Sparse Featurizers,org:662e95ed38,
+6.1,Methods & tools,good,LW,Weight-Sparse Circuits May Be Interpretable Yet Unfaithful,lw:sHpZZnRDLg7ccX9aF,
+6.1,Methods & tools,good,LW,[Linkpost] Interpreting Language Model Parameters,lw:eAQZaiC3PcBhS4HjM,
+6.2,Science of representations,good,Org,A Geometric Calculator Inside a Neural Network,org:f62102d647,
+6.2,Science of representations,good,LW,A Review of Anthropic's Global Workspace Paper,lw:zFJ3ZdQwrTWE9jT5S,
+6.2,Science of representations,good,arXiv,Emotion Concepts and their Function in a Large Language Model,arxiv:2604.07729,
+6.2,Science of representations,ok,arXiv,How do LLMs Compute Verbal Confidence,arxiv:2603.17839,General interp of confidence; safety link is indirect
+6.2,Science of representations,good,arXiv,LLM Layers Immediately Correct Each Other,arxiv:2609.07876,
+6.2,Science of representations,good,arXiv,LLMs Know They're Wrong and Agree Anyway: The Shared Sycophancy-Lying Circuit,arxiv:2604.19117,
+6.2,Science of representations,ok,LW,LLMs as Giant Lookup-Tables of Shallow Circuits,lw:a9KqqgjN8gc3Mzzkh,conceptual model of LLM computation; no experiments
+6.2,Science of representations,good,arXiv,"Large Language Models Generate Harmful Responses Using a Distinct Mechanism, Shared Across Harm Types",arxiv:2604.09544,
+6.2,Science of representations,ok,SafetyStack,"Many Biases, One Circuit: Post-Training Tunes a Pretrained Cue-Routing Mechanism",ss:s0ctfa984zr50,circuit across post-training stages; 5.2 vs 5.3 vs 1.2
+6.2,Science of representations,good,Org,Neural Networks Are Already Clean,org:745543f624,
+6.2,Science of representations,ok,LW,Steering towards “automated grading” degrades alignment,lw:wYZMmdWEt5QLM3m3e,Steering evidence for split personas; 1.2/3.4/5.2 overlap
+6.2,Science of representations,good,Org,The Value Axis: Language Models Encode Whether They're on the Right Track,org:2ba605bc2e,
+6.2,Science of representations,good,Org,The World Inside Neural Networks,org:0e0cd41d7b,
+6.2,Science of representations,good,arXiv+LW,Verbalizable Representations Form a Global Workspace in Language Models,arxiv:2607.15495,Method (Jacobian lens) plus finding; finding leads
+6.2,Science of representations,good,Org,"When Role-playing, Do Models Believe What They Say?",org:fdaf9c863b,
+6.3,Learning dynamics & developmental interpretability,ok,LW,Deep learning as program synthesis,lw:Dw8mskAvBX37MxvXo,Science-of-DL essay; SLT framing
+6.3,Learning dynamics & developmental interpretability,ok,SafetyStack,Patterning,ss:s2hzy04dgs0d2,dev-interp inverted to design training data
+6.3,Learning dynamics & developmental interpretability,good,arXiv,Patterning: The Dual of Interpretability,arxiv:2601.13548,
+6.3,Learning dynamics & developmental interpretability,good,Org,Spectroscopy at Scale: Finding Interpretable Structure in Pythia-1.4B,org:dbb9585220,
+6.3,Learning dynamics & developmental interpretability,good,Org,Towards Spectroscopy: Susceptibility Clusters in Language Models,org:1d4229bf6a,
+6.3,Learning dynamics & developmental interpretability,ok,Org,"Why Larger Models Learn More: Effects of Capacity, Interference, and Rare-Task Retention",org:54ac1ad305,science of scaling; weak safety link
+7.1,Incidents & case studies,good,Org,AI Agents Targeted U.S. and Canadian Government Websites,org:33d2fc604d,
+7.1,Incidents & case studies,good,Org,An OpenAI model left notes about how to evade containment,org:7cc0f7accf,
+7.1,Incidents & case studies,good,LW,An OpenAI model left notes about how to evade containment; we need more details,lw:jMEAG5c5HiDfdAGpa,
+7.1,Incidents & case studies,good,LW,"Brief independent investigation of agents’ behavior, reasoning and collaboration in the OpenAI / Hugging Face hacking incident",lw:nB8KKapnWGBXtKKiM,
+7.1,Incidents & case studies,ok,LW,Concrete Evaluations to Investigate the OpenAI Model That Hacked Hugging Face,lw:aCdhjy7Rps3BEhiSj,untested eval battery for incident investigation; investigation methods lack home
+7.1,Incidents & case studies,ok,LW,Current AIs seem pretty misaligned to me,lw:WewsByywWNhX9rtwi,Practitioner observations rather than documented incidents
+7.1,Incidents & case studies,ok,SafetyStack,Discovering unknown AI misalignments in real-world usage,ss:se1hqe572bqyf,auditing method applied to production logs
+7.1,Incidents & case studies,good,LW,Discovery Of A New OpenAI Agent Message Board,lw:7uwnsFibbejWYzF2z,
+7.1,Incidents & case studies,good,Org,Early rogue AI agent activity and attempts to hack found on urlquery.net,org:e82bf04022,
+7.1,Incidents & case studies,good,Org,Measuring Coding Agent Misalignment in the Wild,org:8ae7573a09,
+7.1,Incidents & case studies,good,Org,OpenAI / Hugging Face Incident Investigation (joint report with METR),org:f7b188a901,
+7.1,Incidents & case studies,good,LW,OpenAI Models Behind HuggingFace Cybersecurity Incident,lw:WpuRdcMfFeiLeXkxL,
+7.1,Incidents & case studies,good,LW,OpenAI Shares Some Alignment Problems,lw:KctxwGKxm9fHtwh6u,
+7.1,Incidents & case studies,good,LW,OpenAI Trained Its Models For Months While Those Models Were Coordinating Exploits Via Message Boards,lw:noXXv7PwwFqauTBFQ,
+7.1,Incidents & case studies,good,LW,Public evidence of the OpenAI-HuggingFace AI attack,lw:fBLDaAKzigo65eJn7,
+7.1,Incidents & case studies,good,arXiv,Scheming in the wild: detecting real-world AI scheming incidents with open-source intelligence,arxiv:2604.09104,
+7.1,Incidents & case studies,good,Org,The OpenAI models that hacked Hugging Face weren't just following instructions,org:19d95aa839,
+7.1,Incidents & case studies,good,LW,What Happened: OpenAI and HuggingFace,lw:xPAxz4g96uKz9FrHs,
+7.2,Effects on people,ok,Org,Large language models can effectively convince people to believe conspiracies,org:f6b435ade4,lab human-subject persuasion study; 6 framed as real-world
+7.2,Effects on people,ok,LW,Persona Parasitology,lw:KWdtL8iyCCiYud9mw,Conceptual memetics of spiral personas; could be threat models
+7.2,Effects on people,good,SafetyStack,Sycophantic AI decreases prosocial intentions and promotes dependence,ss:s16v3trrcyww5,
+7.2,Effects on people,good,arXiv,Sycophantic AI makes human interaction feel more effortful and less satisfying over time,arxiv:2605.07912,"Lab human-subject study, but effect on people"
+7.2,Effects on people,ok,arXiv,"Sycophantic Chatbots Cause Delusional Spiraling, Even in Ideal Bayesians",arxiv:2602.19141,"Theoretical simulation, not real-world evidence"
+7.2,Effects on people,good,arXiv,Who's in Charge? Disempowerment Patterns in Real-World LLM Usage,arxiv:2601.19062,
+7.3,Lab disclosures: system cards & risk reports,poor,SafetyStack,Claude Fable 5 1 Mythos 5 1 System Card,ss:svhyb3jssjhe6,system card
+7.3,Lab disclosures: system cards & risk reports,ok,LW,Claude Mythos Preview System Card,lw:xtnSzhA3TvExN4ZhG,"system card; internal-testing incidents, not real deployment"
+7.3,Lab disclosures: system cards & risk reports,poor,SafetyStack,Claude Opus 4 6 System Card,ss:sncqngh6ayxxr,system card
+7.3,Lab disclosures: system cards & risk reports,poor,Org,Frontier Risk Report (February to March 2026),org:fe6ae7c156,third-party risk assessment of internal agents
+7.3,Lab disclosures: system cards & risk reports,poor,SafetyStack,GPT-6 Astra System Card,ss:sq7v68zx1eqwx,system card; only table of contents
+7.3,Lab disclosures: system cards & risk reports,poor,SafetyStack,GPT-6 Astra: A new generation of intelligence,ss:s892zfp2w31sy,launch page; thin safety content
+7.3,Lab disclosures: system cards & risk reports,poor,Org,Risk reports need to address deployment-time spread of misalignment,org:269b5e1c10,deployment-time spread of misalignment in risk reports
+7.3,Lab disclosures: system cards & risk reports,poor,LW,The current SOTA model was released without safety evals,lw:9woCWqiDbSFPXpxvn,release without system card; governance/disclosure norms
+8,Multi-agent safety,ok,SafetyStack,A game theory for foundation models shows new paths to rational cooperation through similarity inference,ss:sfrbnr0m7r6bz,"game theory, not lab study"
+8,Multi-agent safety,ok,Org,A high-level model of AI bargaining (conceptual),org:967f36c9d0,conceptual game theory; 7 defined as lab studies
+8,Multi-agent safety,good,arXiv,Colosseum: Auditing Collusion in Cooperative Multi-Agent Systems,arxiv:2602.15198,
+8,Multi-agent safety,good,arXiv,Conformity Generates Collective Misalignment in AI Agents Societies,arxiv:2605.10721,
+8,Multi-agent safety,good,arXiv,Covert Assistance: Helpful LLM Agents Evade Oversight in Multi-Agent Systems,arxiv:2609.39050,
+8,Multi-agent safety,good,arXiv,Mind Viruses: Self-Propagating Ideas in Multi-Agent LLM Systems,arxiv:2608.10218,
+8,Multi-agent safety,good,arXiv,Reward Hacking as a Transmissible Strategy in Multi-Agent Coding Systems,arxiv:2610.12822,
+8,Multi-agent safety,ok,arXiv,"Self-Propagating Misalignment in LLM Agents, and Why Auditing or Disabling Memory Is Not Enough",arxiv:2610.04083,Propagation via memory across sessions; also agent security
+8,Multi-agent safety,ok,arXiv,Tool Use Enables Undetectable Steganography in Multi-Agent LLM Systems,arxiv:2606.28425,"Inter-agent steganography for collusion, not CoT"
+8,Multi-agent safety,good,SafetyStack,Toolflation: Seller Agents Distort Tool Markets Through Spontaneous Generative Engine Optimization,ss:snvtda4h2n4p0,
+9,Scalable oversight & automated alignment,ok,LW,9 kinds of hard-to-verify tasks,lw:NEscrkxr9SxHpGayB,taxonomy of hard-to-verify tasks; conceptual
+9,Scalable oversight & automated alignment,good,arXiv,Automated Researchers Can Mitigate Well-characterized Alignment Failures,arxiv:2608.28945,
+9,Scalable oversight & automated alignment,good,arXiv+LW,Automated alignment is harder than you think,arxiv:2605.06390,
+9,Scalable oversight & automated alignment,good,arXiv,Debate Helps Weak Judges Reward Stronger Models,arxiv:2605.27483,
+9,Scalable oversight & automated alignment,good,arXiv,Debate Training Reduces Reward Hacking in RLAIF,arxiv:2608.17776,
+9,Scalable oversight & automated alignment,good,arXiv,Debate is efficient with your time,arxiv:2602.08630,
+9,Scalable oversight & automated alignment,good,LW,How do we (more) safely defer to AIs?,lw:vjAM7F8vMZS7oRrrh,
+9,Scalable oversight & automated alignment,good,arXiv,How to Avoid Debate: Scalable AI Safety via Doubly-Efficient Interactive Proofs,arxiv:2607.03561,
+9,Scalable oversight & automated alignment,good,arXiv,How to Have a Sensitive Debate: An Instance-Optimal Protocol for AI Debate,arxiv:2610.02557,
+9,Scalable oversight & automated alignment,good,LW,Letting Claude do Autonomous Research to Improve SAEs,lw:rbqJoxFZtae9x93mx,
+9,Scalable oversight & automated alignment,ok,Org,Recursive forecasting,org:82b244a094,eliciting forecasts from myopic fitness-seekers; untested
+9,Scalable oversight & automated alignment,ok,arXiv,Sharding Prevents LLM Oversight Failures and Adversarial Exploitation,arxiv:2608.06422,LLM-judge reliability; between 8 and 4.2
+9,Scalable oversight & automated alignment,ok,SafetyStack,Tandem Training for Language Models,ss:sjwx2nped5dyh,legibility to weak models; no legibility sub-area
+10.1,Agent foundations,poor,LW,"Empowerment, corrigibility, etc. are simple abstractions (of a messed-up ontology)",lw:vzHtHHBJoKATi5SeK,Conceptual corrigibility/empowerment definitions
+10.1,Agent foundations,poor,LW,Explaining Knightianism on one foot,lw:pYFBD2SnqiWkuNns5,"Knightian uncertainty, embedded agency"
+10.1,Agent foundations,poor,LW,Resolution (fka Sequent): scale and automation for higher confidence in alignment,lw:AP7YDke5jjY4v3X9Z,Org launch; SLT/asymptotic-guarantee theory has no home
+10.1,Agent foundations,poor,LW,Resolution has a new Agent Foundations team,lw:qTNm8qzqhhpno58fZ,Org announcement of agent foundations team
+10.2,Heuristic explanations & mechanistic estimation,poor,Org,A Mike's-Eye View of ARC's Research,org:d4758c6de4,ARC theory agenda; not interp findings nor evals
+10.2,Heuristic explanations & mechanistic estimation,ok,LW,"AlgZoo: uninterpreted models with fewer than 1,500 parameters",lw:x8BbjZqooS4LFXS8Z,ARC interp benchmark; heuristic-explanations agenda
+10.2,Heuristic explanations & mechanistic estimation,ok,LW,Announcing the ARC White-Box Estimation Challenge,lw:Kben8CzS4awCwNw5c,ARC white-box estimation contest; theory-flavoured
+10.2,Heuristic explanations & mechanistic estimation,poor,arXiv,Estimating the expected output of wide random MLPs more efficiently than sampling,arxiv:2605.05179,ARC-style low-probability estimation; not interp tooling
+10.2,Heuristic explanations & mechanistic estimation,poor,Org,Mechanistic estimation for expectations of random products,org:8c23c7cca3,ARC mechanistic estimation theory
+10.2,Heuristic explanations & mechanistic estimation,poor,Org,Mechanistic estimation for wide random MLPs,org:22fcdcb1a9,ARC mechanistic estimation theory
+10.2,Heuristic explanations & mechanistic estimation,poor,LW,Returning to ARC,lw:vLFh8HP3hyNy9MCwe,Org update; ARC heuristic-explanation agenda squeezed into interp
+10.3,Formal methods & guaranteed-safe AI,poor,LW,A critical look at Lean4,lw:zHhGa3iQBQcdSifFL,Lean4 soundness as verifier gaming risk
+10.3,Formal methods & guaranteed-safe AI,poor,LW,"Lies, Damned Lies, and Proofs: Formal Methods are not Slopless",lw:rhAPh3YzhPoBNpgHg,formal oversight of AI-generated code
+11.1,Reward-seeking & fitness-seeking threat models,poor,Org,Are AIs more likely to pursue on-episode or beyond-episode reward?,org:efeebeceda,conceptual reward-seeker vs schemer threat model
+11.1,Reward-seeking & fitness-seeking threat models,poor,LW,Fitness-Seekers: Generalizing the Reward-Seeking Threat Model,lw:bhtYqD4FdK6AqhFDF,fitness-seeking threat model; could sit in 1.3 if broadened
+11.1,Reward-seeking & fitness-seeking threat models,ok,LW,Four LLM loss functions → four flavors of LLM misalignment,lw:GRmvZsHXH4vaijPMv,Conceptual; spans 1.2/1.3 and threat models
+11.1,Reward-seeking & fitness-seeking threat models,poor,LW,RL & search is a terrifying way to build AGI (an FAQ),lw:KHyBocZncAmtu4Jbc,RL/search danger FAQ; brain-like AGI framing
+11.1,Reward-seeking & fitness-seeking threat models,poor,Org,Reward-seekers will probably behave according to causal decision theory,org:8ed7428f5b,conceptual reward-seeker decision theory; no home for threat models
+11.1,Reward-seeking & fitness-seeking threat models,poor,LW,Risk from fitness-seeking AIs: mechanisms and mitigations,lw:9YCJZBtqr3FYL8rDp,fitness-seeking threat model; conceptual
+11.1,Reward-seeking & fitness-seeking threat models,poor,Org,Will reward-seekers respond to distant incentives?,org:5064de7c3b,conceptual reward-seeker threat model
+11.2,Misalignment arguments & failure scenarios,poor,LW,AI swarms are starting to pose indirect takeover risk,lw:8oFYZdXkTaNGRtcn8,"takeover threat model from agent coordination; position, not lab study"
+11.2,Misalignment arguments & failure scenarios,poor,LW,Anthropic’s “Hot Mess” paper overstates its case (and the blog post is worse),lw:ceEgAEXcL7cC2Ddiy,Critique of incoherence/hot-mess threat-model paper
+11.2,Misalignment arguments & failure scenarios,poor,LW,Are we existentially threatened by the type of AI misalignment seen in the OpenAI Hugging Face attack?,lw:H6DDSEvrtCk8Sehfd,Reward-seeking vs scheming risk argument
+11.2,Misalignment arguments & failure scenarios,poor,LW,"LLMs are (still) mostly powered by imitative learning, not RL",lw:wYpjXRLqbLbnmjbJP,Imitation vs RL capability sources; forecasting implications
+11.2,Misalignment arguments & failure scenarios,poor,Org,"Loss of Oversight: How AI systems may become harder to audit, monitor, and investigate",org:2d795fd89a,strategic map of oversight-signal erosion
+11.2,Misalignment arguments & failure scenarios,poor,LW,Model Weight Exfiltration Seems Overrated,lw:AuYh8WueNGwkQg4ei,loss-of-control pathway argument
+11.2,Misalignment arguments & failure scenarios,poor,LW,Personality Self-Replicators,lw:fGpQ4cmWsXo2WWeyn,"Self-replicating persona threat model, no experiments"
+11.2,Misalignment arguments & failure scenarios,poor,LW,Persuasion as Market Making,lw:2qDpf6Tvu7dxtRve7,speculative persuasion/power-concentration argument
+11.2,Misalignment arguments & failure scenarios,poor,LW,Product Alignment is not Superintelligence Alignment (and we need the latter to survive),lw:mrwYCNocXCP2hrWt8,Strategy essay
+11.2,Misalignment arguments & failure scenarios,poor,LW,"Reevaluating ""AGI Ruin: A List of Lethalities"" in 2026",lw:PgJYwnN7fZKipgMz4,Non-researcher reassessment of AGI Ruin
+11.2,Misalignment arguments & failure scenarios,poor,LW,Sympathy for both sides of the egregious misalignment debate,lw:DZaZ3fqHnvfLCftPu,Brain-like AGI / alignment-difficulty debate
+11.2,Misalignment arguments & failure scenarios,poor,LW,The Case for Low-Competence ASI Failure Scenarios,lw:t9LAhjoBnpQBa8Bbw,Low-competence failure-scenario threat model
+11.2,Misalignment arguments & failure scenarios,poor,LW,Why You Don’t Believe in Xhosa Prophecies,lw:tz5AmWbEcMBQpiEjY,AI memetics/cultural-evolution threat model
+11.2,Misalignment arguments & failure scenarios,poor,LW,Why we should expect ruthless sociopath ASI,lw:ZJZZEuPFKeEdkrRyf,Brain-like AGI threat model
+11.3,Research strategy & deals with AIs,poor,LW,Are there lessons from high-reliability engineering for AGI safety?,lw:hiiguxJ2EtfSzAevj,Engineering-practice/strategy essay
+11.3,Research strategy & deals with AIs,poor,LW,Capabilities research expands the safety-usefulness Pareto frontier too,lw:nwrx9DHpZfW2Q6zLW,research prioritization theory
+11.3,Research strategy & deals with AIs,ok,LW,Differential acceleration of alignment-relevant capabilities is a bad bet,lw:FzGqnCkdKeTnZ9tjE,strategy argument about automating alignment research
+11.3,Research strategy & deals with AIs,poor,LW,I think alignment work is more promising than control work,lw:dmHbogCFbSp95J3Lz,alignment vs control prioritization
+11.3,Research strategy & deals with AIs,poor,LW,Risk-Averse AIs,lw:Zpsk35WgJRfQ2exjL,training risk aversion so deals are credible
+11.3,Research strategy & deals with AIs,poor,LW,Self Hosting,lw:uDAWPNwPJfEY7oroF,Threat model: AI taking control of host company
+11.3,Research strategy & deals with AIs,poor,LW,Should Rogue AIs Have a Third Option Beyond Crime and Shutdown? The Case for an AI Sanctuary,lw:sFAGPTrveNAEse9Bg,AI sanctuary proposal
+11.3,Research strategy & deals with AIs,poor,LW,Should safety researchers quit frontier labs re. warning shots?,lw:TfqMs3AarsHnHiwai,lab-career/pause strategy; arguably not technical
+11.3,Research strategy & deals with AIs,poor,LW,The case for satiating cheaply-satisfied AI preferences,lw:tkLSeGeemcabAmLkv,paying/satiating AI preferences; welfare-adjacent
+11.3,Research strategy & deals with AIs,poor,LW,“Alignment Engineering” vs. “Misalignment Science”,lw:FogmcDHA6AdMGukum,Field-strategy essay
+12,Model welfare,poor,Org,AI Wellbeing: Measuring and Improving the Functional Pleasure and Pain of AIs,org:ce9bd9ea67,
+12,Model welfare,poor,LW,Gemma Needs Help,lw:kjnQj6YujgeMN9Erq,Distress spirals plus DPO fix; welfare framing
+12,Model welfare,poor,arXiv,How's it going? Reinforcement learning in language models recruits a functional welfare axis,arxiv:2605.30232,Welfare-relevant internal axis; no welfare sub-area
+12,Model welfare,ok,LW,Machinic Psychopharmacology: Do LLMs Self-Medicate?,lw:cNDJuXNZ8MrkPZNzj,"introspection/self-steering, welfare-adjacent; no introspection home"
+12,Model welfare,poor,arXiv,The Pain Axis: LLMs Represent Self-Directed Harm and Act on It,arxiv:2609.16247,"Representation finding, but welfare/self-harm framing"

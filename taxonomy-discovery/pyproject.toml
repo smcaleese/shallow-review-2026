@@ -15,4 +15,5 @@ dependencies = [
     "scikit-learn>=1.5",
     "sentence-transformers>=3.0",
     "squarify>=0.4.5",
+    "umap-learn>=0.5.12",
 ]

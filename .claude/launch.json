@@ -1,0 +1,53 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "taxonomy-site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765",
+        "--directory",
+        "taxonomy/site"
+      ],
+      "port": 8765
+    },
+    {
+      "name": "facets-shared-site",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8767",
+        "--directory",
+        "facets-shared/site"
+      ],
+      "port": 8767
+    },
+    {
+      "name": "facets-shared-site-8768",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8768",
+        "--directory",
+        "facets-shared/site"
+      ],
+      "port": 8768
+    },
+    {
+      "name": "semantic-map",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8770",
+        "--directory",
+        "taxonomy-discovery/5-semantic-map/site"
+      ],
+      "port": 8770
+    }
+  ]
+}

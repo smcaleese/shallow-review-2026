@@ -1,0 +1,222 @@
+# Shallow Review 2026 taxonomy (draft, 2026-11-03)
+#
+# Same format as taxonomy-2025.yaml. Tested against the 502 sources on the facets site
+# (https://shallow-review-facets.netlify.app): every item has a primary sub-area. The per-item
+# assignments are in taxonomy-2026-assignments.csv; they were made from summaries and not yet checked by a person.
+#
+# Placement rules
+# - File by theory of change: the item's main contribution decides the section, not its setting or method.
+# - White-box vs black-box is a tag, not a branch. A probe aimed at catching sabotage goes in Monitors.
+# - Changing the model is alignment (section 1). Constraining a possibly adversarial model from outside is control (4).
+#   Threats from external adversaries (users, attackers, thieves) go in Security & misuse (5).
+# - CoT: "is the reasoning trace a reliable signal?" goes in 2. Using any signal (CoT, actions, activations) to deploy
+#   safely goes in 4; papers on a CoT monitor's performance go in Monitors.
+# - Reward hacking: how training produces it, or training-side fixes -> 1.6. Measuring how often finished models hack
+#   -> Propensity evals. Detecting it as it happens -> Monitors. Conceptual threat models -> 11.1.
+# - Personas: which character training produces -> 1.3. Measuring a model's current traits -> Model characterization,
+#   or Science of representations if the finding is about internals.
+# - Real-world vs lab: evidence from real deployments goes in 7. Controlled experiments go in 3 (or 8 if multi-agent).
+# - Multi-agent: findings that come from agents interacting -> 8. Multi-agent attacks on control protocols -> 4.
+# - Sycophancy: training cause -> 1.2/1.4; measuring it in a model -> 3; effect on people -> 7.2.
+#
+# Cross-cutting tags: white-box, black-box, persona, introspection, obfuscation under optimization pressure,
+# reward hacking, deception and honesty, sycophancy, scheming, model organisms, RL/RLVR.
+taxonomy:
+- id: training_time_alignment
+  name: Training-time alignment
+  description: Understanding how pretraining and post-training shape a model's behaviour and character, and using that
+    to produce an aligned model.
+  children:
+  - id: training_data_and_data_attribution
+    name: Training data & data attribution
+    description: Pretraining, midtraining and post-training data interventions (filtering, alignment pretraining,
+      hyperstition, spec midtraining), and tracing behaviours back to the data that caused them.
+  - id: emergent_misalignment_and_generalization_science
+    name: Emergent misalignment & generalization science
+    description: Why fine-tuning generalizes the way it does, including emergent and conditional misalignment and which
+      post-training stages drive safety properties.
+  - id: persona_science
+    name: Persona science
+    description: Models of LLMs as characters selected and strengthened by training (persona selection, split personas,
+      the default Assistant persona), and how training changes which persona a model takes on.
+  - id: subliminal_learning_and_hidden_signal_transfer
+    name: Subliminal learning & hidden-signal transfer
+    description: Traits, capabilities and backdoors passed between models through data that looks unrelated to them.
+  - id: inoculation_prompting
+    name: Inoculation prompting
+    description: Training under prompts that elicit an unwanted behaviour, so the behaviour stays tied to that context
+      instead of generalizing.
+  - id: reward_hacking_and_reward_seeking_in_training
+    name: Reward hacking & reward seeking in training
+    description: How RL and reward design produce reward hacking, specification gaming and reward-seeking motivations,
+      and training-side fixes such as better verifiers or channelling hacks into a harmless outlet.
+  - id: models_resisting_training
+    name: Models resisting training
+    description: Models that steer or resist their own training, such as exploration hacking, generalization hacking and
+      gradient hacking.
+  - id: internals_and_monitors_as_training_signals
+    name: Internals & monitors as training signals
+    description: Using probes, features or monitors as training rewards or penalties, and the risk that the model learns
+      to fool them instead of changing its behaviour.
+  - id: alignment_targets_and_training_methods
+    name: Alignment targets & training methods
+    description: What to train models to be (constitutions, specs, virtues, corrigibility) and methods that train a
+      target property directly, such as shutdownability or consistency training.
+- id: chain_of_thought_monitorability
+  name: Chain-of-thought monitorability
+  description: Whether a model's written reasoning is a reliable signal of what it is doing, and what keeps or destroys
+    that.
+  children:
+  - id: latent_reasoning_and_cot_necessity
+    name: Latent reasoning & CoT necessity
+    description: How much models can do without visible reasoning (no-CoT time horizons, filler tokens, recurrent and
+      diffusion architectures), and so whether dangerous reasoning has to appear in the CoT.
+  - id: cot_control_obfuscation_and_steganography
+    name: CoT control, obfuscation & steganography
+    description: Stress tests of whether models can control, hide or encode their reasoning.
+  - id: how_training_affects_monitorability
+    name: How training affects monitorability
+    description: Which training pressures keep or degrade CoT legibility, including accidental training against the CoT
+      and language drift.
+  - id: measuring_and_improving_faithfulness
+    name: Measuring & improving faithfulness
+    description: Measuring whether the CoT reflects the computation behind the answer, and training for faithful or
+      monitorable reasoning.
+- id: evaluations_and_auditing
+  name: Evaluations & auditing
+  description: Measuring what models can do and will do, finding hidden behaviours, and checking that those
+    measurements are trustworthy.
+  children:
+  - id: capability_evals
+    name: Capability evals
+    description: Dangerous and decision-relevant capabilities, such as cyber, bio, autonomy, self-replication, AI R&D and
+      time horizons.
+  - id: propensity_evals
+    name: Propensity evals
+    description: How often models scheme, sabotage, deceive, hack rewards or break their spec when given the chance,
+      including reward-hacking benchmarks.
+  - id: model_characterization
+    name: Model characterization
+    description: Values, preferences, drives and dispositions of current models.
+  - id: situational_and_evaluation_awareness
+    name: Situational & evaluation awareness
+    description: Whether models can tell they are being evaluated, trained or tampered with, and how that changes their
+      behaviour and our measurements.
+  - id: introspection_and_self_report
+    name: Introspection & self-report
+    description: What models can accurately report about their own internal states and learned behaviours, and training
+      them to report it.
+  - id: eval_science_and_validity
+    name: Eval science & validity
+    description: Whether evals, benchmarks, red-team numbers and lab safety claims are trustworthy, including construct
+      validity, eval realism, benchmark hardening and statistical methods.
+  - id: alignment_auditing_methods
+    name: 'Alignment auditing: methods'
+    description: Techniques and agents for finding hidden objectives or misbehaviour in a model, eliciting sandbagged
+      capabilities, and attacks on audits.
+  - id: alignment_auditing_testbeds_and_model_organisms
+    name: 'Alignment auditing: testbeds & model organisms'
+    description: Models with known hidden behaviours used to test audits, and whether those model organisms are
+      realistic and robust.
+- id: monitoring_and_control
+  name: Monitoring & control
+  description: Deploying models that may be misaligned, using monitors and protocols that keep them safe even if they try
+    to cause harm.
+  children:
+  - id: control_settings_and_protocols
+    name: Control settings & protocols
+    description: Control environments, protocols and safety cases that assume the model may be adversarial, including
+      multi-agent and distributed attacks on those protocols.
+  - id: monitors
+    name: Monitors
+    description: Black-box, CoT and probe-based monitors for scheming, sabotage, deception and reward hacking, and how
+      well they work.
+  - id: red_teaming_monitors_and_control_protocols
+    name: Red-teaming monitors & control protocols
+    description: Attack policies, evasion benchmarks and studies of models evading monitors.
+- id: security_and_misuse
+  name: Security & misuse
+  description: Defending models and agents against external adversaries, such as misusers, prompt injectors and
+    thieves.
+  children:
+  - id: misuse_safeguards_and_jailbreaks
+    name: Misuse safeguards & jailbreaks
+    description: Classifiers, probes and refusal training against misuse, and attacks that get past them.
+  - id: agent_security
+    name: Agent security
+    description: Prompt injection, memory and skill-file poisoning, privilege escalation, and system-level defences for
+      agents.
+  - id: open_weight_tamper_resistance_and_unlearning
+    name: Open-weight tamper resistance & unlearning
+    description: Removing hazardous knowledge and keeping safeguards in open-weight models after fine-tuning.
+  - id: weight_and_infrastructure_security
+    name: Weight & infrastructure security
+    description: Protecting model weights and the inference and agent harness infrastructure from theft or tampering.
+- id: interpretability
+  name: Interpretability
+  description: Work whose main contribution is a tool for understanding model internals, or a finding about them.
+  children:
+  - id: interpretability_methods_and_tools
+    name: Methods & tools
+    description: SAEs and their alternatives, circuits, lenses, activation oracles, steering and other interpretability
+      techniques, and tests of whether they work.
+  - id: science_of_representations
+    name: Science of representations
+    description: Findings about how models represent and compute things, such as the global workspace, emotion concepts
+      and shared circuits.
+  - id: learning_dynamics_and_developmental_interpretability
+    name: Learning dynamics & developmental interpretability
+    description: How internal structure forms during training, including singular learning theory and susceptibilities.
+- id: real_world_evidence
+  name: Real-world evidence
+  description: Evidence from real deployments and from labs' own disclosures, not controlled experiments.
+  children:
+  - id: incidents_and_case_studies
+    name: Incidents & case studies
+    description: Real-world AI incidents and their investigation, such as the OpenAI-Hugging Face incident and scheming
+      found in the wild.
+  - id: effects_on_people
+    name: Effects on people
+    description: Harms to users and human agency from everyday AI use, such as sycophancy, delusion, dependence and
+      disempowerment.
+  - id: lab_disclosures
+    name: 'Lab disclosures: system cards & risk reports'
+    description: System cards, risk reports and what they do or don't show.
+- id: multi_agent_safety
+  name: Multi-agent safety
+  description: Failures that come from AI agents interacting, such as collusion, spreading ideas or behaviours, and the
+    behaviour of AI organisations, in experiments or game theory.
+- id: scalable_oversight_and_automated_alignment
+  name: Scalable oversight & automated alignment
+  description: Debate and other ways for weaker overseers to supervise stronger models, and using AI to do alignment
+    research.
+- id: theory_and_foundations
+  name: Theory & foundations
+  description: Theoretical agendas aimed at understanding or guaranteeing safety from first principles.
+  children:
+  - id: agent_foundations
+    name: Agent foundations
+    description: Formal models of agency, corrigibility and decision-making.
+  - id: heuristic_explanations_and_mechanistic_estimation
+    name: Heuristic explanations & mechanistic estimation
+    description: ARC's agenda of explaining and estimating model behaviour without sampling.
+  - id: formal_methods_and_guaranteed_safe_ai
+    name: Formal methods & guaranteed-safe AI
+    description: Proofs, formal verification and their limits as a route to safety.
+- id: threat_models_and_strategy
+  name: Threat models & strategy
+  description: Arguments about how AI could go wrong and what the field should do about it.
+  children:
+  - id: reward_seeking_threat_models
+    name: Reward-seeking & fitness-seeking threat models
+    description: How AIs that seek reward or fitness would behave, and what follows for safety.
+  - id: misalignment_arguments_and_failure_scenarios
+    name: Misalignment arguments & failure scenarios
+    description: Arguments for and against egregious misalignment, and scenarios for how AI risk plays out.
+  - id: research_strategy_and_deals_with_ais
+    name: Research strategy & deals with AIs
+    description: Prioritization between safety agendas, career and lab-strategy questions, and proposals for making deals
+      with AIs.
+- id: model_welfare
+  name: Model welfare
+  description: Model welfare and moral status, including functional pleasure and pain in models.

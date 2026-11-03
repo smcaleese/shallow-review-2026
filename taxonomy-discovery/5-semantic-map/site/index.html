@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Safety Research Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f7f6f2; --panel: #ffffff; --ink: #1c1d1f; --muted: #6b6e74; --faint: #a3a6ab;
+  --line: #e4e2dc; --hover: #f1efe9; --sel: #e9e6dd; --chip: #efede7;
+  --faded: rgba(28, 29, 31, 0.10); --halo: rgba(247, 246, 242, 0.85); --shadow: 0 8px 28px rgba(0,0,0,.12);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1c1f; --ink: #ececea; --muted: #9a9ca1; --faint: #62656b;
+    --line: #2c2e32; --hover: #232428; --sel: #2b2c31; --chip: #26272b;
+    --faded: rgba(236, 236, 234, 0.09); --halo: rgba(19, 20, 22, 0.85); --shadow: 0 8px 28px rgba(0,0,0,.5);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --panel: #1b1c1f; --ink: #ececea; --muted: #9a9ca1; --faint: #62656b;
+  --line: #2c2e32; --hover: #232428; --sel: #2b2c31; --chip: #26272b;
+  --faded: rgba(236, 236, 234, 0.09); --halo: rgba(19, 20, 22, 0.85); --shadow: 0 8px 28px rgba(0,0,0,.5);
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg); color: var(--ink); font: 13px/1.45 Inter, system-ui, sans-serif;
+  display: grid; grid-template-rows: auto auto 1fr auto; height: 100vh; overflow: hidden;
+}
+header { padding: 14px 20px 8px; }
+h1 { font: 600 19px/1.25 "Source Serif 4", Georgia, serif; margin: 0; letter-spacing: -0.005em; }
+.sub { color: var(--muted); margin-top: 3px; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 6px 20px 10px; border-bottom: 1px solid var(--line); }
+.controls .label { color: var(--muted); margin-right: 2px; }
+.chip {
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px;
+  padding: 3px 10px; font: inherit; cursor: pointer; display: inline-flex; gap: 6px; align-items: center;
+}
+.chip .n { color: var(--muted); font-variant-numeric: tabular-nums; }
+.chip[aria-pressed="false"] { background: transparent; color: var(--faint); border-style: dashed; }
+.chip[aria-pressed="false"] .n { color: var(--faint); }
+button.plain { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 4px 10px; font: inherit; cursor: pointer; }
+button.plain:hover, .chip:hover { background: var(--hover); }
+input[type=search] {
+  border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 6px;
+  padding: 5px 10px; font: inherit; width: 260px; max-width: 100%;
+}
+.spacer { flex: 1; }
+.inview { color: var(--muted); font-variant-numeric: tabular-nums; }
+main { display: grid; grid-template-columns: 1fr 360px; min-height: 0; }
+#mapwrap { position: relative; min-width: 0; min-height: 0; }
+canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+canvas.dragging { cursor: grabbing; }
+canvas.over { cursor: pointer; }
+aside { border-left: 1px solid var(--line); background: var(--panel); overflow-y: auto; min-height: 0; }
+.aside-head { position: sticky; top: 0; background: var(--panel); padding: 10px 14px 8px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 8px; z-index: 1; }
+.aside-head b { font-weight: 600; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+.aside-head .muted { color: var(--muted); }
+.row { display: grid; grid-template-columns: 12px 1fr auto 40px; gap: 8px; align-items: center; padding: 4px 14px; cursor: pointer; user-select: none; }
+.row:hover { background: var(--hover); }
+.row.on { background: var(--sel); }
+.row.off { opacity: .45; }
+.row .sw { width: 10px; height: 10px; border-radius: 50%; }
+.row .num { font-variant-numeric: tabular-nums; color: var(--muted); text-align: right; }
+.row .pct { font-variant-numeric: tabular-nums; color: var(--faint); text-align: right; font-size: 12px; }
+.grow { margin-top: 6px; padding-top: 6px; padding-bottom: 6px; }
+.grow .name { font-weight: 600; }
+.grow .sw { width: 12px; height: 12px; }
+.grow .num { color: var(--ink); font-weight: 500; }
+.crow { padding-left: 32px; }
+.crow .name { color: var(--ink); }
+.key { color: var(--faint); font-variant-numeric: tabular-nums; margin-right: 4px; font-weight: 500; }
+.gdesc { color: var(--muted); font-size: 12px; padding: 0 14px 4px 34px; }
+footer { padding: 6px 20px; color: var(--muted); border-top: 1px solid var(--line); font-size: 12px; }
+#tip {
+  position: fixed; pointer-events: none; max-width: 380px; background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; box-shadow: var(--shadow);
+  display: none; z-index: 10;
+}
+#tip .where { display: flex; gap: 6px; align-items: center; color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+#tip .where .sw { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+#tip .t { font-weight: 600; font-size: 13.5px; line-height: 1.3; }
+#tip .meta { color: var(--muted); font-size: 12px; margin-top: 3px; }
+#tip .sum { margin-top: 6px; }
+#tip .tags { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 4px; }
+#tip .tags span { background: var(--chip); border-radius: 4px; padding: 1px 6px; font-size: 11.5px; color: var(--muted); }
+#tip .open { margin-top: 6px; color: var(--faint); font-size: 11.5px; }
+@media (max-width: 860px) {
+  body { height: auto; overflow: auto; grid-template-rows: auto auto auto auto; }
+  header, .controls, footer { padding-left: 16px; padding-right: 16px; }
+  main { grid-template-columns: 1fr; }
+  #mapwrap { height: 70vh; }
+  aside { border-left: none; border-top: 1px solid var(--line); overflow: visible; }
+  input[type=search] { width: 100%; }
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>A semantic map of the 2026 shallow review sources</h1>
+  <div class="sub" id="sub"></div>
+</header>
+<div class="controls">
+  <span class="label">Sources</span>
+  <span id="sources"></span>
+  <input type="search" id="q" placeholder="Search title, author, summary, agenda…  ( / )">
+  <span class="spacer"></span>
+  <span class="inview" id="inview"></span>
+  <button class="plain" id="reset">Reset view</button>
+  <button class="plain" id="theme">Theme</button>
+</div>
+<main>
+  <div id="mapwrap"><canvas id="map"></canvas></div>
+  <aside>
+    <div class="aside-head"><b>Clusters</b><span class="muted" id="ccount"></span><span class="spacer" style="flex:1"></span><button class="plain" id="clear">Clear</button></div>
+    <div id="legend"></div>
+  </aside>
+</main>
+<footer>UMAP axes have no units; only relative closeness means anything. Scroll to zoom, drag to pan, click a dot to open the source, click a row to filter. Counts and percentages are each row's share of the sources currently in view.</footer>
+<div id="tip"></div>
+
+<script src="data.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(() => {
+const D = window.MAP_DATA;
+const P = D.points, G = D.groups;
+const SOURCES = { arxiv: "arXiv", lesswrong: "LessWrong / AF", org: "Lab & org posts", safety_stack: "Safety stack" };
+const HUES = [28, 222, 148, 300, 70, 190, 345, 105, 255, 0];
+
+// ---------- colour: hue = group, lightness = cluster within group ----------
+const clusterOf = {};
+G.forEach((g, gi) => g.clusters.forEach((c, ci) => { clusterOf[c.id] = { ...c, group: g, gi, ci, n: g.clusters.length }; }));
+function isDark() {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+}
+let colors = {}, groupColors = {};
+function computeColors() {
+  const dark = isDark();
+  const [lo, hi] = dark ? [52, 86] : [34, 74];
+  colors = {}; groupColors = {};
+  G.forEach((g, gi) => {
+    const h = HUES[gi % HUES.length];
+    groupColors[g.id] = d3.lch((lo + hi) / 2, 62, h).formatHex();
+    g.clusters.forEach((c, ci) => {
+      const t = g.clusters.length === 1 ? 0.5 : ci / (g.clusters.length - 1);
+      colors[c.id] = d3.lch(lo + t * (hi - lo), 70 - t * 18, h + (t - 0.5) * 14).formatHex();
+    });
+  });
+}
+
+// ---------- state ----------
+const state = { sources: new Set(Object.keys(SOURCES)), selected: new Set(), q: "", hoverRow: null };
+P.forEach(p => {
+  p.hay = [p.title, p.authors, p.summary, (p.agendas || []).join(" "), clusterOf[p.cluster].name, clusterOf[p.cluster].group.name].join(" ").toLowerCase();
+});
+const passes = p => state.sources.has(p.source) && (!state.q || p.hay.includes(state.q));
+const active = p => passes(p) && (state.selected.size === 0 || state.selected.has(p.cluster));
+
+// ---------- header ----------
+document.getElementById("sub").textContent =
+  `${P.length} selected sources · ${D.embedder} embeddings of title + abstract · UMAP · ${G.length} groups, ` +
+  `${Object.keys(clusterOf).length} clusters from one Ward tree · hue = group, shade = cluster` +
+  (D.named_by ? ` · names by ${D.named_by}` : "");
+
+const srcBox = document.getElementById("sources");
+Object.entries(SOURCES).forEach(([k, label]) => {
+  const n = P.filter(p => p.source === k).length;
+  if (!n) return;
+  const b = document.createElement("button");
+  b.className = "chip"; b.setAttribute("aria-pressed", "true");
+  b.innerHTML = `${label} <span class="n">${n}</span>`;
+  b.onclick = () => {
+    state.sources.has(k) ? state.sources.delete(k) : state.sources.add(k);
+    b.setAttribute("aria-pressed", state.sources.has(k));
+    refresh();
+  };
+  srcBox.appendChild(b); srcBox.append(" ");
+});
+
+// ---------- canvas & layout ----------
+const canvas = document.getElementById("map"), wrap = document.getElementById("mapwrap");
+const ctx = canvas.getContext("2d");
+let W = 0, H = 0, dpr = 1, base = { k: 1, x: 0, y: 0 }, transform = d3.zoomIdentity, quad;
+const xs = P.map(p => p.x), ys = P.map(p => p.y);
+const ext = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) };
+
+function resize() {
+  dpr = window.devicePixelRatio || 1;
+  W = wrap.clientWidth; H = wrap.clientHeight;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  const pad = 36, sw = ext.x1 - ext.x0, sh = ext.y1 - ext.y0;
+  const k = Math.min((W - 2 * pad) / sw, (H - 2 * pad) / sh);
+  base = { k, x: (W - k * sw) / 2 - k * ext.x0, y: (H - k * sh) / 2 - k * ext.y0 };
+  P.forEach(p => { p.bx = base.x + base.k * p.x; p.by = base.y + base.k * (ext.y1 + ext.y0 - p.y); });
+  quad = d3.quadtree().x(p => p.bx).y(p => p.by).addAll(P);
+  G.forEach(g => {
+    const m = P.filter(p => clusterOf[p.cluster].gi === G.indexOf(g));
+    g.cx = d3.median(m, p => p.bx); g.cy = d3.median(m, p => p.by);
+    g.clusters.forEach(c => {
+      const cm = P.filter(p => p.cluster === c.id);
+      c.cx = d3.median(cm, p => p.bx); c.cy = d3.median(cm, p => p.by);
+    });
+  });
+  draw(); updateCounts();
+}
+
+let hovered = null;
+function radius() { return 3.6 + Math.min(transform.k - 1, 4) * 0.45; }
+function draw() {
+  const css = getComputedStyle(document.documentElement);
+  const faded = css.getPropertyValue("--faded").trim(), halo = css.getPropertyValue("--halo").trim();
+  const ink = css.getPropertyValue("--ink").trim(), bg = css.getPropertyValue("--bg").trim();
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  const r = radius(), t = transform;
+  const hl = state.hoverRow;
+  const lit = p => active(p) && (!hl || (hl.type === "g" ? clusterOf[p.cluster].group.id === hl.id : p.cluster === hl.id));
+  const front = [];
+  ctx.fillStyle = faded;
+  for (const p of P) {
+    if (lit(p)) { front.push(p); continue; }
+    ctx.beginPath(); ctx.arc(t.applyX(p.bx), t.applyY(p.by), r * 0.8, 0, 2 * Math.PI); ctx.fill();
+  }
+  ctx.lineWidth = 0.8; ctx.strokeStyle = bg;
+  for (const p of front) {
+    ctx.beginPath(); ctx.arc(t.applyX(p.bx), t.applyY(p.by), r, 0, 2 * Math.PI);
+    ctx.fillStyle = colors[p.cluster]; ctx.fill(); ctx.stroke();
+  }
+  // labels: group names when zoomed out, cluster names when zoomed in
+  ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineJoin = "round";
+  const showClusters = t.k >= 2.2;
+  const labels = [];
+  G.forEach(g => {
+    if (!showClusters) labels.push({ x: g.cx, y: g.cy, text: g.name, size: 13, weight: 600, color: groupColors[g.id], id: g.id, type: "g" });
+    else g.clusters.forEach(c => labels.push({ x: c.cx, y: c.cy, text: c.name, size: 12, weight: 500, color: colors[c.id], id: c.id, type: "c" }));
+  });
+  // place bigger labels first; nudge up or down to avoid overlaps, drop the label if nothing fits
+  const placed = [];
+  const count = L => P.filter(p => lit(p) && (L.type === "g" ? clusterOf[p.cluster].group.id === L.id : p.cluster === L.id)).length;
+  labels.forEach(L => { L.n = count(L); });
+  labels.sort((a, b) => b.n - a.n);
+  for (const L of labels) {
+    if (!L.n) continue;
+    const rawX = t.applyX(L.x), y0 = t.applyY(L.y);
+    if (rawX < -100 || rawX > W + 100 || y0 < -20 || y0 > H + 20) continue;
+    ctx.font = `${L.weight} ${L.size}px Inter, system-ui, sans-serif`;
+    const w = ctx.measureText(L.text).width + 8, h = L.size + 4;
+    const x = Math.max(w / 2, Math.min(W - w / 2, rawX));  // keep the whole label on the canvas
+    const spot = [0, -1, 1, -2, 2, -3, 3].map(s => y0 + s * h).find(y =>
+      !placed.some(b => Math.abs(b.x - x) < (b.w + w) / 2 && Math.abs(b.y - y) < (b.h + h) / 2));
+    if (spot === undefined) continue;
+    placed.push({ x, y: spot, w, h });
+    ctx.lineWidth = 4; ctx.strokeStyle = halo; ctx.strokeText(L.text, x, spot);
+    ctx.fillStyle = ink; ctx.fillText(L.text, x, spot);
+  }
+  if (hovered) {
+    ctx.beginPath(); ctx.arc(t.applyX(hovered.bx), t.applyY(hovered.by), r + 3.5, 0, 2 * Math.PI);
+    ctx.lineWidth = 2; ctx.strokeStyle = ink; ctx.stroke();
+  }
+}
+
+// ---------- zoom / pan ----------
+const zoom = d3.zoom().scaleExtent([0.6, 30])
+  .on("start", e => { if (e.sourceEvent && e.sourceEvent.type === "mousedown") canvas.classList.add("dragging"); })
+  .on("zoom", e => { transform = e.transform; hideTip(); draw(); updateCountsSoon(); })
+  .on("end", () => canvas.classList.remove("dragging"));
+const sel = d3.select(canvas).call(zoom);
+document.getElementById("reset").onclick = () => sel.transition().duration(450).call(zoom.transform, d3.zoomIdentity);
+
+// ---------- hover & click ----------
+const tip = document.getElementById("tip");
+function hideTip() { tip.style.display = "none"; }
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function pick(ev) {
+  const [mx, my] = d3.pointer(ev, canvas);
+  const [bx, by] = transform.invert([mx, my]);
+  const found = quad.find(bx, by, (radius() + 4) / transform.k);
+  return found && active(found) ? found : null;
+}
+canvas.addEventListener("mousemove", ev => {
+  const p = pick(ev);
+  if (p !== hovered) { hovered = p; draw(); }
+  canvas.classList.toggle("over", !!p);
+  if (!p) return hideTip();
+  const c = clusterOf[p.cluster];
+  const authors = p.authors.length > 140 ? p.authors.slice(0, 140) + "…" : p.authors;
+  const summary = p.summary.length > 420 ? p.summary.slice(0, 420) + "…" : p.summary;
+  tip.innerHTML = `
+    <div class="where"><span class="sw" style="background:${colors[p.cluster]}"></span>${esc(c.group.key)} ${esc(c.group.name)} › ${esc(c.name)}</div>
+    <div class="t">${esc(p.title)}</div>
+    <div class="meta">${esc(SOURCES[p.source] || p.source)}${p.date ? " · " + esc(p.date) : ""} · rank #${p.rank}${authors ? "<br>" + esc(authors) : ""}</div>
+    ${summary ? `<div class="sum">${esc(summary)}</div>` : ""}
+    ${p.agendas && p.agendas.length ? `<div class="tags">${p.agendas.map(a => `<span>${esc(a)}</span>`).join("")}</div>` : ""}
+    <div class="open">Click to open</div>`;
+  tip.style.display = "block";
+  const pad = 14, tw = tip.offsetWidth, th = tip.offsetHeight;
+  let x = ev.clientX + pad, y = ev.clientY + pad;
+  if (x + tw > innerWidth - 8) x = ev.clientX - tw - pad;
+  if (y + th > innerHeight - 8) y = Math.max(8, ev.clientY - th - pad);
+  tip.style.left = x + "px"; tip.style.top = y + "px";
+});
+canvas.addEventListener("mouseleave", () => { hovered = null; hideTip(); draw(); });
+canvas.addEventListener("click", ev => {
+  if (ev.defaultPrevented) return;
+  const p = pick(ev);
+  if (p && p.url) window.open(p.url, "_blank", "noopener");
+});
+
+// ---------- legend ----------
+const legend = document.getElementById("legend");
+const rows = [];
+function addRow(cls, html, onClick, hover) {
+  const el = document.createElement("div");
+  el.className = "row " + cls; el.innerHTML = html;
+  el.onclick = onClick;
+  el.onmouseenter = () => { state.hoverRow = hover; draw(); };
+  el.onmouseleave = () => { state.hoverRow = null; draw(); };
+  legend.appendChild(el);
+  return el;
+}
+function buildLegend() {
+  legend.innerHTML = ""; rows.length = 0;
+  document.getElementById("ccount").textContent = `${Object.keys(clusterOf).length} in ${G.length} groups`;
+  G.forEach(g => {
+    const ids = g.clusters.map(c => c.id);
+    const gel = addRow("grow",
+      `<span class="sw" style="background:${groupColors[g.id]}"></span><span class="name"><span class="key">${g.key}</span>${esc(g.name)}</span><span class="num"></span><span class="pct"></span>`,
+      () => {
+        const all = ids.every(i => state.selected.has(i));
+        ids.forEach(i => all ? state.selected.delete(i) : state.selected.add(i));
+        refresh();
+      }, { type: "g", id: g.id });
+    gel.title = g.description || "";
+    rows.push({ el: gel, match: p => clusterOf[p.cluster].group.id === g.id, sel: () => ids.every(i => state.selected.has(i)), part: () => ids.some(i => state.selected.has(i)) });
+    g.clusters.forEach(c => {
+      const cel = addRow("crow",
+        `<span class="sw" style="background:${colors[c.id]}"></span><span class="name"><span class="key">${c.key}</span>${esc(c.name)}</span><span class="num"></span><span class="pct"></span>`,
+        () => { state.selected.has(c.id) ? state.selected.delete(c.id) : state.selected.add(c.id); refresh(); },
+        { type: "c", id: c.id });
+      cel.title = "Keywords: " + c.keywords.join(", ");
+      rows.push({ el: cel, match: p => p.cluster === c.id, sel: () => state.selected.has(c.id), part: () => state.selected.has(c.id) });
+    });
+  });
+}
+document.getElementById("clear").onclick = () => { state.selected.clear(); refresh(); };
+
+// counts: sources in the viewport that pass the source + search filters
+let countTimer = null;
+function updateCountsSoon() { if (!countTimer) countTimer = requestAnimationFrame(() => { countTimer = null; updateCounts(); }); }
+function updateCounts() {
+  const t = transform;
+  const inView = P.filter(p => {
+    if (!passes(p)) return false;
+    const x = t.applyX(p.bx), y = t.applyY(p.by);
+    return x >= 0 && x <= W && y >= 0 && y <= H;
+  });
+  const total = inView.length;
+  document.getElementById("inview").textContent = `${total} of ${P.length} in view`;
+  const anySel = state.selected.size > 0;
+  rows.forEach(r => {
+    const n = inView.filter(r.match).length;
+    r.el.querySelector(".num").textContent = n;
+    r.el.querySelector(".pct").textContent = total ? (100 * n / total).toFixed(n && n / total < 0.1 ? 1 : 0) + "%" : "–";
+    r.el.classList.toggle("on", r.sel());
+    r.el.classList.toggle("off", anySel && !r.part());
+  });
+}
+function refresh() { draw(); updateCounts(); }
+
+// ---------- search, keys, theme ----------
+const q = document.getElementById("q");
+q.addEventListener("input", () => { state.q = q.value.trim().toLowerCase(); refresh(); });
+document.addEventListener("keydown", e => {
+  if (e.key === "/" && document.activeElement !== q) { e.preventDefault(); q.focus(); }
+  if (e.key === "Escape") { q.value = ""; state.q = ""; state.selected.clear(); q.blur(); refresh(); }
+});
+function applyTheme(t) {
+  if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme;
+  computeColors(); buildLegend(); refresh();
+}
+document.getElementById("theme").onclick = () => {
+  const next = isDark() ? "light" : "dark";
+  try { localStorage.setItem("safety-map-theme", next); } catch (e) {}
+  applyTheme(next);
+};
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => applyTheme(document.documentElement.dataset.theme));
+
+let saved = null;
+try { saved = localStorage.getItem("safety-map-theme"); } catch (e) {}
+if (saved) document.documentElement.dataset.theme = saved;
+computeColors(); buildLegend();
+new ResizeObserver(resize).observe(wrap);
+})();
+</script>
+</body>
+</html>

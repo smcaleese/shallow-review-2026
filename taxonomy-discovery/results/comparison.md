@@ -8,15 +8,20 @@ Reassignment accuracy: a fresh classifier, given only category names and descrip
 | 2-llm-knn-graph | 285 | 10 | 26 | 0% | 0.97 | 17–45 | 88% | 93% | 0.30 | 0.10 |
 | 3-embedding-knn-graph | 285 | 10 | 26 | 0% | 0.98 | 12–44 | 70% | 79% | 0.22 | 0.06 |
 | 4-human-taxonomy | 285 | 8 | 9 | 1% | 0.98 | 21–50 | 91% | 94% | 0.35 | 0.16 |
+| 6-map-taxonomy | 285 | 12 | 39 | 1% | 0.96 | 8–48 | 86% | 90% | 0.34 | 0.11 |
 
 ## Agreement between methods (top level, adjusted Rand index)
 
 - 1-llm-taxonomy vs 2-llm-knn-graph: 0.53
 - 1-llm-taxonomy vs 3-embedding-knn-graph: 0.27
 - 1-llm-taxonomy vs 4-human-taxonomy: 0.51
+- 1-llm-taxonomy vs 6-map-taxonomy: 0.48
 - 2-llm-knn-graph vs 3-embedding-knn-graph: 0.27
 - 2-llm-knn-graph vs 4-human-taxonomy: 0.48
+- 2-llm-knn-graph vs 6-map-taxonomy: 0.39
 - 3-embedding-knn-graph vs 4-human-taxonomy: 0.26
+- 3-embedding-knn-graph vs 6-map-taxonomy: 0.28
+- 4-human-taxonomy vs 6-map-taxonomy: 0.42
 
 ## Most-confused category pairs
 
@@ -51,3 +56,11 @@ Reassignment accuracy: a fresh classifier, given only category names and descrip
 - leaf: Agent foundations and alignment strategy ↔ RL safety (2 items)
 - leaf: Agent foundations and alignment strategy ↔ Pre-training and post-training: personas, character and psychology (2 items)
 - leaf: Evaluations and auditing ↔ RL safety (2 items)
+
+**6-map-taxonomy**
+- top: Finding hidden misalignment ↔ Interpretability (4 items)
+- top: AI character, identity and welfare ↔ Generalization from training (4 items)
+- top: Automating alignment and overseeing stronger AIs ↔ Misuse and dangerous capabilities (2 items)
+- leaf: Reward hacking in RL ↔ Reward-seeker threat models and motivations (3 items)
+- leaf: Alignment targets and foundations ↔ Misalignment evidence and debate (3 items)
+- leaf: Agent security and prompt injection ↔ Incidents and deployment monitoring (2 items)

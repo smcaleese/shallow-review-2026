@@ -9,6 +9,8 @@ can be compared. Each method is self-contained: either LLM-only or embedding-onl
 | `2-llm-knn-graph/` | LLM nearest-neighbour graph + Leiden | Claude reads every item and lists each one's 15 nearest items by research agenda; Leiden finds communities in that graph |
 | `3-embedding-knn-graph/` | Embedding nearest-neighbour graph + Leiden (baseline) | Same as 2, but neighbours come from cosine similarity of local embeddings |
 | `4-human-taxonomy/` | Hand-written taxonomy | Categories from `4-human-taxonomy/taxonomy.yaml` (written by a person); the method 1 classifier sorts items into them |
+| `5-semantic-map/` | Interactive UMAP map (not scored) | The 502 selected sources embedded, laid out with UMAP and clustered at two levels; a local website. See its README |
+| `6-map-taxonomy/` | Taxonomy read off the semantic map | Categories written from scratch from the map's Ward tree over the 502 selected sources (`6-map-taxonomy/taxonomy.yaml`); the method 1 classifier sorts items into them |
 
 Methods 2 and 3 share everything after the neighbour lists (`shared/graph.py`), so comparing them isolates LLM vs.
 embedding similarity. In both, Claude only *names* the clusters at the end; it doesn't change membership.
@@ -24,6 +26,7 @@ uv run python 3-embedding-knn-graph/run.py   # ~$0.25 (naming only); downloads t
 uv run python 2-llm-knn-graph/run.py         # ~$5: 2 passes x 57 calls, the item list is prompt-cached
 uv run python 1-llm-taxonomy/run.py          # ~$2-3 with the default 1 refinement round
 uv run python 4-human-taxonomy/run.py        # ~$0.80: sorts items into taxonomy.yaml
+uv run python 6-map-taxonomy/run.py          # ~$1: sorts items into the map-derived taxonomy.yaml
 uv run python compare.py                     # ~$4: scores every method and writes results/comparison.md
 uv run python report.py                      # free: taxonomy.md + figures for each method
 ```
@@ -36,12 +39,12 @@ Each method writes to its own `output/`:
 - `taxonomy.md` (from `report.py`): the taxonomy as a document, with descriptions, sizes, example items and scores
 - `graph.png` (from `report.py`): the categories drawn on a nearest-neighbour graph. A numbered overview with a
   legend, then one panel per top-level category with its members highlighted and its subcategories labelled.
-  Methods 1 and 4 have no graph of their own, so they're drawn on method 2's LLM neighbour graph. The layout pulls items in the
+  Methods 1, 4 and 6 have no graph of their own, so they're drawn on method 2's LLM neighbour graph. The layout pulls items in the
   same category together, so read spread and overlap from the panels, not from distances on the overview.
 - `matrix.png`: the neighbour graph as a 285 × 285 matrix, sorted by category. Good categories are dark squares on
   the diagonal; shading off the diagonal is overlap. The title gives the share of all link strength that falls
   inside categories (method 2: 69%, method 4 on method 2's graph: 61%, method 1 on method 2's graph: 58%,
-  method 3: 55%). No layout, so the most
+  method 3: 55%, method 6 on method 2's graph: 55%). No layout, so the most
   accurate of the graph views.
 - `category_map.png`: one circle per top-level category with lines for the most strongly linked pairs, and a
   heatmap of average link strength within and between every pair of categories.
@@ -52,7 +55,9 @@ Each method writes to its own `output/`:
 
 ## Input
 
-The 285 in-scope items from `facets-shared/data/2-items-deduped.jsonl` (the 2026 arXiv shortlist plus notable
+The 285 in-scope items from a frozen snapshot of facets-shared's items and tags (`data/items-2026-10-21.jsonl`,
+`data/tags-2026-10-21.jsonl`; facets-shared's live files have since grown to ~900 in-scope items, and the short ids
+below are positions in this list, so every method's results depend on it staying fixed) (the 2026 arXiv shortlist plus notable
 LW/AF posts, deduplicated), dropping the ones facets-shared's tagger marked out of scope. arXiv papers come with
 their abstract, LW posts with their opening ~2,000 characters. Items get short ids (`P001`...) in prompts. The whole
 set is about 130k tokens, so it fits in one prompt.
