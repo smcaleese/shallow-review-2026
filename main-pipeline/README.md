@@ -49,7 +49,8 @@ URL lists ──add──▶ classify table ◀──collect── aggregator pa
 ## Inputs
 
 - **Entries:** URL lists in `data/sources-links/` (one URL per line, `#` for comments) or CSVs. Use `--source <label>`
-  when adding so you can filter by provenance later.
+  when adding so you can filter by provenance later. The 2026 review's selected sources are the `facets-*-2026.txt`
+  lists (see "Running on the 2026 selected sources").
 - **Taxonomy:** `data/taxonomy.yaml`. It's a tree of `id`, `name`, `description` and `children`, and only leaves
   can be assigned. Leaves may also have `examples`, and nodes may have `sr2024` (context from the 2024 review), which
   export prints. Year-specific copies sit next to it (`taxonomy-2025.yaml`, `taxonomy-2026.yaml`); the pipeline
@@ -96,6 +97,31 @@ uv run pipeline.py export-taxonomy --min-shallow-review 0.4 > draft-2026.md
 
 With no filters, `reset-classify` re-queues every item without asking; add `--source` to limit it. Scrapes are
 cached, so re-classifying only costs the LLM calls.
+
+## Running on the 2026 selected sources
+
+`data/sources-links/facets-{arxiv,lw,org,safetystack}-2026.txt` hold the 502 sources on the facets site (240 arXiv,
+140 LessWrong, 80 org pages, 42 Safety Stack). `facets-shared/src/export_for_pipeline.py` writes them from
+`facets-shared/output/selected-sources.csv`; rerun it if the selection changes.
+
+```bash
+for s in arxiv lw org safetystack; do
+  uv run pipeline.py add data/sources-links/facets-$s-2026.txt --phase classify --source facets-$s-2026
+done
+uv run pipeline.py classify --limit 600 --workers 4
+uv run pipeline.py export-taxonomy --min-shallow-review 0 --min-ai-safety 0 \
+  --source facets-arxiv-2026,facets-lw-2026,facets-org-2026,facets-safetystack-2026 > draft-2026-facets.md
+```
+
+- `data/data.db` also holds the 2025 items. None of the 502 are among them, and `--source` keeps the 2025 items
+  out of the export.
+- `classify` has no source filter, so it also processes anything else still queued (30 items left over from 2025).
+- The thresholds are 0 because these sources were already selected. Raise them to let the classifier drop some.
+- Items are filed under whatever `data/taxonomy.yaml` holds when `classify` runs. It is currently a copy of
+  `taxonomy-2026.yaml`. To export or re-run the 2025 items, copy `taxonomy-2025.yaml` back first, since their
+  categories come from that taxonomy.
+- The worked examples in `prompts/classify.yaml` use category IDs from an older taxonomy. If the LLM copies one,
+  the item is marked `classify_error`; rerun those with `classify --retry-errors`.
 
 ## Data
 
