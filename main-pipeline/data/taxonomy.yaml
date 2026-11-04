@@ -21,6 +21,25 @@
 #
 # Cross-cutting tags: white-box, black-box, persona, introspection, obfuscation under optimization pressure,
 # reward hacking, deception and honesty, sycophancy, scheming, model organisms, RL/RLVR.
+
+# Year of the review. Used in the draft heading, in "{year}" in agenda field labels and for the date filter in
+# export (items dated before 1 November of the previous year are dropped).
+year: 2026
+
+# Agenda fields printed under each leaf category in the exported draft, in this order. "{year}" becomes the year above.
+# A field is either a plain label or a mapping with `name` and `options` (the allowed values, shown to editors).
+# "Outputs in {year}" is always printed last, above the item list; don't list it.
+agenda_fields:
+- One-sentence summary
+- Theory of change
+- See also
+- name: General approach
+  options: [alignment engineering, misalignment science]
+- name: Target case
+  options: [average case, pessimistic case, worst case]
+- Key people
+- Critiques
+
 taxonomy:
 - id: training_time_alignment
   name: Training-time alignment

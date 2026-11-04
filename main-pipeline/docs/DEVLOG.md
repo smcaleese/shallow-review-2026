@@ -233,3 +233,24 @@ leaf_ids = tax.get_all_leaf_ids()  # 103 items
 - Add category-based filtering/analysis
 - Track taxonomy version with data
 
+## 2026-11-04: 2026 run, configurable agenda fields, LLM-written agenda headers
+
+- The 2026 run uses its own data folder (`DATA_PATH = data-2026-facets`) with only the 502 selected sources, so the
+  2025 items and leftovers stay out. `load_taxonomy()` now reads `DATA_PATH/taxonomy.yaml`; before it always read
+  `data/taxonomy.yaml` regardless of `DATA_PATH`.
+- Default model moved to `claude-sonnet-5-5` (Sonnet 4.5 is no longer served). Current models reject
+  `thinking: {type: enabled, budget_tokens}`, so `get_completion` sends `{type: adaptive}`; `thinking_budget` only
+  switches thinking on.
+- The taxonomy file sets the draft's `year` (heading, labels, date filter) and its `agenda_fields`, so the 2026 header
+  fields differ from 2025 without code changes.
+- `enrich-taxonomy` writes all header fields per category with an LLM from the classified items into a separate
+  `taxonomy-enriched.yaml` (ruamel.yaml round trip of the input, so comments survive). The input stays hand-written;
+  the generated file can be reviewed and edited, and re-runs keep existing agendas. Critiques must cite items from
+  the database (an index of all items is in the cached system prompt); otherwise an "unsourced" sentence is used.
+  `export-taxonomy --strict` refuses to write a draft with empty fields.
+- Items are filed under their highest-scoring category, not the first listed (2 of 502 were listed out of order).
+- All 140 LessWrong pages returned 403 to the scraper, yet were classified from the error page and URL (no authors,
+  summaries guessed from titles). LessWrong/AF post URLs are now fetched from the GraphQL API (see SCRAPE.md); the
+  143 LW items were re-scraped and reclassified. Lesson: a 403 page still reaches the LLM and comes back "done";
+  check `scrape.status_code` after a run. Two goodfire.com pages are still 403 (the browser is blocked).
+

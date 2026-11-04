@@ -339,9 +339,24 @@ This indicates: re-classified due to obsolete LLM category, appears in 2 categor
 
 ## Classification Taxonomy
 
-**Ground truth:** `data/taxonomy.yaml`
+**Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data-2026-facets/taxonomy.yaml`.
+It is hand-written; `enrich-taxonomy` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
+which export uses when present. A paper's category is always its highest-scoring one in `classify.data.categories`.
 
 The classification taxonomy defines a hierarchical category structure for classifying AI safety/alignment content. Each classified item must be assigned to exactly one **leaf category**.
+
+### Top-level keys
+
+- `taxonomy`: list of top-level categories (required)
+- `year`: review year (optional, defaults to the current year). Export uses it in the draft heading, in `{year}` in
+  agenda field labels, and for the date filter (drops items dated before 1 November of `year - 1`, or with only a
+  year before `year - 1`)
+- `agenda_fields`: agenda fields printed under each leaf category in the exported draft, in order (optional,
+  defaults to `DEFAULT_AGENDA_FIELDS` in `taxonomy.py`, the 2025 layout). Each entry is a plain label or a mapping
+  `{name, options}`; options are printed after the label as `*(one of: a / b)*` for editors. `{year}` in a label is
+  replaced by `year`. A label starting with `Who edits` gets the "take me" marker. `Outputs in {year}` is always
+  printed last, above the items, and may not be listed. Labels in `SR2024_FIELD_KEYS` (`cli.py`) are prefilled from a
+  category's `sr2024` block
 
 ### Structure
 
@@ -354,6 +369,10 @@ The classification taxonomy defines a hierarchical category structure for classi
   - `children`: List of subcategories (empty for leaf categories)
   - `examples`: Optional list of example items from 2024 (ONLY allowed on leaf categories)
   - `is_leaf`: Can be explicitly set in YAML, otherwise inferred from presence of children
+  - `agenda`: Only in the enriched taxonomy (`taxonomy-enriched.yaml`, written by `enrich-taxonomy`,
+    `shallow_review/agendas.py`, prompt `prompts/agenda.yaml`). Agenda field values keyed by agenda field name, as
+    markdown (`Key people` is a list; `See also` links to `#<category id>`; `Critiques` links cited items, or is an
+    LLM-written sentence marked "unsourced"). Also `Comment (internal)`, the LLM's notes for editors, not printed
 
 ### Top-Level Categories
 
@@ -380,6 +399,7 @@ The classification taxonomy defines a hierarchical category structure for classi
 2. Category IDs must be alphanumeric with underscores/hyphens (snake_case)
 3. Only leaf categories can have examples
 4. At least one leaf category must exist
+5. `agenda_fields` must not contain `Outputs in ...` (always printed)
 
 ## File Formats
 

@@ -354,6 +354,8 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
             raise RuntimeError(error_msg)
 
     # Step 9: Update database with results
+    # Best-fitting category first: the draft files each item under its first category only
+    result.categories.sort(key=lambda c: c.score, reverse=True)
     data_dict = result.model_dump()
     data_dict["classify_duration"] = round(classify_duration, 2)
     data_json = json.dumps(data_dict)

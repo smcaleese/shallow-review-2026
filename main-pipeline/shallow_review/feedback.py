@@ -223,7 +223,7 @@ def import_feedback_from_csv(
             if reclassify_obsolete_llm and row['data']:
                 try:
                     data = json.loads(row['data'])
-                    categories = data.get('categories', [])
+                    categories = sorted(data.get('categories', []), key=lambda c: c.get('score', 0), reverse=True)
                     if categories:
                         llm_category_id = categories[0]['id']
                         if llm_category_id not in valid_leaf_ids:

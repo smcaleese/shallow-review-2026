@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 
 # Paths - derived from package location, independent of pwd
 ROOT_PATH = Path(__file__).parent.parent.resolve()
-DATA_PATH = ROOT_PATH / "data"
+DATA_PATH = ROOT_PATH / "data-2026-facets"
 PROMPTS_PATH = ROOT_PATH / "prompts"
 RUNS_PATH = ROOT_PATH / "runs"
 SCRAPED_PATH = DATA_PATH / "scraped"

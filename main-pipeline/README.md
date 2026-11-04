@@ -39,10 +39,15 @@ URL lists ──add──▶ classify table ◀──collect── aggregator pa
 4. **Feedback (optional).** `pipeline.py import-feedback <csv>` records human decisions, such as including a
    below-threshold item, excluding one or moving it to another category. Export applies them on top of the LLM's
    output.
-5. **Export the draft.** `pipeline.py export-taxonomy > draft.md` walks the taxonomy tree and lists, under each
+5. **Enrich the taxonomy.** `pipeline.py enrich-taxonomy` makes one LLM call per leaf category with its items, the
+   list of all categories and an index of all items, and writes every agenda field (summary, theory of change, see
+   also, general approach, target case, key people, critiques) to `taxonomy-enriched.yaml`, a copy of the taxonomy
+   with an `agenda` block per category. The hand-written `taxonomy.yaml` is not modified. Agendas already in the
+   enriched file are kept (so hand edits survive) unless `--overwrite` or `--only`.
+6. **Export the draft.** `pipeline.py export-taxonomy > draft.md` walks the taxonomy tree and lists, under each
    category, the classified items that pass the score thresholds, sorted by `shallow_review_inclusion`. Each
    category gets empty agenda fields (summary, theory of change, key people, ...) for editors to fill in.
-6. **Process the edited draft.** After people edit the draft, `process_draft.py parse` splits it into agendas and
+7. **Process the edited draft.** After people edit the draft, `process_draft.py parse` splits it into agendas and
    papers, fills paper metadata from the database and uses an LLM to extract agenda attributes. Then
    `process_draft.py format` renders the parsed JSON with `draft_template.md` (or a template in `templates/`).
 
@@ -51,9 +56,10 @@ URL lists ──add──▶ classify table ◀──collect── aggregator pa
 - **Entries:** URL lists in `data/sources-links/` (one URL per line, `#` for comments) or CSVs. Use `--source <label>`
   when adding so you can filter by provenance later. The 2026 review's selected sources are the `facets-*-2026.txt`
   lists (see "Running on the 2026 selected sources").
-- **Taxonomy:** `data/taxonomy.yaml`. It's a tree of `id`, `name`, `description` and `children`, and only leaves
+- **Taxonomy:** `taxonomy.yaml` in the data folder (`DATA_PATH`, see "Things to watch for"). It's a tree of `id`, `name`, `description` and `children`, and only leaves
   can be assigned. Leaves may also have `examples`, and nodes may have `sr2024` (context from the 2024 review), which
-  export prints. Year-specific copies sit next to it (`taxonomy-2025.yaml`, `taxonomy-2026.yaml`); the pipeline
+  export prints. Optional top-level `year` and `agenda_fields` set the draft's year and the agenda fields printed
+  under each category (see `docs/DATA.md`). Year-specific copies sit next to it (`taxonomy-2025.yaml`, `taxonomy-2026.yaml`); the pipeline
   only reads `taxonomy.yaml`.
 
 ## Setup
@@ -78,6 +84,8 @@ with Playwright, keep `--workers 1`.
 | `uv run pipeline.py classify --retry-errors` | Retry items that failed |
 | `uv run pipeline.py reset-classify [--source X] [--remove-scrapes]` | Put items back in the queue |
 | `uv run pipeline.py import-feedback feedback.csv --source <label>` | Import human feedback (columns `URL,CATEGORY_ID,PAPER_ID,LINK_TEXT`) |
+| `uv run pipeline.py enrich-taxonomy [--only id1,id2] [--overwrite]` | Write each category's agenda fields with an LLM into `taxonomy-enriched.yaml` |
+| `uv run pipeline.py export-taxonomy --min-shallow-review 0 --min-ai-safety 0 --strict > draft.md` | Export from the enriched taxonomy; `--strict` fails if any agenda field is empty |
 | `uv run pipeline.py export-taxonomy --min-shallow-review 0.4 > draft.md` | Write the draft (also `--min-ai-safety`, `--min-collect`, `--kinds`, `--source`) |
 | `uv run process_draft.py collect-links draft.md` | List every link in a draft |
 | `uv run process_draft.py parse draft.md -o parsed` | Parse an edited draft into `parsed.json` / `parsed.yaml` |
@@ -132,12 +140,14 @@ uv run pipeline.py export-taxonomy --min-shallow-review 0 --min-ai-safety 0 \
 
 ## Things to watch for
 
-- **The data folder is fixed.** `DATA_PATH` in `shallow_review/common.py` always points to `data/`. The log at the top
-  of `draft-2026.md` shows that run used `data-2026/data.db`, so a separate year means pointing `DATA_PATH` there.
+- **The data folder is set in code.** `DATA_PATH` in `shallow_review/common.py` decides which database, taxonomy and
+  caches are used. It currently points to `data-2026-facets/`, which holds only the 502 selected 2026 sources; set it
+  back to `data` for the 2025 items.
 - **Logs end up in the draft.** Log messages are printed to stdout, so redirecting `export-taxonomy` captures them
   too. Delete the lines before `# AI Safety Shallow Review`.
-- **Some years are hard-coded in export.** It drops items dated before 2024-11-01 (or with only a year before 2024)
-  and labels the empty fields "Funding in 2025" and "Outputs in 2025".
+- **The draft's year comes from the taxonomy.** Export reads `year` from the taxonomy file for the heading, the
+  "Funding in"/"Outputs in" labels and the date filter (items dated before 1 November of the previous year are
+  dropped).
 
 ## Documentation
 

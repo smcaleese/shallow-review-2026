@@ -30,6 +30,13 @@ Scraping fetches and caches HTML content for later processing. All scrapes are c
 - **Deduplication**: One scrape per URL (regardless of `kind` parameter)
 - **kind parameter**: Stored in DB for context but doesn't affect caching
 
+## LessWrong and Alignment Forum
+
+Both sites return 403 to the automated browser. Post URLs (`lesswrong.com/posts/<id>/...`,
+`alignmentforum.org/posts/<id>/...`, matched by `FORUM_POST_RE`) are fetched from the site's GraphQL API instead
+(`scrape_forum_api`), and cached like any other page: a small HTML page with the title, authors (full names where set,
+otherwise display names) and date at the top, then the post body.
+
 ## Error Handling
 
 - Network errors, timeouts: Cached as `scrape_error`

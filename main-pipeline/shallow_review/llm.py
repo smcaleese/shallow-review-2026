@@ -161,7 +161,7 @@ def _on_retry_before_sleep(retry_state):
 )
 def get_completion(
     template_vars: dict[str, Any],
-    model: str = "claude-sonnet-4-5",
+    model: str = "claude-sonnet-5-5",
     stats_subtree: str | None = None,
     response_type: Type[T] | None = None,
     thinking_budget: int | None = None,
@@ -319,10 +319,8 @@ def get_completion(
 
     # Add thinking parameter for Anthropic models
     if is_anthropic and thinking_budget is not None:
-        completion_kwargs["thinking"] = {
-            "type": "enabled",
-            "budget_tokens": thinking_budget,
-        }
+        # Current Claude models only accept adaptive thinking; the budget value just switches it on.
+        completion_kwargs["thinking"] = {"type": "adaptive"}
 
     # Make API call with litellm
     try:
