@@ -36,6 +36,12 @@ env/
 runs/
 .llm_cache/
 .playwright-mcp/
+# Scraped pages: rebuilt by re-running the scrape (data/scraped from 2025 is still tracked)
+scraped/
+
+# SQLite temporary files
+*.db-shm
+*.db-wal
 
 # Secrets
 .env
