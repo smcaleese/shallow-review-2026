@@ -50,6 +50,7 @@ and open http://localhost:8767. Reruns are cheap: every Claude step skips items 
 | 6 | `src/rank.py` | Opus, 2 passes per item | Scores impact, novelty and interest against the whole set, plus popularity → `output/rankings.csv`, `output/top-papers.md` |
 | 7 | `src/select_budget.py` | – | Keeps the top `BUDGET` items of each source → `data/6-selected.json`, `output/selected-sources.csv` |
 | 8 | `src/build_site.py` | – | Writes `site/data.js` (read by `site/index.html`) and `output/items-tagged.csv`, for the selected items only |
+| 9 | `src/export_for_pipeline.py` | – | Writes the selected items as URL lists for `main-pipeline` (`data/sources-links/facets-<source>-2026.txt`); not run by `run_pipeline.sh` |
 
 `PRINT_PROMPT=1 uv run python src/tag.py` prints the tagging prompt and one example message without calling the API.
 

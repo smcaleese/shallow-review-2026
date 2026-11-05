@@ -1,0 +1,68 @@
+[10/27/26 23:14:19] INFO     Shortlisting 10 month(s) in parallel...            
+                    INFO     2026-04: asking claude-opus-5-5 to pick 2 of 19    
+                             papers...                                          
+                    INFO     2026-07: asking claude-opus-5-5 to pick 1 of 16    
+                             papers...                                          
+                    INFO     2026-02: asking claude-opus-5-5 to pick 1 of 12    
+                             papers...                                          
+                    INFO     2026-06: asking claude-opus-5-5 to pick 1 of 13    
+                             papers...                                          
+                    INFO     2026-03: asking claude-opus-5-5 to pick 2 of 23    
+                             papers...                                          
+                    INFO     2026-01: asking claude-opus-5-5 to pick 2 of 25    
+                             papers...                                          
+                    INFO     2026-09: asking claude-opus-5-5 to pick 2 of 18    
+                             papers...                                          
+                    INFO     2026-08: asking claude-opus-5-5 to pick 1 of 8     
+                             papers...                                          
+                    INFO     2026-05: asking claude-opus-5-5 to pick 1 of 15    
+                             papers...                                          
+                    INFO     2026-10: asking claude-opus-5-5 to pick 14 of 150  
+                             papers...                                          
+[10/27/26 23:14:23] INFO     2026-05: saved 1 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/may/arx
+                             iv-papers-shortlisted.csv                          
+[10/27/26 23:14:24] INFO     2026-01: saved 2 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/jan/arx
+                             iv-papers-shortlisted.csv                          
+                    INFO     2026-04: saved 2 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/apr/arx
+                             iv-papers-shortlisted.csv                          
+                    INFO     2026-03: saved 2 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/mar/arx
+                             iv-papers-shortlisted.csv                          
+[10/27/26 23:14:25] INFO     2026-06: saved 1 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/jun/arx
+                             iv-papers-shortlisted.csv                          
+                    INFO     2026-02: saved 1 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/feb/arx
+                             iv-papers-shortlisted.csv                          
+[10/27/26 23:14:27] INFO     2026-09: saved 2 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/sep/arx
+                             iv-papers-shortlisted.csv                          
+                    INFO     2026-07: saved 1 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/jul/arx
+                             iv-papers-shortlisted.csv                          
+[10/27/26 23:14:28] INFO     2026-08: saved 1 papers to                         
+                             ../../safety-stack/results/shortlisted/2026/aug/arx
+                             iv-papers-shortlisted.csv                          
+[10/27/26 23:14:48] INFO     2026-10: saved 14 papers to                        
+                             ../../safety-stack/results/shortlisted/2026/oct/arx
+                             iv-papers-shortlisted.csv                          
+                    INFO     Combined shortlist:                                
+                             ../../safety-stack/results/shortlisted/2026/arxiv-p
+                             apers-shortlisted.csv (27 papers)                  
+   Shortlisted /    
+      filtered      
+┌─────────┬────────┐
+│ 2026-01 │ 2/25   │
+│ 2026-02 │ 1/12   │
+│ 2026-03 │ 2/23   │
+│ 2026-04 │ 2/19   │
+│ 2026-05 │ 1/15   │
+│ 2026-06 │ 1/13   │
+│ 2026-07 │ 1/16   │
+│ 2026-08 │ 1/8    │
+│ 2026-09 │ 2/18   │
+│ 2026-10 │ 14/150 │
+└─────────┴────────┘

@@ -14,8 +14,13 @@ import yaml
 ROOT = Path(__file__).resolve().parent.parent
 REPO = ROOT.parent
 FACETS = REPO / "facets-shared"
-ITEMS_PATH = FACETS / "data" / "2-items-deduped.jsonl"
-TAGS_PATH = FACETS / "data" / "4-tags-final.jsonl"
+# The methods are compared on a frozen snapshot of facets-shared's items and tags (as of 2026-10-21, 285 in scope).
+# Short ids (P001...) are positions in this list, so every method's clusters.json depends on it staying fixed:
+# facets-shared's live files have since grown to ~900 in-scope items, which would renumber everything.
+ITEMS_PATH = ROOT / "data" / "items-2026-10-21.jsonl"
+TAGS_PATH = ROOT / "data" / "tags-2026-10-21.jsonl"
+LIVE_ITEMS_PATH = FACETS / "data" / "2-items-deduped.jsonl"
+LIVE_TAGS_PATH = FACETS / "data" / "4-tags-final.jsonl"
 TAXONOMY_2025 = FACETS / "input" / "taxonomy-2025.yaml"
 CACHE = ROOT / "cache"
 RESULTS = ROOT / "results"

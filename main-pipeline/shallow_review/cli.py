@@ -548,7 +548,7 @@ def collect(
     limit: int = typer.Option(100, help="Maximum sources to process"),
     workers: int = typer.Option(1, help="Number of worker threads (safe with Selenium, use 1 with Playwright)"),
     relevancy: float = typer.Option(0.3, help="Minimum relevancy threshold for links"),
-    model: str = typer.Option("anthropic/claude-sonnet-4-5", help="LLM model to use"),
+    model: str = typer.Option("anthropic/claude-sonnet-5-5", help="LLM model to use"),
     max_tokens: int = typer.Option(100000, help="Max HTML tokens before error"),
     retry_errors: bool = typer.Option(False, "--retry-errors", help="Retry sources with extract_error status"),
 ) -> None:
@@ -654,7 +654,7 @@ def classify(
     limit: int = typer.Option(100, help="Maximum candidates to process"),
     workers: int = typer.Option(1, help="Number of worker threads (safe with Selenium, use 1 with Playwright)"),
     min_relevancy: float = typer.Option(0.0, help="Minimum collect_relevancy to process (filter)"),
-    model: str = typer.Option("anthropic/claude-sonnet-4-5", help="LLM model to use"),
+    model: str = typer.Option("anthropic/claude-sonnet-5-5", help="LLM model to use"),
     max_tokens: int = typer.Option(100000, help="Max HTML tokens before error"),
     retry_errors: bool = typer.Option(False, "--retry-errors", help="Retry candidates with classify_error status"),
 ) -> None:
@@ -855,6 +855,51 @@ def import_feedback(
         console.print(f"  {action:<15} {count:>5}")
 
 
+# Agenda field label (as written in the taxonomy's agenda_fields) -> key in a category's sr2024 block, for prefilling
+SR2024_FIELD_KEYS = {
+    "One-sentence summary": "summary",
+    "Theory of change": "theory_of_change",
+    "See also": "see_also",
+    "Orthodox problems": "orthodox_problems",
+    "Target case": "target_case",
+    "Broad approach": "broad_approach",
+    "Key people": "names",
+    "Estimated FTEs": "ftes",
+    "Critiques": "critiques",
+    "Funded by": "funded_by",
+    "Funding in {year}": "funding_2023_4",
+}
+
+
+@app.command()
+def enrich_taxonomy(
+    input: str = typer.Option("", help="Hand-written taxonomy (default: <data folder>/taxonomy.yaml)"),
+    output: str = typer.Option("", help="Enriched taxonomy to write (default: <data folder>/taxonomy-enriched.yaml)"),
+    model: str = typer.Option("anthropic/claude-sonnet-5-5", help="LLM model to use"),
+    workers: int = typer.Option(4, help="Number of parallel LLM calls"),
+    overwrite: bool = typer.Option(False, "--overwrite", help="Rewrite agendas already in the output file"),
+    only: str = typer.Option("", help="Comma-separated category IDs to (re)write (empty = all missing ones)"),
+) -> None:
+    """Write each leaf category's agenda fields with an LLM, from its classified items, into an enriched taxonomy."""
+    from pathlib import Path
+
+    from .agendas import enrich_taxonomy as run_enrich
+    from .common import DATA_PATH
+
+    input_path = Path(input) if input else DATA_PATH / "taxonomy.yaml"
+    output_path = Path(output) if output else DATA_PATH / "taxonomy-enriched.yaml"
+    assert input_path.resolve() != output_path.resolve(), "Output must differ from the input taxonomy"
+    only_ids = {s.strip() for s in only.split(",") if s.strip()} or None
+
+    console.print(f"[bold]Enriching {input_path} -> {output_path}[/bold] (model={model}, workers={workers})\n")
+    written, no_items, errors = run_enrich(input_path, output_path, model, workers, overwrite, only_ids)
+    console.print(f"\nWrote {written} agendas to {output_path}")
+    if no_items:
+        console.print(f"[yellow]No classified items (fields left empty): {', '.join(no_items)}[/yellow]")
+    for cat_id, err in errors.items():
+        console.print(f"[red]{cat_id}: {err}[/red]")
+
+
 @app.command()
 def export_taxonomy(
     min_shallow_review: float = typer.Option(0.1, help="Minimum shallow_review_inclusion score"),
@@ -864,6 +909,10 @@ def export_taxonomy(
     source: str = typer.Option("", help="Comma-separated list of accepted sources (empty = all)"),
     respect_feedback: bool = typer.Option(True, help="Respect human feedback (include/exclude/reclassify)"),
     feedback_source: str = typer.Option("", help="Only respect feedback from this source (empty = all sources)"),
+    taxonomy_file: str = typer.Option(
+        "", "--taxonomy", help="Taxonomy to export (default: taxonomy-enriched.yaml in the data folder if present, else taxonomy.yaml)"
+    ),
+    strict: bool = typer.Option(False, "--strict", help="Fail if any agenda field of a printed category is empty"),
 ) -> None:
     """Export taxonomy with classified papers as markdown to stdout."""
     import json
@@ -873,7 +922,22 @@ def export_taxonomy(
     from .taxonomy import load_taxonomy
 
     # Load taxonomy
-    taxonomy = load_taxonomy()
+    from pathlib import Path
+
+    from rich.console import Console
+
+    from .common import DATA_PATH
+
+    err_console = Console(stderr=True)  # stdout is the draft
+    if taxonomy_file:
+        taxonomy_path = Path(taxonomy_file)
+    elif (DATA_PATH / "taxonomy-enriched.yaml").exists():
+        taxonomy_path = DATA_PATH / "taxonomy-enriched.yaml"
+    else:
+        taxonomy_path = DATA_PATH / "taxonomy.yaml"
+    err_console.print(f"Taxonomy: {taxonomy_path}")
+    taxonomy = load_taxonomy(taxonomy_path)
+    empty_fields: list[str] = []  # "category_id: field" for --strict
     
     # Parse kinds filter
     kinds_filter = set()
@@ -985,7 +1049,7 @@ def export_taxonomy(
         rows = cursor.fetchall()
 
     if not rows and not feedback_by_url:
-        console.print("[yellow]No items found matching filters[/yellow]", file=sys.stderr)
+        err_console.print("[yellow]No items found matching filters[/yellow]")
         return
 
     # Parse data JSON and group by top category
@@ -1012,10 +1076,10 @@ def export_taxonomy(
             
             data = json.loads(row["data"])
             
-            # Get top category ID (may be overridden by feedback)
-            categories = data.get("categories", [])
+            # Get top category ID (may be overridden by feedback). Sorted by score: older rows may not be
+            categories = sorted(data.get("categories", []), key=lambda c: c.get("score", 0), reverse=True)
             if not categories:
-                console.print(f"[yellow]Warning: Item {url} has no categories, skipping[/yellow]", file=sys.stderr)
+                err_console.print(f"[yellow]Warning: Item {url} has no categories, skipping[/yellow]")
                 continue
             
             # Check if needs recategorization (obsolete category from CSV)
@@ -1076,23 +1140,23 @@ def export_taxonomy(
                 "category_count": len(category_ids),
             }
             
-            # Filter by date: only include items from 2024-11-01 onwards
+            # Filter by date: only include items from 1 November of the year before the review year
             include_item = True
             if item["date"]:
-                # Full date available - check if >= 2024-11-01
+                # Full date available - check against the cutoff
                 try:
                     item_date = date_type.fromisoformat(item["date"])
-                    cutoff_date = date_type(2024, 11, 1)
+                    cutoff_date = date_type(taxonomy.year - 1, 11, 1)
                     if item_date < cutoff_date:
                         include_item = False
                 except (ValueError, TypeError):
                     # Invalid date format - include by default
                     pass
             elif item["published_year"]:
-                # Only year available - accept 2024 and 2025
+                # Only year available - accept the review year and the one before
                 try:
                     year = int(item["published_year"])
-                    if year < 2024:
+                    if year < taxonomy.year - 1:
                         include_item = False
                 except (ValueError, TypeError):
                     # Invalid year - include by default
@@ -1105,7 +1169,7 @@ def export_taxonomy(
                     items_by_category[category_id].append(item)
             
         except (json.JSONDecodeError, KeyError) as e:
-            console.print(f"[yellow]Warning: Failed to parse data for {row['url']}: {e}[/yellow]", file=sys.stderr)
+            err_console.print(f"[yellow]Warning: Failed to parse data for {row['url']}: {e}[/yellow]")
             continue
 
     # Sort items within each category by shallow_review_inclusion (descending)
@@ -1116,7 +1180,7 @@ def export_taxonomy(
     from datetime import datetime
     
     output_lines = []
-    output_lines.append("# AI Safety Shallow Review")
+    output_lines.append(f"# AI Safety Shallow Review {taxonomy.year}")
     output_lines.append("")
     output_lines.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d')}")
     output_lines.append("")
@@ -1187,7 +1251,7 @@ def export_taxonomy(
         # Output section header with ID
         header_prefix = "#" * (level + 1)
         size = ["1.6em", "1.5em", "1.4em", "1.3em", "1.2em", "1.1em"][level]
-        output_lines.append(f"{header_prefix} <span style=\"font-size:{size}\">{cat.name}</span> <span style=\"color:#bbb\">[cat:{cat.id}]</span>\n")
+        output_lines.append(f"{header_prefix} <span id=\"{cat.id}\" style=\"font-size:{size}\">{cat.name}</span> <span style=\"color:#bbb\">[cat:{cat.id}]</span>\n")
 
         # Output description
         # output_lines.append(f"**Taxonomy description (internal):** *{cat.description.strip()}*")
@@ -1195,71 +1259,37 @@ def export_taxonomy(
         
         # If leaf category, output rubrics and items
         if cat.is_leaf:
-            output_lines.append("**<span style=\"color:#777\">Who edits (internal):</span>** **<span style=\"color:#da5\">take me</span>**  ")
-
             # Get SR2024 data if available
             sr = cat.sr2024 if hasattr(cat, 'sr2024') and cat.sr2024 else {}
-            
-            # Output SR2024-style rubrics (prefilled from SR2024 where available)
-            if sr.get('summary'):
-                output_lines.append(f"**One-sentence summary:** *(SR2024: {sr['summary']})*  ")
-            else:
-                output_lines.append("**One-sentence summary:**  ")
-            
-            if sr.get('theory_of_change'):
-                output_lines.append(f"**Theory of change:** *(SR2024: {sr['theory_of_change']})*  ")
-            else:
-                output_lines.append("**Theory of change:**  ")
-            
-            if sr.get('see_also'):
-                output_lines.append(f"**See also:** *(SR2024: {sr['see_also']})*  ")
-            else:
-                output_lines.append("**See also:**  ")
-            
-            if sr.get('orthodox_problems'):
-                output_lines.append(f"**Orthodox problems:** *(SR2024: {sr['orthodox_problems']})*  ")
-            else:
-                output_lines.append("**Orthodox problems:**  ")
-            
-            if sr.get('target_case'):
-                output_lines.append(f"**Target case:** *(SR2024: {sr['target_case']})*  ")
-            else:
-                output_lines.append("**Target case:**  ")
-            
-            if sr.get('broad_approach'):
-                output_lines.append(f"**Broad approach:** *(SR2024: {sr['broad_approach']})*  ")
-            else:
-                output_lines.append("**Broad approach:**  ")
-            
-            if sr.get('names'):
-                output_lines.append(f"**Key people:** *(SR2024: {sr['names']})*  ")
-            else:
-                output_lines.append("**Key people:**  ")
-            
-            if sr.get('ftes'):
-                output_lines.append(f"**Estimated FTEs:** *(SR2024: {sr['ftes']})*  ")
-            else:
-                output_lines.append("**Estimated FTEs:**  ")
-            
-            if sr.get('critiques'):
-                output_lines.append(f"**Critiques:** *(SR2024: {sr['critiques']})*  ")
-            else:
-                output_lines.append("**Critiques:**  ")
-            
-            if sr.get('funded_by'):
-                output_lines.append(f"**Funded by:** *(SR2024: {sr['funded_by']})*  ")
-            else:
-                output_lines.append("**Funded by:**  ")
-            
-            if sr.get('funding_2023_4'):
-                output_lines.append(f"**Funding in 2025:** *(SR2024 funding 2023-4: {sr['funding_2023_4']})*  ")
-            else:
-                output_lines.append("**Funding in 2025:**  ")
-        
+            year = str(taxonomy.year)
+
+            # Agenda fields from the taxonomy file: the category's own value (agenda block), otherwise a placeholder
+            agenda = cat.agenda or {}
+            for field in taxonomy.agenda_fields:
+                label = field.name.replace("{year}", year)
+                sr_key = SR2024_FIELD_KEYS.get(field.name)
+                value = agenda.get(field.name)
+                if isinstance(value, list):
+                    value = ", ".join(value)
+                if value:
+                    output_lines.append(f"**{label}:** {value}  ")
+                elif label.startswith("Who edits"):
+                    output_lines.append(f"**<span style=\"color:#777\">{label}:</span>** **<span style=\"color:#da5\">take me</span>**  ")
+                    empty_fields.append(f"{cat.id}: {label}")
+                elif field.options:
+                    empty_fields.append(f"{cat.id}: {label}")
+                    output_lines.append(f"**{label}:** *(one of: {' / '.join(field.options)})*  ")
+                elif sr_key and sr.get(sr_key):
+                    output_lines.append(f"**{label}:** *(SR2024: {sr[sr_key]})*  ")
+                    empty_fields.append(f"{cat.id}: {label}")
+                else:
+                    output_lines.append(f"**{label}:**  ")
+                    empty_fields.append(f"{cat.id}: {label}")
+
             if sr.get('outputs'):
-                output_lines.append(f"**Outputs in 2025:**  \n*(SR2024 outputs: {sr['outputs']})*  ")
+                output_lines.append(f"**Outputs in {year}:**  \n*(SR2024 outputs: {sr['outputs']})*  ")
             else:
-                output_lines.append("**Outputs in 2025:**  ")
+                output_lines.append(f"**Outputs in {year}:**  ")
 
         # If leaf category with items, output them
         if cat.is_leaf and items_in_this_cat:
@@ -1351,6 +1381,12 @@ def export_taxonomy(
     # Output all top-level categories
     for top_cat in taxonomy.taxonomy:
         output_category(top_cat, level=1)
+
+    if strict and empty_fields:
+        err_console.print(f"[red]--strict: {len(empty_fields)} empty agenda fields, nothing written:[/red]")
+        for entry in empty_fields:
+            err_console.print(f"  {entry}")
+        raise typer.Exit(1)
 
     # Write to stdout (not console, which adds Rich formatting)
     for line in output_lines:

@@ -34,7 +34,8 @@ from shared.taxonomy import OTHER, level_assignments, top_categories
 # Colours from the dataviz reference palette (light mode). Clusters are identified by their labels, not by colour:
 # ten categories can't be told apart by colour on a scatter, so one highlight hue + small multiples instead.
 SURFACE, TEXT, TEXT_2, MUTED, HAIRLINE, HIGHLIGHT = "#fcfcfb", "#0b0b0b", "#52514e", "#898781", "#e1e0d9", "#2a78d6"
-GRAPH_SOURCE = {"1-llm-taxonomy": "2-llm-knn-graph", "4-human-taxonomy": "2-llm-knn-graph"}  # no graph of their own
+GRAPH_SOURCE = {"1-llm-taxonomy": "2-llm-knn-graph", "4-human-taxonomy": "2-llm-knn-graph",
+                "6-map-taxonomy": "2-llm-knn-graph"}  # no graph of their own
 
 
 def load_votes(method: str, index: dict[str, int]) -> dict[tuple[int, int], float]:

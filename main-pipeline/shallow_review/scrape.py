@@ -1,11 +1,14 @@
 """Web scraping utilities with playwright and selenium."""
 
+import html
 import logging
+import re
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import IO, Any, Literal
 
+import requests
 from playwright.sync_api import Browser, sync_playwright
 
 from .common import SCRAPED_PATH
@@ -232,6 +235,60 @@ def scrape_selenium(url: str, headless: bool = True, scroll: bool = True) -> tup
         driver.quit()
 
 
+# LessWrong and the Alignment Forum block browser scraping (403), so their posts are fetched from the GraphQL API
+FORUM_POST_RE = re.compile(r"^https?://(?:www\.)?(lesswrong\.com|alignmentforum\.org)/posts/([A-Za-z0-9]+)")
+
+FORUM_POST_QUERY = """
+query Post($id: String!) {
+  post(input: {selector: {_id: $id}}) {
+    result {
+      title
+      pageUrl
+      postedAt
+      user { displayName fullName }
+      coauthors { displayName fullName }
+      contents { html }
+    }
+  }
+}
+"""
+
+
+def scrape_forum_api(url: str) -> tuple[str, int]:
+    """Fetch a LessWrong / Alignment Forum post from the GraphQL API as a simple HTML page.
+
+    The page has the title, authors (full names where set) and date at the top, then the post body.
+    Returns (html, status_code); 404 if the API has no such post.
+    """
+    match = FORUM_POST_RE.match(url)
+    assert match, f"Not a forum post URL: {url}"
+    site, post_id = match.groups()
+    response = requests.post(
+        f"https://www.{site}/graphql",
+        json={"query": FORUM_POST_QUERY, "variables": {"id": post_id}},
+        headers={"Content-Type": "application/json", "Accept": "application/json"},
+        timeout=60,
+    )
+    response.raise_for_status()
+    post = ((response.json().get("data") or {}).get("post") or {}).get("result")
+    if not post:
+        return (f"<html><body>No post {post_id} on {site}</body></html>", 404)
+
+    people = [post.get("user") or {}] + (post.get("coauthors") or [])
+    authors = [p.get("fullName") or p.get("displayName") for p in people if p.get("fullName") or p.get("displayName")]
+    title = html.escape(post.get("title") or "")
+    body = (post.get("contents") or {}).get("html") or ""
+    page = f"""<html><head><title>{title}</title></head><body>
+<h1>{title}</h1>
+<p>By {html.escape(", ".join(authors))}</p>
+<p>Posted {(post.get("postedAt") or "")[:10]} on {site}</p>
+<article>
+{body}
+</article>
+</body></html>"""
+    return (page, 200)
+
+
 def compute_scrape(
     url: str,
     kind: str,
@@ -318,7 +375,10 @@ def compute_scrape(
     scrape_start = time.time()
     
     try:
-        if USE_SELENIUM:
+        if FORUM_POST_RE.match(url):
+            # LessWrong / Alignment Forum: API instead of the browser (which gets 403)
+            content, status_code = scrape_forum_api(url)
+        elif USE_SELENIUM:
             # Use Selenium (thread-safe)
             content, status_code = scrape_selenium(url, headless=headless, scroll=scroll)
         else:

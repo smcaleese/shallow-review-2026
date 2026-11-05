@@ -1,14 +1,45 @@
 """
 Classification taxonomy management.
 
-Loads and validates the category taxonomy from data/taxonomy.yaml.
+Loads and validates the category taxonomy from <DATA_PATH>/taxonomy.yaml.
 Provides utilities for working with categories and generating prompt text.
 """
 
+from datetime import date
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, Field, field_validator
+
+from .common import DATA_PATH
+
+# Agenda fields printed under each leaf category in the exported draft, used when the taxonomy file has no
+# `agenda_fields` (this is the 2025 layout). "{year}" is replaced by the taxonomy's year. "Outputs in {year}" is always
+# printed last, above the items, and must not be listed.
+DEFAULT_AGENDA_FIELDS = [
+    "Who edits (internal)",
+    "One-sentence summary",
+    "Theory of change",
+    "See also",
+    "Orthodox problems",
+    "Target case",
+    "Broad approach",
+    "Key people",
+    "Estimated FTEs",
+    "Critiques",
+    "Funded by",
+    "Funding in {year}",
+]
+
+
+class AgendaField(BaseModel):
+    """An agenda field printed under each leaf category in the draft.
+
+    In YAML either a plain label, or a mapping with `name` and the allowed `options` (shown to editors in the draft).
+    """
+
+    name: str
+    options: list[str] = Field(default_factory=list)
 
 
 class Category(BaseModel):
@@ -27,6 +58,9 @@ class Category(BaseModel):
     examples: list[str] = Field(default_factory=list, description="Example items from 2024")
     is_leaf_explicit: bool | None = Field(default=None, validation_alias="is_leaf", description="Explicitly set leaf status")
     sr2024: dict[str, str] | None = Field(default=None, description="Context from Shallow Review 2024")
+    agenda: dict[str, str | list[str]] | None = Field(
+        default=None, description="Agenda field values keyed by agenda field name, printed in the draft (enrich-taxonomy)"
+    )
     
     @property
     def is_leaf(self) -> bool:
@@ -94,6 +128,17 @@ class Category(BaseModel):
 class Taxonomy(BaseModel):
     """The complete classification taxonomy."""
     
+    year: int = Field(default_factory=lambda: date.today().year, description="Review year, used in the draft")
+    agenda_fields: list[AgendaField] = Field(
+        default_factory=lambda: [AgendaField(name=f) for f in DEFAULT_AGENDA_FIELDS],
+        description="Agenda fields printed under each leaf category in the draft",
+    )
+
+    @field_validator("agenda_fields", mode="before")
+    @classmethod
+    def labels_to_fields(cls, v: list) -> list:
+        """Allow plain labels as shorthand for fields without options."""
+        return [{"name": f} if isinstance(f, str) else f for f in v]
     taxonomy: list[Category] = Field(description="Top-level categories")
     
     def get_all_leaf_ids(self) -> list[str]:
@@ -129,7 +174,7 @@ def load_taxonomy(path: Path | str | None = None) -> Taxonomy:
     """Load and validate taxonomy from YAML file.
     
     Args:
-        path: Path to taxonomy YAML file. Defaults to data/taxonomy.yaml
+        path: Path to taxonomy YAML file. Defaults to <DATA_PATH>/taxonomy.yaml
         
     Returns:
         Validated Taxonomy object
@@ -139,7 +184,7 @@ def load_taxonomy(path: Path | str | None = None) -> Taxonomy:
         ValueError: If taxonomy is invalid
     """
     if path is None:
-        path = Path(__file__).parent.parent / "data" / "taxonomy.yaml"
+        path = DATA_PATH / "taxonomy.yaml"
     else:
         path = Path(path)
     
@@ -169,7 +214,11 @@ def load_taxonomy(path: Path | str | None = None) -> Taxonomy:
     if len(all_ids) != len(set(all_ids)):
         duplicates = [id_ for id_ in all_ids if all_ids.count(id_) > 1]
         raise ValueError(f"Duplicate category IDs found: {set(duplicates)}")
-    
+
+    # "Outputs in {year}" is printed by export anyway, above the items
+    for field in taxonomy.agenda_fields:
+        assert not field.name.startswith("Outputs in"), f"'{field.name}' is always printed, remove it from agenda_fields"
+
     return taxonomy
 
 

@@ -182,7 +182,7 @@ def extract_agenda_attributes(
 
         # Call Anthropic API with extended thinking
         response = client.messages.create(
-            model="claude-sonnet-4-5",
+            model="claude-sonnet-5-5",
             messages=[{"role": "user", "content": prompt}],
             max_tokens=adjusted_max_tokens,
             thinking={"type": "enabled", "budget_tokens": 2048},
