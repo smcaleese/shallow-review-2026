@@ -4,8 +4,8 @@ All data stored in a single SQLite database: data/data.db
 
 Tables:
 - scrape: Scraped page metadata
-- collect: Collection source pages
-- classify: Classification candidates (links to classify)
+- entries: One row per URL: status, source label and the classification result
+- feedback: Human decisions (include / exclude / reclassify) per URL
 """
 
 import logging
@@ -26,8 +26,25 @@ _data_db_init_lock = threading.Lock()
 _data_db_op_lock = threading.Lock()
 
 
+def _rename_old_tables(data_db: sqlite3.Connection) -> None:
+    """Databases made before the rename have `classify` and `classify_feedback` tables; rename them in place."""
+    tables = {row[0] for row in data_db.execute("SELECT name FROM sqlite_master WHERE type = 'table'")}
+    if "classify" in tables and "entries" not in tables:
+        old_indexes = data_db.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'index' AND name LIKE 'idx_classify_%'"
+        ).fetchall()
+        for (name,) in old_indexes:
+            data_db.execute(f"DROP INDEX {name}")  # Recreated below as idx_entries_*
+        data_db.execute("ALTER TABLE classify RENAME TO entries")
+        logger.info("Renamed table classify -> entries")
+    if "classify_feedback" in tables and "feedback" not in tables:
+        data_db.execute("ALTER TABLE classify_feedback RENAME TO feedback")
+        logger.info("Renamed table classify_feedback -> feedback")
+
+
 def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
     """Create all tables and indexes in the data database."""
+    _rename_old_tables(data_db)
     statements = [
         # Scrape table
         """CREATE TABLE IF NOT EXISTS scrape (
@@ -44,32 +61,11 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
         "CREATE INDEX IF NOT EXISTS idx_scrape_url_hash_short ON scrape(url_hash_short)",
         "CREATE INDEX IF NOT EXISTS idx_scrape_kind ON scrape(kind)",
         "CREATE INDEX IF NOT EXISTS idx_scrape_timestamp ON scrape(timestamp)",
-        # Collect table
-        """CREATE TABLE IF NOT EXISTS collect (
+        # Entries table
+        """CREATE TABLE IF NOT EXISTS entries (
             url TEXT PRIMARY KEY,
-            url_hash TEXT,
-            url_hash_short TEXT,
-            status TEXT NOT NULL,
-            source TEXT,
-            added_at TEXT NOT NULL,
-            processed_at TEXT,
-            data JSON,
-            error TEXT,
-            CHECK(status IN ('new', 'scrape_error', 'extract_error', 'done'))
-        )""",
-        "CREATE INDEX IF NOT EXISTS idx_collect_status ON collect(status)",
-        "CREATE INDEX IF NOT EXISTS idx_collect_added_at ON collect(added_at)",
-        "CREATE INDEX IF NOT EXISTS idx_collect_url_hash ON collect(url_hash)",
-        "CREATE INDEX IF NOT EXISTS idx_collect_url_hash_short ON collect(url_hash_short)",
-        # Classify table
-        """CREATE TABLE IF NOT EXISTS classify (
-            url TEXT PRIMARY KEY,
-            url_hash TEXT,
-            url_hash_short TEXT,
             status TEXT NOT NULL,
             source TEXT NOT NULL,
-            source_url TEXT,
-            collect_relevancy REAL,
             added_at TEXT NOT NULL,
             processed_at TEXT,
             ai_safety_relevance REAL,
@@ -79,20 +75,16 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
             error TEXT,
             CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
         )""",
-        "CREATE INDEX IF NOT EXISTS idx_classify_status ON classify(status)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_source ON classify(source)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_source_url ON classify(source_url)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_added_at ON classify(added_at)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_ai_safety_relevance ON classify(ai_safety_relevance)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_shallow_review_inclusion ON classify(shallow_review_inclusion)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_kind ON classify(kind)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_url_hash ON classify(url_hash)",
-        "CREATE INDEX IF NOT EXISTS idx_classify_url_hash_short ON classify(url_hash_short)",
-        # Classify feedback table
-        """CREATE TABLE IF NOT EXISTS classify_feedback (
+        "CREATE INDEX IF NOT EXISTS idx_entries_status ON entries(status)",
+        "CREATE INDEX IF NOT EXISTS idx_entries_source ON entries(source)",
+        "CREATE INDEX IF NOT EXISTS idx_entries_added_at ON entries(added_at)",
+        "CREATE INDEX IF NOT EXISTS idx_entries_ai_safety_relevance ON entries(ai_safety_relevance)",
+        "CREATE INDEX IF NOT EXISTS idx_entries_shallow_review_inclusion ON entries(shallow_review_inclusion)",
+        "CREATE INDEX IF NOT EXISTS idx_entries_kind ON entries(kind)",
+        # Feedback table
+        """CREATE TABLE IF NOT EXISTS feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             url TEXT NOT NULL,
-            url_hash_short TEXT,
             feedback_source TEXT NOT NULL,
             feedback_timestamp TEXT NOT NULL,
             action TEXT NOT NULL,
@@ -102,16 +94,15 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
             notes TEXT,
             CHECK(action IN ('include', 'exclude', 'reclassify', 'note'))
         )""",
-        "CREATE INDEX IF NOT EXISTS idx_feedback_url ON classify_feedback(url)",
-        "CREATE INDEX IF NOT EXISTS idx_feedback_url_hash_short ON classify_feedback(url_hash_short)",
-        "CREATE INDEX IF NOT EXISTS idx_feedback_action ON classify_feedback(action)",
-        "CREATE INDEX IF NOT EXISTS idx_feedback_human_category ON classify_feedback(human_category)",
-        "CREATE INDEX IF NOT EXISTS idx_feedback_source ON classify_feedback(feedback_source)",
+        "CREATE INDEX IF NOT EXISTS idx_feedback_url ON feedback(url)",
+        "CREATE INDEX IF NOT EXISTS idx_feedback_action ON feedback(action)",
+        "CREATE INDEX IF NOT EXISTS idx_feedback_human_category ON feedback(human_category)",
+        "CREATE INDEX IF NOT EXISTS idx_feedback_source ON feedback(feedback_source)",
         """CREATE UNIQUE INDEX IF NOT EXISTS idx_feedback_unique_single_action 
-           ON classify_feedback(url, feedback_source, action, feedback_timestamp) 
+           ON feedback(url, feedback_source, action, feedback_timestamp) 
            WHERE action IN ('include', 'exclude', 'note')""",
         """CREATE UNIQUE INDEX IF NOT EXISTS idx_feedback_unique_reclassify 
-           ON classify_feedback(url, feedback_source, action, human_category, feedback_timestamp) 
+           ON feedback(url, feedback_source, action, human_category, feedback_timestamp) 
            WHERE action = 'reclassify'""",
     ]
 
@@ -169,7 +160,7 @@ def data_db_locked():
         with data_db_locked() as db:
             cursor = db.execute("SELECT * FROM scrape WHERE url = ?", (url,))
             row = cursor.fetchone()
-            db.execute("INSERT INTO collect ...", (...))
+            db.execute("INSERT INTO entries ...", (...))
             
     Note: Keep operations inside the context minimal. Don't hold lock
     while doing expensive operations like scraping or LLM calls.

@@ -14,7 +14,7 @@
 - **Data**: polars, numpy, scipy
 - **LLM**: litellm, jinja2, pyyaml, pydantic, tenacity
 - **Web**: beautifulsoup4, requests, playwright
-- **UI**: rich, typer
+- **UI**: rich, argparse (pipeline scripts), typer (`process_draft.py`)
 - **Utils**: python-dotenv, zstandard
 
 **Observability:** Helicone.ai proxy for LLM calls
@@ -23,24 +23,25 @@
 
 ## Module Structure
 
-All code in `shallow_review/` module. Executable `pipeline.py` at root imports and calls `cli.py`.
+Shared code is in the `shallow_review/` module (installed editable by `uv sync`). The pipeline stages are scripts in
+`src/` (one `argparse` script per stage, run with `uv run python src/<script>.py`); `src/terminal.py` holds what they
+share: `.env` loading, logging, Ctrl+C handling and `run_parallel`. `process_draft.py` at the root is a separate typer CLI.
 
 ### Notable Files
 
 - **`common.py`**: Shared types, constants, enums, pydantic models, global state (e.g. shutdown flag). Only includes items used across multiple modules.
-- **`cli.py`**: Typer CLI definition
 - **`data_db.py`**: Unified database access (lazy singleton pattern)
 - **`llm.py`**: Litellm initialization, retry logic, JSON extraction, token tracking
 - **`utils.py`**: File I/O (`smart_open`), logging setup, console object, token counting
 - **`stats.py`**: Global thread-safe stats tracking
 - **`taxonomy.py`**: Classification taxonomy loader and utilities (loads `data/taxonomy.yaml`)
 - **`scrape.py`**: Web scraping with playwright
-- **`collect.py`**: Collection phase logic
+- **`entries.py`**: Adding URLs to the `entries` table (`add_entry`)
 - **`classify.py`**: Classification phase logic
 
 ## Database Access
 
-**Single database file:** `data/data.db` (contains `scrape`, `collect`, `classify` tables)
+**Single database file:** `data/data.db` (contains `scrape`, `entries`, `feedback` tables)
 
 **Pattern:** Lazy singleton with thread-safe initialization
 
@@ -51,7 +52,7 @@ from .data_db import get_data_db
 db = get_data_db()
 
 # Use connection (check_same_thread=False is set)
-cursor = db.execute("SELECT * FROM collect WHERE status = ?", ("new",))
+cursor = db.execute("SELECT * FROM entries WHERE status = ?", ("new",))
 db.commit()  # Explicit commits required
 ```
 
@@ -84,7 +85,7 @@ setup_litellm()
 result = get_completion(
     template_vars={"url": url, "html": html},
     model="claude-3-5-sonnet-20241022",
-    stats_subtree="collect_tokens",  # Stats key for tracking
+    stats_subtree="classify_tokens",  # Stats key for tracking
     response_type=MyPydanticModel,  # Validates JSON response
     system_prompt_template=prompts["task"]["system"],
     user_prompt_template=prompts["task"]["user"],
@@ -240,8 +241,8 @@ stats = get_stats()
 
 # Update stats (always use lock)
 with stats.lock:
-    stats.collect_sources.new.add(url)
-    stats.collect_tokens.update(
+    stats.classify_candidates.new.add(url)
+    stats.classify_tokens.update(
         cache_read=100,
         uncached=500,
         cost=0.002
@@ -257,11 +258,11 @@ stats.save_to_file(output_path)
 **CountStats pattern:**
 - Uses sets of IDs to avoid double-counting
 - Tracks: `new`, `cached`, `errors` (dict with error messages)
-- Access via: `stats.collect_sources.new.add(url)`
+- Access via: `stats.classify_candidates.new.add(url)`
 
 **TokenStats pattern:**
 - Tracks: `cache_read`, `cache_write`, `uncached`, `reasoning`, `output`, `cost`
-- Update via: `stats.collect_tokens.update(cache_read=100, cost=0.002)`
+- Update via: `stats.classify_tokens.update(cache_read=100, cost=0.002)`
 
 ## File Handling
 
@@ -373,7 +374,7 @@ token_count = estimate_tokens(text, model="gpt-4")
 1. Get items with status='new' from DB
 2. Check shutdown flag in loop
 3. For each item:
-   - Call processing function (scrape, compute_collect, compute_classify)
+   - Call processing function (scrape, compute_classify)
    - Update stats with lock
    - Update DB status and commit
    - Log progress
@@ -381,7 +382,7 @@ token_count = estimate_tokens(text, model="gpt-4")
 
 **Configuration objects:**
 - Defined in `common.py` as Pydantic models
-- Examples: `RunCollectConfig`, `RunClassifyConfig`
+- Examples: `RunClassifyConfig`
 - Passed from CLI to processing functions
 - Immutable during run
 

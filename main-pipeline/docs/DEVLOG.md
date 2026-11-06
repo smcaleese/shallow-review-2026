@@ -243,14 +243,33 @@ leaf_ids = tax.get_all_leaf_ids()  # 103 items
   switches thinking on.
 - The taxonomy file sets the draft's `year` (heading, labels, date filter) and its `agenda_fields`, so the 2026 header
   fields differ from 2025 without code changes.
-- `enrich-taxonomy` writes all header fields per category with an LLM from the classified items into a separate
+- `enrich_taxonomy.py` writes all header fields per category with an LLM from the classified items into a separate
   `taxonomy-enriched.yaml` (ruamel.yaml round trip of the input, so comments survive). The input stays hand-written;
   the generated file can be reviewed and edited, and re-runs keep existing agendas. Critiques must cite items from
   the database (an index of all items is in the cached system prompt); otherwise an "unsourced" sentence is used.
-  `export-taxonomy --strict` refuses to write a draft with empty fields.
+  `export_draft.py --strict` refuses to write a draft with empty fields.
 - Items are filed under their highest-scoring category, not the first listed (2 of 502 were listed out of order).
 - All 140 LessWrong pages returned 403 to the scraper, yet were classified from the error page and URL (no authors,
   summaries guessed from titles). LessWrong/AF post URLs are now fetched from the GraphQL API (see SCRAPE.md); the
   143 LW items were re-scraped and reclassified. Lesson: a 403 page still reaches the LLM and comes back "done";
   check `scrape.status_code` after a run. Two goodfire.com pages are still 403 (the browser is blocked).
+- Split the single typer CLI (`pipeline.py` / `shallow_review/cli.py`, 1,400 lines) into one `argparse` script per stage
+  in `src/`, like `scraping-scripts/`. The scripts are thin; shared code stays in `shallow_review/` (made importable
+  with a hatchling build-system entry in `pyproject.toml`) and `src/terminal.py` (`.env`, logging, Ctrl+C,
+  `run_parallel`). `export_draft.py` takes `-o` so logs no longer mix into the draft.
 
+## 2026-11-06: Removed the collect stage
+
+- Dropped the `collect` table, `collect.py`, `add_items.py` (LLM detection of aggregator pages), `src/collect_links.py`,
+  `prompts/collect.yaml`, `prompts/add_items.yaml`, `docs/COLLECT.md` and the `classify.source_url` /
+  `collect_relevancy` columns. All 2026 sources are individual items, so there is one queue: `add_entries.py` adds URLs
+  to `classify`, with no `--phase` and no LLM call. Old databases keep their `collect` table; the code ignores it.
+
+## 2026-11-06: Renamed tables
+
+- `classify` -> `entries` and `classify_feedback` -> `feedback` (indexes `idx_entries_*`), since with the collect stage
+  gone the table holds the whole item, not a phase. `data_db.py` renames the old tables in place when it opens a
+  database that still has them (tested on a copy of the 2025 database: 3,886 entries and 1,561 feedback rows kept).
+- Dropped the stored hashes from `entries` and `feedback`: `url_hash_short(url)` is computed where the id is shown
+  (export, agendas). The `scrape` table still stores `url_hash` / `url_hash_short` (its schema has `url_hash NOT NULL
+  UNIQUE`, so removing it needs a table rebuild for old databases).

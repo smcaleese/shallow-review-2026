@@ -7,7 +7,7 @@
 ```
 data/
 ├── .llm_cache/          # Litellm disk cache (gitignored)
-├── data.db              # Unified database (scrape, collect, classify tables)
+├── data.db              # Unified database (scrape, entries, feedback tables)
 ├── taxonomy.yaml        # Classification category taxonomy (ground truth)
 └── scraped/             # Scraped HTML content
     └── <hash>.html.zst  # Zstandard-compressed HTML files
@@ -45,7 +45,7 @@ CREATE INDEX idx_scrape_timestamp ON scrape(timestamp);
 - `url`: Original URL (primary key - unique)
 - `url_hash`: SHA256(url) - full 64-char hex for file naming
 - `url_hash_short`: First 8 chars of SHA256(url) - for human-readable IDs
-- `kind`: Context/type of scrape (e.g., "collect", "classify")
+- `kind`: Context/type of scrape (e.g., "classify")
 - `timestamp`: ISO 8601 UTC timestamp with timezone
 - `status_code`: HTTP status code (if successful)
 - `error`: Error message (if failed)
@@ -74,81 +74,23 @@ CREATE INDEX idx_scrape_timestamp ON scrape(timestamp);
 - Debug file (stripped HTML): `data/scraped/{url_hash}-stripped.html` (uncompressed, for inspection)
 - Use `get_scrape_path(url)` or `open_scraped(url, mode)` to access files
 
-### collect table
+### entries table
 
-Tracks source pages being collected from (conferences, newsletters, etc.).
+Databases created before the collect stage was removed (such as `data/data.db`) may still contain a `collect` table and
+`classify.source_url` / `classify.collect_relevancy` columns. The code ignores them. Databases created before the
+rename of `classify` to `entries` and `classify_feedback` to `feedback` are renamed in place (and their
+`idx_classify_*` indexes recreated as `idx_entries_*`) the first time the code opens them. Older databases also have
+unused `url_hash` / `url_hash_short` columns in `entries` and `url_hash_short` in `feedback`: the short hash (the `id:`
+shown in drafts) is computed from the URL with `url_hash_short(url)` instead of stored.
 
-```sql
-CREATE TABLE collect (
-    url TEXT PRIMARY KEY,
-    url_hash TEXT,
-    url_hash_short TEXT,
-    status TEXT NOT NULL,
-    source TEXT,
-    added_at TEXT NOT NULL,
-    processed_at TEXT,
-    data JSON,
-    error TEXT,
-    CHECK(status IN ('new', 'scrape_error', 'extract_error', 'done'))
-);
 
-CREATE INDEX idx_collect_status ON collect(status);
-CREATE INDEX idx_collect_added_at ON collect(added_at);
-CREATE INDEX idx_collect_url_hash ON collect(url_hash);
-CREATE INDEX idx_collect_url_hash_short ON collect(url_hash_short);
-```
-
-**Fields:**
-- `url`: Source page URL (primary key)
-- `url_hash`: SHA256(url) - full 64-char hex
-- `url_hash_short`: First 8 chars of SHA256(url) - for human-readable IDs
-- `status`: Processing state (new → scrape_error/extract_error/done)
-- `source`: Optional user-supplied label for tracking
-- `added_at`: ISO 8601 UTC timestamp when added
-- `processed_at`: ISO 8601 UTC timestamp when completed
-- `data`: JSON with LLM-extracted data and preprocessing info (see below)
-- `error`: Error message if failed
-
-**data JSON structure** (when status='done'):
-```json
-{
-  "tokens_full": 50000,
-  "tokens_stripped": 15000,
-  "collect_duration": 12.34,
-  "title": "Page title",
-  "kind": "conference|newsletter|blog_aggregator|...",
-  "collection_quality_score": 0.85,
-  "comments": "2-4 sentence description",
-  "links": [
-    {
-      "url": "https://...",
-      "link_text": "verbatim link text",
-      "context": "one-sentence context",
-      "ai_safety_relevancy": 0.75
-    }
-  ]
-}
-```
-
-**Notes:**
-- `tokens_full`: Token count of full HTML
-- `tokens_stripped`: Token count after preprocessing (scripts/styles removed)
-- `collect_duration`: Total time for collection process in seconds
-- Other fields are LLM-extracted
-
-### classify table
-
-Tracks URLs to classify (for AI safety/alignment relevance).
+One row per URL: its processing status, source label and, once classified, the LLM's result (AI safety/alignment relevance, kind, categories, metadata).
 
 ```sql
-CREATE TABLE classify (
+CREATE TABLE entries (
     url TEXT PRIMARY KEY,
-    url_hash TEXT,
-    url_hash_short TEXT,
     status TEXT NOT NULL,
     source TEXT NOT NULL,
-    source_url TEXT,
-    collect_relevancy REAL,
     added_at TEXT NOT NULL,
     processed_at TEXT,
     ai_safety_relevance REAL,
@@ -159,30 +101,23 @@ CREATE TABLE classify (
     CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
 );
 
-CREATE INDEX idx_classify_status ON classify(status);
-CREATE INDEX idx_classify_source ON classify(source);
-CREATE INDEX idx_classify_source_url ON classify(source_url);
-CREATE INDEX idx_classify_added_at ON classify(added_at);
-CREATE INDEX idx_classify_ai_safety_relevance ON classify(ai_safety_relevance);
-CREATE INDEX idx_classify_shallow_review_inclusion ON classify(shallow_review_inclusion);
-CREATE INDEX idx_classify_kind ON classify(kind);
-CREATE INDEX idx_classify_url_hash ON classify(url_hash);
-CREATE INDEX idx_classify_url_hash_short ON classify(url_hash_short);
+CREATE INDEX idx_entries_status ON entries(status);
+CREATE INDEX idx_entries_source ON entries(source);
+CREATE INDEX idx_entries_added_at ON entries(added_at);
+CREATE INDEX idx_entries_ai_safety_relevance ON entries(ai_safety_relevance);
+CREATE INDEX idx_entries_shallow_review_inclusion ON entries(shallow_review_inclusion);
+CREATE INDEX idx_entries_kind ON entries(kind);
 ```
 
 **Fields:**
 - `url`: URL to classify (primary key)
-- `url_hash`: SHA256(url) - full 64-char hex
-- `url_hash_short`: First 8 chars of SHA256(url) - for human-readable IDs
 - `status`: Processing state (new → scrape_error/classify_error/done)
-- `source`: "collect" or user-supplied label
-- `source_url`: URL of collect source page (if from collect, **not a foreign key**)
-- `collect_relevancy`: Relevancy score from collect phase (if applicable)
+- `source`: Label given with `add_entries.py --source` (default: the URL file's name without extension)
 - `added_at`: ISO 8601 UTC timestamp when added
 - `processed_at`: ISO 8601 UTC timestamp when completed
 - `ai_safety_relevance`: AI safety/alignment topic relevance score 0.0-1.0 (from LLM)
 - `shallow_review_inclusion`: Suitability for Shallow Review inclusion score 0.0-1.0 (from LLM)
-- `kind`: Content type - independent of relevancy (see ClassifyKind enum below)
+- `kind`: Content type - independent of relevancy (see EntryKind enum below)
 - `data`: JSON with classification results and preprocessing info (see below)
 - `error`: Error message if failed
 
@@ -221,7 +156,7 @@ CREATE INDEX idx_classify_url_hash_short ON classify(url_hash_short);
 - `date`: Publication date in ISO format YYYY-MM-DD (nullable)
 - `published_year`: Publication year as integer (nullable)
 - `venue`: Publication venue (nullable)
-- `kind`: Content type (one of ClassifyKind enum values, also stored as column)
+- `kind`: Content type (one of EntryKind enum values, also stored as column)
 - `contribution_type`: Type of contribution (e.g., "empirical_results", "theoretical_framework")
 - `ai_safety_relevance`, `shallow_review_inclusion`: Scores 0.0-1.0 (also stored as columns)
 - `categories`: List of 1-3 category assignments with taxonomy leaf IDs and fit scores
@@ -229,15 +164,14 @@ CREATE INDEX idx_classify_url_hash_short ON classify(url_hash_short);
 - `confidence`: Overall classification confidence 0.0-1.0
 - Other fields are LLM-extracted
 
-### classify_feedback table
+### feedback table
 
 Stores human feedback on classification decisions (category assignments, inclusions, exclusions).
 
 ```sql
-CREATE TABLE classify_feedback (
+CREATE TABLE feedback (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     url TEXT NOT NULL,
-    url_hash_short TEXT,
     feedback_source TEXT NOT NULL,
     feedback_timestamp TEXT NOT NULL,
     action TEXT NOT NULL,
@@ -248,25 +182,23 @@ CREATE TABLE classify_feedback (
     CHECK(action IN ('include', 'exclude', 'reclassify', 'note'))
 );
 
-CREATE INDEX idx_feedback_url ON classify_feedback(url);
-CREATE INDEX idx_feedback_url_hash_short ON classify_feedback(url_hash_short);
-CREATE INDEX idx_feedback_action ON classify_feedback(action);
-CREATE INDEX idx_feedback_human_category ON classify_feedback(human_category);
-CREATE INDEX idx_feedback_source ON classify_feedback(feedback_source);
+CREATE INDEX idx_feedback_url ON feedback(url);
+CREATE INDEX idx_feedback_action ON feedback(action);
+CREATE INDEX idx_feedback_human_category ON feedback(human_category);
+CREATE INDEX idx_feedback_source ON feedback(feedback_source);
 
 -- Partial unique indexes to prevent true duplicates while allowing multi-category
 CREATE UNIQUE INDEX idx_feedback_unique_single_action 
-  ON classify_feedback(url, feedback_source, action, feedback_timestamp) 
+  ON feedback(url, feedback_source, action, feedback_timestamp) 
   WHERE action IN ('include', 'exclude', 'note');
 
 CREATE UNIQUE INDEX idx_feedback_unique_reclassify 
-  ON classify_feedback(url, feedback_source, action, human_category, feedback_timestamp) 
+  ON feedback(url, feedback_source, action, human_category, feedback_timestamp) 
   WHERE action = 'reclassify';
 ```
 
 **Fields:**
-- `url`: URL being reviewed (must match classify.url)
-- `url_hash_short`: First 8 chars of SHA256(url) - for human-readable IDs
+- `url`: URL being reviewed (must match entries.url)
 - `feedback_source`: Source of feedback (e.g., "SR2025-WIP-doc", "manual-review")
 - `feedback_timestamp`: ISO 8601 UTC timestamp when feedback was recorded
 - `action`: What to do with this item
@@ -280,7 +212,7 @@ CREATE UNIQUE INDEX idx_feedback_unique_reclassify
 - `notes`: Optional comments or reasoning
 
 **Usage:**
-- Import feedback via `pipeline.py import-feedback <csv-file> --source "label" [--reclassify-obsolete-llm]`
+- Import feedback via `src/import_feedback.py <csv-file> --source "label" [--reclassify-obsolete-llm]`
 - Classification phase checks for existing feedback and respects reclassification
 - Export phase respects include/exclude actions and uses human categories when available
 - **Multi-category support**: A URL can have multiple `reclassify` entries with different `human_category` values
@@ -292,7 +224,7 @@ CREATE UNIQUE INDEX idx_feedback_unique_reclassify
 - Use when taxonomy has changed and old categories no longer exist
 - For papers NOT in CSV but with obsolete LLM-assigned categories:
   - Instead of excluding them, marks them for re-classification
-  - Resets their status to `new` in classify table
+  - Resets their status to `new` in entries table
   - Creates feedback with `action='note'` (annotation only, no forced inclusion/exclusion)
   - Papers are re-classified with current taxonomy and normal thresholds apply
   - After re-classification, papers with sr>=0.4 appear in exports marked with 🔄 emoji
@@ -341,7 +273,7 @@ This indicates: re-classified due to obsolete LLM category, appears in 2 categor
 
 **Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data-2026-facets/taxonomy.yaml`.
 It is hand-written; `enrich-taxonomy` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
-which export uses when present. A paper's category is always its highest-scoring one in `classify.data.categories`.
+which export uses when present. A paper's category is always its highest-scoring one in `entries.data.categories`.
 
 The classification taxonomy defines a hierarchical category structure for classifying AI safety/alignment content. Each classified item must be assigned to exactly one **leaf category**.
 
@@ -355,7 +287,7 @@ The classification taxonomy defines a hierarchical category structure for classi
   defaults to `DEFAULT_AGENDA_FIELDS` in `taxonomy.py`, the 2025 layout). Each entry is a plain label or a mapping
   `{name, options}`; options are printed after the label as `*(one of: a / b)*` for editors. `{year}` in a label is
   replaced by `year`. A label starting with `Who edits` gets the "take me" marker. `Outputs in {year}` is always
-  printed last, above the items, and may not be listed. Labels in `SR2024_FIELD_KEYS` (`cli.py`) are prefilled from a
+  printed last, above the items, and may not be listed. Labels in `SR2024_FIELD_KEYS` (`src/export_draft.py`) are prefilled from a
   category's `sr2024` block
 
 ### Structure
@@ -418,22 +350,7 @@ When used, parquet files written with:
 
 ## Enums and Constants
 
-### SourceKind (collect.data.kind)
-
-Types of collection sources:
-- `conference` - Conference websites
-- `newsletter` - Email newsletters, digests
-- `blog_aggregator` - Aggregator sites (LessWrong, EA Forum)
-- `resource_list` - Curated resource lists
-- `workshop` - Workshop pages
-- `summer_school` - Summer school programs
-- `reading_list` - Reading/bibliography lists
-- `organization_page` - Organization homepages
-- `paper_page` - Individual paper page (no links to collect)
-- `blocked_content` - Captcha, login wall, etc.
-- `other` - Other types
-
-### ClassifyKind (classify.kind)
+### EntryKind (entries.kind)
 
 Content type classification (independent of AI safety/alignment relevancy).
 
@@ -492,13 +409,7 @@ Examples of what to exclude:
 
 ### Status Values
 
-**CollectStatus:**
-- `new` - Not yet processed
-- `scrape_error` - Failed to scrape
-- `extract_error` - LLM/extraction failed
-- `done` - Successfully completed
-
-**ClassifyStatus:**
+**EntryStatus:**
 - `new` - Not yet processed
 - `scrape_error` - Failed to scrape
 - `classify_error` - LLM/classification failed
@@ -507,12 +418,10 @@ Examples of what to exclude:
 ## Data Flow
 
 1. **Scraping**: URL → `scrape` table + `data/scraped/<hash>.html.zst`
-2. **Collection**: Source URL → `collect` table → extract links → `classify` table
-3. **Classification**: Candidate URL → `classify` table with results
+2. **Classification**: URL → `entries` table with results
 
 **Key points:**
 - Scrapes are shared across all phases (one scrape per URL)
-- Links from collect are directly added to classify table (no intermediate table)
 - Tables do NOT reference each other with foreign key constraints
 - All timestamps are ISO 8601 with timezone (UTC)
 

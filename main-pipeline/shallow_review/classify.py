@@ -2,7 +2,6 @@
 
 import json
 import logging
-import sqlite3
 from datetime import datetime, timezone
 
 import yaml
@@ -10,7 +9,7 @@ from pydantic import BaseModel, Field
 
 from .common import (
     PROMPTS_PATH,
-    ClassifyStatus,
+    EntryStatus,
     RunClassifyConfig,
 )
 from .data_db import data_db_locked
@@ -18,7 +17,7 @@ from .llm import get_completion
 from .scrape import compute_scrape, open_scraped
 from .stats import get_stats
 from .taxonomy import load_taxonomy, format_taxonomy_for_prompt
-from .utils import format_error, normalize_url, preprocess_html, url_hash, url_hash_short
+from .utils import format_error, preprocess_html
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +39,7 @@ class ClassificationResult(BaseModel):
     date: str | None = None  # ISO format YYYY-MM-DD
     published_year: int | None = None
     venue: str | None = None
-    kind: str  # One of the ClassifyKind enum values
+    kind: str  # One of the EntryKind enum values
     contribution_type: str  # One of: empirical_results, theoretical_framework, etc.
     summary: str
     key_result: str | None = None
@@ -51,66 +50,6 @@ class ClassificationResult(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     tokens_full: int | None = None  # Full HTML token count
     tokens_stripped: int | None = None  # Stripped HTML token count
-
-
-def add_classify_candidate(
-    url: str,
-    source: str,
-    source_url: str | None = None,
-    collect_relevancy: float | None = None,
-) -> bool:
-    """
-    Add a URL to classification queue.
-
-    Args:
-        url: URL to classify (will be normalized)
-        source: Source label ("collect" or user-supplied)
-        source_url: URL of source page (if from collect)
-        collect_relevancy: Relevancy score from collect phase (if applicable)
-
-    Returns:
-        True if added (new), False if already exists
-    """
-    # Normalize URL for consistent handling
-    url = normalize_url(url)
-    
-    timestamp = datetime.now(timezone.utc).isoformat()
-    hash_value = url_hash(url)
-    hash_short = url_hash_short(url)
-
-    try:
-        with data_db_locked() as db:
-            db.execute(
-                """
-                INSERT INTO classify 
-                (url, url_hash, url_hash_short, status, source, source_url, collect_relevancy, added_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (url, hash_value, hash_short, ClassifyStatus.NEW.value, source, source_url, collect_relevancy, timestamp),
-            )
-
-        # Update stats
-        try:
-            stats = get_stats()
-            with stats.lock:
-                stats.classify_candidates.new.add(url)
-        except RuntimeError:
-            pass
-
-        logger.info(f"Added classify candidate: {url}")
-        return True
-
-    except sqlite3.IntegrityError:
-        # URL already exists
-        try:
-            stats = get_stats()
-            with stats.lock:
-                stats.classify_candidates_already_exist += 1
-        except RuntimeError:
-            pass
-
-        logger.debug(f"Classify candidate already exists: {url}")
-        return False
 
 
 def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool = False) -> ClassificationResult:
@@ -142,21 +81,21 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
 
     # Check if already processed
     with data_db_locked() as db:
-        cursor = db.execute("SELECT status FROM classify WHERE url = ?", (url,))
+        cursor = db.execute("SELECT status FROM entries WHERE url = ?", (url,))
         row = cursor.fetchone()
 
-        if row and row["status"] != ClassifyStatus.NEW.value:
+        if row and row["status"] != EntryStatus.NEW.value:
             # Allow retrying classify_error with force_recompute
-            if force_recompute and row["status"] == ClassifyStatus.CLASSIFY_ERROR.value:
+            if force_recompute and row["status"] == EntryStatus.CLASSIFY_ERROR.value:
                 logger.info(f"Retrying classification for {url} (was classify_error)")
                 db.execute(
-                    "UPDATE classify SET status = ? WHERE url = ?",
-                    (ClassifyStatus.NEW.value, url),
+                    "UPDATE entries SET status = ? WHERE url = ?",
+                    (EntryStatus.NEW.value, url),
                 )
-            elif row["status"] == ClassifyStatus.DONE.value:
+            elif row["status"] == EntryStatus.DONE.value:
                 logger.warning(f"URL {url} already classified successfully")
                 # Return cached result
-                cursor = db.execute("SELECT data FROM classify WHERE url = ?", (url,))
+                cursor = db.execute("SELECT data FROM entries WHERE url = ?", (url,))
                 data_row = cursor.fetchone()
                 if data_row and data_row["data"]:
                     data = json.loads(data_row["data"])
@@ -176,11 +115,11 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
         with data_db_locked() as db:
             db.execute(
                 """
-                UPDATE classify
+                UPDATE entries
                 SET status = ?, processed_at = ?, error = ?
                 WHERE url = ?
                 """,
-                (ClassifyStatus.SCRAPE_ERROR.value, timestamp, error_msg, url),
+                (EntryStatus.SCRAPE_ERROR.value, timestamp, error_msg, url),
             )
 
         # Update stats
@@ -206,11 +145,11 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
         with data_db_locked() as db:
             db.execute(
                 """
-                UPDATE classify
+                UPDATE entries
                 SET status = ?, processed_at = ?, error = ?
                 WHERE url = ?
                 """,
-                (ClassifyStatus.CLASSIFY_ERROR.value, timestamp, error_msg, url),
+                (EntryStatus.CLASSIFY_ERROR.value, timestamp, error_msg, url),
             )
 
         # Update stats
@@ -233,12 +172,12 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
 
         db.execute(
             """
-            UPDATE classify
+            UPDATE entries
             SET status = ?, processed_at = ?, error = ?
             WHERE url = ?
             """,
             (
-                ClassifyStatus.CLASSIFY_ERROR.value,
+                EntryStatus.CLASSIFY_ERROR.value,
                 timestamp,
                 error_msg,
                 url,
@@ -265,16 +204,7 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
         logger.error(error_msg)
         raise RuntimeError(error_msg) from e
 
-    # Step 5: Get collect_relevancy from database if available
-    with data_db_locked() as db:
-        cursor = db.execute(
-            "SELECT collect_relevancy FROM classify WHERE url = ?",
-            (url,)
-        )
-        row = cursor.fetchone()
-    collect_relevancy = row["collect_relevancy"] if row else None
-
-    # Step 6: Run LLM classification
+    # Step 5: Run LLM classification
     try:
         # Load prompts
         prompts_file = PROMPTS_PATH / "classify.yaml"
@@ -286,7 +216,6 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
             "url": url,
             "content": cleaned_html,
             "taxonomy": taxonomy_text,
-            "collect_relevancy": collect_relevancy,
         }
 
         # Call LLM with 1-hour cache for system prompt (taxonomy changes infrequently)
@@ -309,12 +238,12 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
 
             db.execute(
             """
-            UPDATE classify
+            UPDATE entries
             SET status = ?, processed_at = ?, error = ?
             WHERE url = ?
             """,
             (
-                ClassifyStatus.CLASSIFY_ERROR.value,
+                EntryStatus.CLASSIFY_ERROR.value,
                 timestamp,
                 error_msg,
                 url,
@@ -345,11 +274,11 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
             with data_db_locked() as db:
                 db.execute(
                     """
-                    UPDATE classify
+                    UPDATE entries
                     SET status = ?, processed_at = ?, error = ?
                     WHERE url = ?
                     """,
-                    (ClassifyStatus.CLASSIFY_ERROR.value, timestamp, error_msg, url),
+                    (EntryStatus.CLASSIFY_ERROR.value, timestamp, error_msg, url),
                 )
             raise RuntimeError(error_msg)
 
@@ -366,12 +295,12 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
     with data_db_locked() as db:
         db.execute(
             """
-            UPDATE classify
+            UPDATE entries
             SET status = ?, processed_at = ?, ai_safety_relevance = ?, shallow_review_inclusion = ?, kind = ?, data = ?
             WHERE url = ?
             """,
             (
-                ClassifyStatus.DONE.value,
+                EntryStatus.DONE.value,
                 timestamp,
                 result.ai_safety_relevance,
                 result.shallow_review_inclusion,

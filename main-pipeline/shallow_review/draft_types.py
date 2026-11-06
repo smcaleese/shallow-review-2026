@@ -127,7 +127,7 @@ class Paper(BaseModel):
     """A research output (paper, blog post, link, or non-link reference) in the outputs section.
 
     This model is used for all output items including papers, blog posts, plain URLs,
-    and non-link text references. Fields from the database (classify.data JSON) are
+    and non-link text references. Fields from the database (entries.data JSON) are
     populated when available for items with URLs.
     """
 
@@ -135,7 +135,7 @@ class Paper(BaseModel):
     link_text: str | None = Field(default=None, description="Display text or title extracted from markdown")
     original_md: str = Field(description="Original markdown text as read from source")
 
-    # Database fields (from classify.data JSON) - populated later for items with URLs
+    # Database fields (from entries.data JSON) - populated later for items with URLs
     title: str | None = Field(default=None, description="Paper title")
     authors: list[str] = Field(default_factory=list, description="List of author names")
     author_organizations: list[str] = Field(

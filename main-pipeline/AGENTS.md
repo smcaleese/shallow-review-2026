@@ -3,8 +3,7 @@
 These are the instructions for AI coding and research assistants.
 
 **General instructions:**
-- You may use shell commands such as ls, pwd, mv, cp, head, etc. Never remove files you have not created.
-- Never run other commands yourself. In particular: no running scripts, tests, package managemet, git commands, external tools. Suggest the commands to the developer (me).
+- You may use shell commands, including running scripts, tests, package management and git commands, and you may remove files when the task calls for it. Ask first before anything destructive or hard to reverse (deleting data, `git reset --hard`, force pushes), and before commands that spend money (LLM calls over many items) or modify `data/data.db` or other data folders; back up the database first when in doubt.
 - Be very succinct in explaining what you did after making changes - write a emphasized short summary, and then list anything that I might find non-obvious or surprising: problems, caveats, creative solutions, possible issues, etc.; still keep to the major ones.
 - Assume I am an experienced senior developer and a mathematician and treat me as such. Tell me when you think something is a mistake. Do NOT praise my solutions and rahter offer impassive and objective view. Assume I am not a native speaker and offer better formulations or grammar corrections, but do so sparingly.
 - In many cases, it will be beneficial to discuss the high-level plan and ask questions to clarify the context before plunging into editing files and taking actions, espacially beginning a new conversation or task; ask at your liberty when you need information (but not for asking itself).
@@ -19,7 +18,6 @@ These are the instructions for AI coding and research assistants.
 
 - `docs/DATA.md`: **Ground truth** for all database schemas, data structures, file formats, enums, and constants. Keep fully synchronized with code.
 - `docs/CODE.md`: **Ground truth** for coding conventions, libraries, patterns, and implementation details. Reference this to avoid duplicating functionality.
-- `docs/COLLECT.md`: Collection phase process, logic, requirements, observations, and design decisions. Do NOT repeat DB schemas (reference DATA.md) or coding patterns (reference CODE.md).
 - `docs/CLASSIFY.md`: Classification phase process, logic, requirements, observations, and design decisions. Do NOT repeat DB schemas (reference DATA.md) or coding patterns (reference CODE.md).
 - `docs/SCRAPE.md`: Minimal scraping infrastructure documentation. Do NOT repeat DB schemas (reference DATA.md).
 - `docs/DEVLOG.md`: Development log with major problems, solutions, lessons learned, and design decisions. Append-only, updated after significant changes. Do not clutter with minor details.
@@ -29,7 +27,7 @@ These are the instructions for AI coding and research assistants.
 - **DO NOT create other documentation files** unless explicitly instructed to do so.
 - When making database or data structure changes, update `docs/DATA.md` first.
 - When adding/changing coding patterns or libraries, update `docs/CODE.md`.
-- When making process changes, update the relevant process doc (COLLECT.md, CLASSIFY.md, or SCRAPE.md).
+- When making process changes, update the relevant process doc (CLASSIFY.md or SCRAPE.md).
 - After significant milestones, append to `docs/DEVLOG.md`.
 - Never duplicate: schemas live in DATA.md only, coding patterns in CODE.md only.
 
@@ -39,9 +37,9 @@ For detailed coding conventions, see `docs/CODE.md`. Key points:
 
 **Platform:** Linux x64, Python>=3.11, uv for package management, ruff and mypy for linting and typechecking, GitHub private repo, pre-commit
 
-**Core libraries:** polars, numpy, scipy, litellm, jinja2, pyyaml, rich, typer, beautifulsoup4, requests, playwright, tenacity, python-dotenv, pydantic
+**Core libraries:** polars, numpy, scipy, litellm, jinja2, pyyaml, rich, argparse, typer (process_draft.py only), beautifulsoup4, requests, playwright, tenacity, python-dotenv, pydantic
 
-**Module structure:** Code in `shallow_review/`, executable `pipeline.py` at root. See CODE.md for notable files.
+**Module structure:** Shared code in `shallow_review/`; the pipeline stages are scripts in `src/` (`uv run python src/<script>.py`). See CODE.md for notable files.
 
 **Database:** Single `data/data.db` with lazy singleton access via `get_data_db()`. See DATA.md for schemas.
 
@@ -81,13 +79,12 @@ Almost all the python code is stored under `shallow_review/` module.
 
 Notable files:
 - `common.py` contains all the *shared* type definitions, constants, pydantic dataclasses, etc. that are used across the codebase. Do NOT include those local to a single module or tied to its functionality.
-- `cli.py` is the module defining the typer cli.
 - `data_db.py` contains the unified database access (lazy singleton pattern).
 - `llm.py` contains initialization code for litellm and basic instrumentation tools
 - `utils.py` functions such as `smart_open()` that seamlessly opens or creates plain or compressed file (.zst), logging setup (to rich, see below), rich console object, etc.
 - `stats.py` contains a global properly mutex-locked object to record stats from all the threads, and code to print them as tables or otherwise.
 
-**Exception:** executable `pipeline.py` in the root folder just imports and then calls cli.py.
+**Exception:** the stage scripts in `src/` (add_entries, classify_entries, enrich_taxonomy, export_draft, import_feedback, reset_classify, show_info) are thin argparse entry points over `shallow_review/`; `src/terminal.py` holds what they share.
 
 **Exception:** Tests in the tests/ folder.
 

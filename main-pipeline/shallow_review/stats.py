@@ -91,12 +91,6 @@ class Stats:
         # Scraping
         self.scraped_pages = CountStats()
 
-        # Collection
-        self.collect_sources = CountStats()
-        self.collect_sources_already_exist: int = 0
-        self.collect_tokens = TokenStats()
-        self.collect_preprocessing: list[dict[str, float]] = []
-
         # Classification
         self.classify_candidates = CountStats()
         self.classify_candidates_already_exist: int = 0
@@ -109,10 +103,6 @@ class Stats:
             "commandline": self.commandline,
             "timestamp": self.timestamp,
             "scraped_pages": self.scraped_pages.model_dump(),
-            "collect_sources": self.collect_sources.model_dump(),
-            "collect_sources_already_exist": self.collect_sources_already_exist,
-            "collect_tokens": self.collect_tokens.model_dump(),
-            "collect_preprocessing": self.collect_preprocessing,
             "classify_candidates": self.classify_candidates.model_dump(),
             "classify_candidates_already_exist": self.classify_candidates_already_exist,
             "classify_tokens": self.classify_tokens.model_dump(),
@@ -154,35 +144,6 @@ class Stats:
             )
 
             console.print(table)
-            console.print()
-
-        # Collection section
-        if self.collect_sources.total > 0:
-            table = Table(title="Collection", show_header=True)
-            table.add_column("Operation")
-            table.add_column("New", justify="right")
-            table.add_column("Done", justify="right")
-            table.add_column("Errors", justify="right")
-            table.add_column("Already Exist", justify="right")
-            table.add_column("Total", justify="right")
-
-            table.add_row(
-                "Sources",
-                str(len(self.collect_sources.new)),
-                str(len(self.collect_sources.cached)),
-                str(len(self.collect_sources.errors)),
-                str(self.collect_sources_already_exist),
-                str(self.collect_sources.total),
-            )
-
-            console.print(table)
-
-            if self.collect_tokens.cost > 0:
-                self._print_token_stats("Collection Tokens", self.collect_tokens)
-            
-            if self.collect_preprocessing:
-                self._print_preprocessing_stats("Collection Preprocessing", self.collect_preprocessing)
-            
             console.print()
 
         # Classification section

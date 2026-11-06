@@ -4,7 +4,7 @@ Documentation for the classification phase: determining AI safety/alignment rele
 
 ## Purpose
 
-Classify processes candidate URLs (from collect or manual addition) to determine if they are relevant AI safety/alignment content and extract detailed metadata.
+Classify processes candidate URLs (added with `src/add_entries.py`) to determine if they are relevant AI safety/alignment content and extract detailed metadata.
 
 **AI Safety Scope**: Following the Shallow Review 2024 definition, we target "work that intends to prevent very competent cognitive systems from having large unintended effects on the world." This includes:
 - Technical AI alignment and safety research
@@ -22,32 +22,25 @@ Classify processes candidate URLs (from collect or manual addition) to determine
 
 ## Design Philosophy
 
-- **Fine-grained filtering**: More selective than collect phase
 - **Rich metadata extraction**: Extracts title, authors, topics, summary, etc.
-- **Prioritization**: High-relevancy candidates from collect processed first
-- **Flexible sources**: Accepts both auto-added (from collect) and manually added URLs
+- **Flexible sources**: Any URL list can be added, labelled with `--source`
 
 ## Process Flow
 
-1. **Add candidates manually** (optional):
-   - `pipeline.py add <file> --phase classify --source "label"`
-   - URLs added to `classify` table with status='new'
+1. **Add candidates**:
+   - `src/add_entries.py <file> [--source "label"]` (the label defaults to the file name without extension)
+   - URLs added to `entries` table with status='new'
    - Optional source label for tracking
 
-2. **Auto-add from collect**:
-   - Links with relevancy ≥ threshold automatically added during collect
-   - source='collect', source_url set, collect_relevancy stored
-
-3. **Run classification**: `pipeline.py classify --limit N --workers W --relevancy 0.5`
-   - Queries `classify` table WHERE status='new'
-   - Optional prioritization by collect_relevancy (high → low)
+2. **Run classification**: `src/classify_entries.py --limit N --workers W`
+   - Queries `entries` table WHERE status='new'
    - For each candidate:
      a. Scrape page (kind="classify")
      b. Preprocess HTML
      c. Check token limit
      d. Send to LLM with classification prompt
      e. Parse and validate JSON response
-     f. Store results in `classify.data` JSON field
+     f. Store results in `entries.data` JSON field
      g. Update status to 'done' or error status
 
 ## Configuration
@@ -55,8 +48,6 @@ Classify processes candidate URLs (from collect or manual addition) to determine
 Via `RunClassifyConfig` in `common.py`:
 - `limit`: Max candidates to process (default: 100)
 - `workers`: Thread pool size (default: 4, max: 32)
-- `relevancy_threshold`: Min score for high priority (default: 0.5)
-  - Used for prioritization, not filtering
 - `model`: LLM model (default: "claude-sonnet-4")
 - `max_html_tokens`: Token limit (default: 100,000)
 
@@ -65,7 +56,7 @@ Via `RunClassifyConfig` in `common.py`:
 Stored as columns:
 - `ai_safety_relevance`: 0.0-1.0 score (how relevant is the topic to AI safety/alignment)
 - `shallow_review_inclusion`: 0.0-1.0 score (how suitable for Shallow Review - technical contribution level)
-- `kind`: Content type - independent of relevancy/inclusion (see ClassifyKind enum in DATA.md)
+- `kind`: Content type - independent of relevancy/inclusion (see EntryKind enum in DATA.md)
   - Example: `paper_page` can have high safety relevance (0.9) but low inclusion (0.1) if not technical
   - All content gets a kind and both scores
   - For `social_media` kind: stricter criteria apply (see DATA.md) - only announcements and major events etc.
@@ -111,7 +102,7 @@ The taxonomy is formatted hierarchically in prompts, with non-leaf categories as
 
 ## HTML Preprocessing
 
-Same as collect phase:
+Before classification the page HTML is cleaned:
 - Remove completely: `<script>`, `<style>`, `<noscript>`, `<svg>` tags
 - Remove: HTML comments (via BeautifulSoup)
 - Remove: Base64-encoded images (data: URIs)
@@ -120,7 +111,6 @@ Same as collect phase:
 - Collapse excessive whitespace
 - Track token counts (tokens_full, tokens_stripped stored in data JSON)
 
-See COLLECT.md for detailed preprocessing policy and rationale.
 
 ## Deduplication
 
@@ -177,20 +167,18 @@ Tracked per run:
 
 ## Implementation Status
 
-- **Database**: ✅ Fully implemented (`classify` table in data.db)
-- **CLI**: ✅ `add` command supports --phase classify
+- **Database**: ✅ Fully implemented (`entries` table in data.db)
+- **CLI**: ✅ `src/add_entries.py`
 - **Processing**: ❌ `compute_classify()` not yet implemented
 - **Prompts**: ❌ `prompts/classify.yaml` not yet created
 - **CLI command**: ❌ `classify` command not yet implemented
 
 ## Notes
 
-- Similar structure to collect phase
 - Reuses scraping and preprocessing infrastructure
-- Classification more detailed than collection relevancy scoring
 - No multi-threading yet (deferred for MVP)
 
 ## Database Schema
 
-See `docs/DATA.md` for classify table schema and JSON structures.
+See `docs/DATA.md` for entries table schema and JSON structures.
 

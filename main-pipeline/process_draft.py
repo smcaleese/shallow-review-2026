@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 # Import shallow_review modules for database access
 try:
-    from shallow_review.common import ClassifyStatus, SCRAPED_PATH
+    from shallow_review.common import EntryStatus, SCRAPED_PATH
     from shallow_review.data_db import data_db_locked
     from shallow_review.scrape import get_scrape_path
     from shallow_review.utils import normalize_url, url_hash
@@ -237,7 +237,7 @@ def clean_agenda_content(content: str) -> str:
 
 
 def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_error_urls: int = 20, retry_errors: bool = False) -> tuple[int, int]:
-    """Enrich Paper objects with data from classify database and add missing papers.
+    """Enrich Paper objects with data from the entries table and add missing papers.
     
     Args:
         doc: ProcessedDocument with parsed papers
@@ -282,7 +282,7 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
             
             # Try normalized URL first, then original - get status and data
             row = db.execute(
-                "SELECT status, data FROM classify WHERE url = ? OR url = ?",
+                "SELECT status, data FROM entries WHERE url = ? OR url = ?",
                 (normalized, url)
             ).fetchone()
             
@@ -308,35 +308,33 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
                             paper.kind = data.get("kind")
                             enriched_count += 1
                     except (json.JSONDecodeError, KeyError) as e:
-                        logger.warning(f"Failed to parse classify data for {url}: {e}")
+                        logger.warning(f"Failed to parse entry data for {url}: {e}")
                         error_urls.append((url, normalized, f"parse_error: {e}"))
             else:
                 # Paper not in database - add it
                 missing_urls.append((url, normalized))
     
-    # Add missing papers to classify table
+    # Add missing papers to entries table
     if missing_urls:
-        from shallow_review.classify import add_classify_candidate
+        from shallow_review.entries import add_entry
         
-        console.print(f"[yellow]Found {len(missing_urls)} papers not in database, adding to classify table...[/yellow]")
+        console.print(f"[yellow]Found {len(missing_urls)} papers not in database, adding to entries table...[/yellow]")
         for original_url, normalized_url in missing_urls:
             try:
-                is_new = add_classify_candidate(
+                is_new = add_entry(
                     url=normalized_url,
                     source="draft_parser",
-                    source_url=None,
-                    collect_relevancy=None,
                 )
                 if is_new:
                     added_count += 1
-                    logger.info(f"Added missing paper to classify: {normalized_url}")
+                    logger.info(f"Added missing paper to entries: {normalized_url}")
                     if original_url != normalized_url:
                         logger.debug(f"  (normalized from: {original_url})")
                 else:
                     # Race condition - was added between check and add
                     logger.debug(f"Paper already exists (race condition): {normalized_url}")
             except Exception as e:
-                logger.error(f"Failed to add paper {normalized_url} to classify: {e}")
+                logger.error(f"Failed to add paper {normalized_url} to entries: {e}")
                 console.print(f"[red]Error: Failed to add {normalized_url}: {e}[/red]")
         
         # Warn about all missing papers
@@ -361,15 +359,15 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
         # Collect URLs to retry (use normalized URLs)
         urls_to_retry = [normalized_url for _, normalized_url, _ in error_urls]
         
-        # Update classify table: reset status to 'new' and clear data/error
+        # Update entries table: reset status to 'new' and clear data/error
         with data_db_locked() as db:
             url_placeholders = ",".join("?" * len(urls_to_retry))
             update_query = f"""
-                UPDATE classify 
+                UPDATE entries 
                 SET status = ?, data = NULL, error = NULL, processed_at = NULL
                 WHERE url IN ({url_placeholders})
             """
-            cursor = db.execute(update_query, [ClassifyStatus.NEW.value] + urls_to_retry)
+            cursor = db.execute(update_query, [EntryStatus.NEW.value] + urls_to_retry)
             retried_count = cursor.rowcount
             db.commit()
         
@@ -411,7 +409,7 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
         if len(error_urls) > list_error_urls:
             console.print(f"  [dim]... and {len(error_urls) - list_error_urls} more[/dim]")
     elif retry_errors and error_urls:
-        console.print(f"[green]✓ Ready to retry {len(error_urls)} papers (run classify to process them)[/green]")
+        console.print(f"[green]✓ Ready to retry {len(error_urls)} papers (run classify_entries.py to process them)[/green]")
     
     return (enriched_count, added_count)
 
@@ -724,7 +722,7 @@ def parse(
     console.print("[cyan]Step 3: Enriching papers from database...[/cyan]")
     enriched_count, added_count = enrich_papers_from_db(doc, verbose=verbose, list_error_urls=list_error_urls, retry_errors=retry_errors)
     console.print(
-        f"[green]Enriched {enriched_count} papers, added {added_count} new papers to classify table[/green]"
+        f"[green]Enriched {enriched_count} papers, added {added_count} new papers to entries table[/green]"
     )
 
     # ========================================================================
@@ -815,10 +813,10 @@ def get_url_title_from_db(url: str) -> str | None:
         # Normalize URL for lookup
         normalized = normalize_url(url)
 
-        # Check classify table first (has more metadata)
+        # Check entries table first (has more metadata)
         with data_db_locked() as db:
             row = db.execute(
-                "SELECT data FROM classify WHERE url = ? OR url = ?",
+                "SELECT data FROM entries WHERE url = ? OR url = ?",
                 (url, normalized)
             ).fetchone()
 
@@ -999,7 +997,7 @@ def _sort_papers_by_relevancy(doc: ProcessedDocument, verbose: bool = False) -> 
         placeholders = ','.join('?' * len(paper_urls))
         query = f"""
             SELECT url, shallow_review_inclusion 
-            FROM classify 
+            FROM entries 
             WHERE url IN ({placeholders})
             AND shallow_review_inclusion IS NOT NULL
         """

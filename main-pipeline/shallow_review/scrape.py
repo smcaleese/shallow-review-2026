@@ -308,7 +308,7 @@ def compute_scrape(
 
     Args:
         url: URL to scrape
-        kind: Kind/context of scrape (e.g., "collect", "classify")
+        kind: Kind/context of scrape (e.g., "classify")
         headless: Run browser in headless mode
         wait_for: Wait condition for Playwright ("networkidle", "load", "domcontentloaded")
         scroll: Scroll page to trigger lazy loading

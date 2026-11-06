@@ -8,11 +8,11 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 
-from .classify import add_classify_candidate
-from .common import ClassifyStatus
+from .entries import add_entry
+from .common import EntryStatus
 from .data_db import data_db_locked
 from .taxonomy import load_taxonomy
-from .utils import normalize_url, url_hash_short
+from .utils import normalize_url
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def import_feedback_from_csv(
     reclassify_obsolete_llm: bool = False,
 ) -> FeedbackImportStats:
     """
-    Import human feedback from CSV file into classify_feedback table.
+    Import human feedback from CSV file into feedback table.
     
     Args:
         csv_path: Path to CSV file with columns URL,CATEGORY_ID,PAPER_ID,LINK_TEXT
@@ -113,7 +113,6 @@ def import_feedback_from_csv(
                         stats.obsolete_csv_categories += 1
                         feedback_entries.append({
                             'url': url,
-                            'url_hash_short': url_hash_short(url),
                             'feedback_source': source,
                             'feedback_timestamp': timestamp,
                             'action': 'include',
@@ -126,7 +125,6 @@ def import_feedback_from_csv(
                     # Valid category: create reclassify entry (can have multiple per URL with different categories)
                     feedback_entries.append({
                         'url': url,
-                        'url_hash_short': url_hash_short(url),
                         'feedback_source': source,
                         'feedback_timestamp': timestamp,
                         'action': 'reclassify',
@@ -139,7 +137,6 @@ def import_feedback_from_csv(
                     if is_first_occurrence:
                         feedback_entries.append({
                             'url': url,
-                            'url_hash_short': url_hash_short(url),
                             'feedback_source': source,
                             'feedback_timestamp': timestamp,
                             'action': 'include',
@@ -154,7 +151,6 @@ def import_feedback_from_csv(
                 if is_first_occurrence:
                     feedback_entries.append({
                         'url': url,
-                        'url_hash_short': url_hash_short(url),
                         'feedback_source': source,
                         'feedback_timestamp': timestamp,
                         'action': 'include',
@@ -164,30 +160,28 @@ def import_feedback_from_csv(
                         'notes': f'Imported from {csv_path.name} (no category assigned)'
                     })
     
-    # Add URLs to classify table if not already present
-    logger.info("Checking which URLs need to be added to classify table...")
+    # Add URLs to entries table if not already present
+    logger.info("Checking which URLs need to be added to entries table...")
     
     # First, check which URLs are missing (inside lock)
     urls_to_add = []
     with data_db_locked() as db:
         for url in csv_urls:
-            cursor = db.execute("SELECT url FROM classify WHERE url = ?", (url,))
+            cursor = db.execute("SELECT url FROM entries WHERE url = ?", (url,))
             if not cursor.fetchone():
                 urls_to_add.append(url)
     
-    # Then add them (outside lock, as add_classify_candidate acquires its own lock)
+    # Then add them (outside lock, as add_entry acquires its own lock)
     for url in urls_to_add:
         try:
-            is_new = add_classify_candidate(
+            is_new = add_entry(
                 url=url,
                 source=f"feedback-{source}",
-                source_url=None,
-                collect_relevancy=None
             )
             if is_new:
                 stats.added_to_classify += 1
         except Exception as e:
-            logger.warning(f"Could not add {url[:60]} to classify: {e}")
+            logger.warning(f"Could not add {url[:60]} to entries: {e}")
     
     # Detect exclusions (exportable items NOT in CSV)
     excluded_entries = []
@@ -200,8 +194,8 @@ def import_feedback_from_csv(
             # Get all exportable URLs with their LLM-assigned categories
             cursor = db.execute(
                 """
-                SELECT url, url_hash_short, data
-                FROM classify
+                SELECT url, data
+                FROM entries
                 WHERE status = 'done'
                   AND shallow_review_inclusion >= ?
                   AND ai_safety_relevance >= 0.1
@@ -236,7 +230,6 @@ def import_feedback_from_csv(
                 # Use 'note' action: tracks the situation but doesn't force inclusion/exclusion
                 reclassify_obsolete_entries.append({
                     'url': url,
-                    'url_hash_short': row['url_hash_short'],
                     'feedback_source': source,
                     'feedback_timestamp': timestamp,
                     'action': 'note',
@@ -249,7 +242,6 @@ def import_feedback_from_csv(
                 # Normal case: exclude because not in CSV
                 excluded_entries.append({
                     'url': url,
-                    'url_hash_short': row['url_hash_short'],
                     'feedback_source': source,
                     'feedback_timestamp': timestamp,
                     'action': 'exclude',
@@ -268,8 +260,8 @@ def import_feedback_from_csv(
             with data_db_locked() as db:
                 for entry in reclassify_obsolete_entries:
                     db.execute(
-                        "UPDATE classify SET status = ? WHERE url = ?",
-                        (ClassifyStatus.NEW.value, entry['url'])
+                        "UPDATE entries SET status = ? WHERE url = ?",
+                        (EntryStatus.NEW.value, entry['url'])
                     )
     
     # Insert all feedback into database
@@ -281,13 +273,12 @@ def import_feedback_from_csv(
             try:
                 db.execute(
                     """
-                    INSERT INTO classify_feedback 
-                    (url, url_hash_short, feedback_source, feedback_timestamp, action, human_category, paper_id, link_text, notes)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO feedback 
+                    (url, feedback_source, feedback_timestamp, action, human_category, paper_id, link_text, notes)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     (
                         entry['url'],
-                        entry['url_hash_short'],
                         entry['feedback_source'],
                         entry['feedback_timestamp'],
                         entry['action'],
@@ -339,7 +330,7 @@ def get_action_counts(source: str) -> dict[str, int]:
         cursor = db.execute(
             """
             SELECT action, COUNT(*) as count
-            FROM classify_feedback
+            FROM feedback
             WHERE feedback_source = ?
             GROUP BY action
             """,

@@ -186,7 +186,7 @@ def get_completion(
     Args:
         template_vars: Variables for Jinja2 template rendering (used for both prompts)
         model: Model name for litellm (e.g., "claude-sonnet-4-5", "gpt-4o")
-        stats_subtree: Name of stats subtree for token accounting (e.g., "collection_tokens")
+        stats_subtree: Name of stats subtree for token accounting (e.g., "classify_tokens")
         response_type: Pydantic model type for structured output. If None, returns raw string.
         thinking_budget: Token budget for extended thinking (Anthropic Claude only, default: None)
         system_cache_ttl: Cache TTL for system prompt (default: "5m", can be None, "1h", etc.)
