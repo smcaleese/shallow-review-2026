@@ -10,11 +10,9 @@ import logging
 import re
 import sys
 from pathlib import Path
-import litellm
 import typer
 import yaml
 from jinja2 import Template
-from litellm.caching.caching import Cache
 from pydantic import ValidationError
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
@@ -46,10 +44,10 @@ logger = logging.getLogger(__name__)
 
 # Import shallow_review modules for database access
 try:
-    from shallow_review.common import EntryStatus, SCRAPED_PATH
+    from shallow_review.common import EntryStatus
     from shallow_review.data_db import data_db_locked
     from shallow_review.scrape import get_scrape_path
-    from shallow_review.utils import normalize_url, url_hash
+    from shallow_review.utils import normalize_url
     _SHALLOW_REVIEW_AVAILABLE = True
 except ImportError:
     _SHALLOW_REVIEW_AVAILABLE = False
@@ -61,31 +59,6 @@ app = typer.Typer(
     help="Process draft shallow review documents",
     add_completion=False,
 )
-
-# LLM setup flag
-_llm_setup_done = False
-
-
-def setup_litellm(cache_dir: Path | None = None) -> None:
-    """Set up litellm with disk-based caching.
-
-    Args:
-        cache_dir: Directory for LLM response caching
-    """
-    global _llm_setup_done
-
-    if _llm_setup_done:
-        return
-
-    if cache_dir is None:
-        cache_dir = Path.cwd() / ".llm_cache"
-
-    cache_dir.mkdir(exist_ok=True, parents=True)
-    litellm.cache = Cache(type="disk", disk_cache_dir=str(cache_dir))  # type: ignore[arg-type]
-
-    _llm_setup_done = True
-    logger.info(f"Litellm initialized with cache at {cache_dir}")
-
 
 def setup_logging(verbose: bool = False) -> None:
     """Configure logging."""
@@ -165,7 +138,7 @@ def _should_retry(exception):
     """Determine if we should retry on this exception."""
     if isinstance(exception, KeyboardInterrupt):
         return False
-    from openai import APIError, RateLimitError
+    from anthropic import APIError, RateLimitError
 
     return isinstance(exception, (RateLimitError, APIError, ValidationError))
 
@@ -351,7 +324,6 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
     
     # Retry papers with errors if requested
     retried_count = 0
-    scrapes_deleted = 0
     files_deleted = 0
     if retry_errors and error_urls:
         console.print(f"\n[cyan]Retrying {len(error_urls)} papers with errors...[/cyan]")
@@ -373,29 +345,12 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
         
         console.print(f"[green]✓ Reset {retried_count} papers to 'new' status[/green]")
         
-        # Delete scrapes from database
-        with data_db_locked() as db:
-            url_placeholders = ",".join("?" * len(urls_to_retry))
-            delete_query = f"DELETE FROM scrape WHERE url IN ({url_placeholders})"
-            cursor = db.execute(delete_query, urls_to_retry)
-            scrapes_deleted = cursor.rowcount
-            db.commit()
-        
-        if scrapes_deleted > 0:
-            console.print(f"[green]✓ Deleted {scrapes_deleted} scrape table rows[/green]")
-        
         # Delete scrape files
         for normalized_url in urls_to_retry:
             scrape_path = get_scrape_path(normalized_url)
             if scrape_path.exists():
                 scrape_path.unlink()
                 files_deleted += 1
-            
-            # Also check for stripped HTML file (if SAVE_STRIPPED_HTML was enabled)
-            hash_value = url_hash(normalized_url)
-            stripped_path = SCRAPED_PATH / f"{hash_value}-stripped.html"
-            if stripped_path.exists():
-                stripped_path.unlink()
         
         if files_deleted > 0:
             console.print(f"[green]✓ Deleted {files_deleted} scrape files[/green]")
@@ -595,9 +550,6 @@ def parse(
     output_file: str | None = typer.Option(
         None, "--output", "-o", help="Output file path base (generates both .json and .yaml, default: <input>-parsed)"
     ),
-    cache_dir: str | None = typer.Option(
-        None, "--cache-dir", help="LLM cache directory (default: .llm_cache)"
-    ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
     limit: int | None = typer.Option(
         None, "--limit", "-n", help="Limit LLM extraction to first N agendas (full document is always parsed)"
@@ -622,10 +574,6 @@ def parse(
     if not input_path.exists():
         console.print(f"[red]Error: File not found: {input_file}[/red]")
         raise typer.Exit(1)
-
-    # Setup LLM
-    cache_path = Path(cache_dir) if cache_dir else None
-    setup_litellm(cache_path)
 
     # Determine output paths (JSON and YAML)
     if output_file is None:
@@ -824,16 +772,6 @@ def get_url_title_from_db(url: str) -> str | None:
                 data = json.loads(row["data"])
                 return data.get("title")
 
-            # Fallback to scrape table
-            row = db.execute(
-                "SELECT data FROM scrape WHERE url = ? OR url = ?",
-                (url, normalized)
-            ).fetchone()
-
-            if row and row["data"]:
-                data = json.loads(row["data"])
-                return data.get("title")
-
         return None
     except Exception as e:
         logger.debug(f"Failed to look up URL {url}: {e}")
@@ -964,7 +902,7 @@ def format(
 
 
 def _sort_papers_by_relevancy(doc: ProcessedDocument, verbose: bool = False) -> int:
-    """Sort papers in each agenda's outputs by shallow_review_inclusion score (descending).
+    """Sort papers in each agenda's outputs by their best category's fit score (descending).
     
     Papers without a score in the database are sorted first (before ranked papers).
     If OutputSectionHeaders are present, papers are sorted within each section.
@@ -996,15 +934,17 @@ def _sort_papers_by_relevancy(doc: ProcessedDocument, verbose: bool = False) -> 
         # Batch query for all URLs
         placeholders = ','.join('?' * len(paper_urls))
         query = f"""
-            SELECT url, shallow_review_inclusion 
+            SELECT url, data
             FROM entries 
             WHERE url IN ({placeholders})
-            AND shallow_review_inclusion IS NOT NULL
+            AND data IS NOT NULL
         """
         
         rows = db.execute(query, list(paper_urls)).fetchall()
         for row in rows:
-            url_to_score[row["url"]] = row["shallow_review_inclusion"]
+            categories = json.loads(row["data"]).get("categories")
+            if categories:
+                url_to_score[row["url"]] = max(c["score"] for c in categories)
         
         if verbose:
             console.print(f"[dim]  Found scores for {len(url_to_score)}/{len(paper_urls)} papers[/dim]")
@@ -1081,7 +1021,7 @@ def generate_doc(
         "md", "--format", "-f", help="Output format: md or html (not yet implemented)"
     ),
     sort_by_relevancy: bool = typer.Option(
-        False, "--sort-by-relevancy", "-s", help="Sort papers by shallow_review_inclusion score (descending)"
+        False, "--sort-by-relevancy", "-s", help="Sort papers by category fit score (descending)"
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
 ) -> None:
@@ -1148,7 +1088,7 @@ def generate_doc(
         if not _SHALLOW_REVIEW_AVAILABLE:
             console.print("[yellow]Warning: shallow_review modules not available - cannot sort by relevancy[/yellow]")
         else:
-            console.print("[cyan]Sorting papers by shallow_review_inclusion score...[/cyan]")
+            console.print("[cyan]Sorting papers by category fit score...[/cyan]")
             papers_sorted = _sort_papers_by_relevancy(doc, verbose)
             console.print(f"[green]Sorted {papers_sorted} paper outputs[/green]")
     

@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
@@ -24,9 +25,19 @@ from tenacity import (
 
 from .common import PROMPTS_PATH, is_shutdown_requested
 from .draft_types import DocumentItem
-from .llm import _get_retry_attempt, _set_retry_attempt, setup_litellm
 
 logger = logging.getLogger(__name__)
+
+# Retry attempt of this thread, used to change max_tokens by a few tokens so that Helicone's cache isn't hit again
+_thread_locals = threading.local()
+
+
+def _get_retry_attempt() -> int:
+    return getattr(_thread_locals, "retry_attempt", 0)
+
+
+def _set_retry_attempt(attempt: int) -> None:
+    _thread_locals.retry_attempt = attempt
 
 
 def extract_agenda_attributes(
@@ -53,8 +64,6 @@ def extract_agenda_attributes(
     Returns:
         DocumentItem with agenda_attributes populated (and parsing_issues added)
     """
-    from litellm import completion
-
     # Defensive checks
     if item.content is not None:
         logger.warning(f"Item {item.id} has non-null content field, should be null for extraction")
@@ -133,7 +142,7 @@ def extract_agenda_attributes(
 
     def _should_retry(exception):
         """Determine if we should retry on this exception."""
-        from openai import APIError, RateLimitError
+        from anthropic import APIError, RateLimitError
         # Retry on API errors, rate limits, and parsing/validation errors
         return isinstance(
             exception,

@@ -4,7 +4,6 @@ import html
 import logging
 import re
 import threading
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import IO, Any, Literal
 
@@ -12,19 +11,14 @@ import requests
 from playwright.sync_api import Browser, sync_playwright
 
 from .common import SCRAPED_PATH
-from .data_db import data_db_locked
 from .stats import get_stats
-from .utils import normalize_url, smart_open, url_hash, url_hash_short
+from .utils import normalize_url, smart_open, url_hash
 
 logger = logging.getLogger(__name__)
 
 # Scraping backend selection
 # Set to True to use Selenium (thread-safe), False for Playwright (faster but needs workers=1)
 USE_SELENIUM = True
-
-# Save stripped HTML for debugging (uncompressed)
-# Set to True to save preprocessed HTML as *-stripped.html files
-SAVE_STRIPPED_HTML = False
 
 # Global lock for Playwright operations (only used if USE_SELENIUM=False)
 # Playwright's sync API uses greenlets which are not thread-safe.
@@ -291,198 +285,76 @@ def scrape_forum_api(url: str) -> tuple[str, int]:
 
 def compute_scrape(
     url: str,
-    kind: str,
     headless: bool = True,
     wait_for: str = "networkidle",
     scroll: bool = True,
 ) -> Path:
     """
-    Scrape URL and cache to data/scraped/<hash>.html.zst
-    
+    Scrape URL and cache the page to data/scraped/<hash>.html.zst
+
     Backend selection via USE_SELENIUM constant:
     - Selenium: Thread-safe, slower, realistic browser (USE_SELENIUM=True)
     - Playwright: Faster, needs workers=1 due to greenlets (USE_SELENIUM=False)
 
-    Caches results in SQLite database and file system. Subsequent calls with
-    same URL will return cached path without re-scraping.
+    The cache is the file: if it exists the page is not scraped again. Failures are not cached (the caller records
+    them, e.g. as a scrape_error entry).
 
     Args:
         url: URL to scrape
-        kind: Kind/context of scrape (e.g., "classify")
         headless: Run browser in headless mode
         wait_for: Wait condition for Playwright ("networkidle", "load", "domcontentloaded")
         scroll: Scroll page to trigger lazy loading
 
     Returns:
-        Path to cached .html.zst file
+        Path to the cached .html.zst file
 
     Raises:
         RuntimeError: If scraping fails
     """
-    # Normalize URL for consistent handling
     url = normalize_url(url)
-    
-    # Compute hash and get path
-    hash_value = url_hash(url)
-    hash_short = url_hash_short(url)
     scrape_path = get_scrape_path(url)
 
-    # Check database cache
-    with data_db_locked() as db:
-        cursor = db.execute(
-            "SELECT status_code, error FROM scrape WHERE url = ?",
-            (url,),
-        )
-        row = cursor.fetchone()
+    if scrape_path.exists():
+        logger.debug(f"Using cached scrape for {url}")
+        _count_page(url, "cached")
+        return scrape_path
 
-    if row is not None:
-        status_code = row["status_code"]
-        error = row["error"]
-
-        if error:
-            # Have cached error
-            logger.warning(f"Using cached error for {url} (kind={kind}): {error}")
-            # Update stats
-            try:
-                stats = get_stats()
-                with stats.lock:
-                    stats.scraped_pages.errors[url] = error
-            except RuntimeError:
-                pass
-            raise RuntimeError(f"Cached scraping error: {error}")
-        
-        # Have cached successful scrape
-        if scrape_path.exists():
-            # Update stats
-            try:
-                stats = get_stats()
-                with stats.lock:
-                    stats.scraped_pages.cached.add(url)
-            except RuntimeError:
-                pass
-
-            logger.debug(f"Using cached scrape for {url} (kind={kind})")
-            return scrape_path
-
-    # Need to scrape
     backend = "selenium" if USE_SELENIUM else "playwright"
-    logger.info(f"Scraping {url} (kind={kind}, backend={backend})")
-    
-    import json
-    import time
-    from .utils import count_tokens, preprocess_html
+    logger.info(f"Scraping {url} (backend={backend})")
 
-    scrape_start = time.time()
-    
     try:
         if FORUM_POST_RE.match(url):
             # LessWrong / Alignment Forum: API instead of the browser (which gets 403)
             content, status_code = scrape_forum_api(url)
         elif USE_SELENIUM:
-            # Use Selenium (thread-safe)
             content, status_code = scrape_selenium(url, headless=headless, scroll=scroll)
         else:
-            # Use Playwright (needs lock)
             with _playwright_lock:
                 content, status_code = scrape_playwright(url, headless=headless, wait_for=wait_for, scroll=scroll)
 
-        scrape_duration = time.time() - scrape_start
-
-        # Calculate metrics
-        size_full = len(content.encode('utf-8'))
-        tokens_full = count_tokens(content)
-        
-        # Preprocess to get stripped HTML and token count
-        stripped_html = None
-        try:
-            stripped_html, _ = preprocess_html(content, "gpt-4")
-            tokens_stripped = count_tokens(stripped_html)
-        except Exception:
-            # If preprocessing fails, use full HTML metrics
-            tokens_stripped = tokens_full
-
-        # Save to file and update DB atomically with transaction
-        try:
-            # Write full HTML file first
-            with open_scraped(url, "wt", encoding="utf-8") as f:
-                f.write(content)
-            
-            # Save stripped HTML for debugging (uncompressed) - optional
-            if SAVE_STRIPPED_HTML and stripped_html:
-                stripped_path = SCRAPED_PATH / f"{hash_value}-stripped.html"
-                with open(stripped_path, "w", encoding="utf-8") as f:
-                    f.write(stripped_html)
-            
-            # Get compressed file size
-            size_compressed = scrape_path.stat().st_size if scrape_path.exists() else 0
-
-            # Build data JSON
-            data_json = json.dumps({
-                "size_full": size_full,
-                "size_compressed": size_compressed,
-                "tokens_full": tokens_full,
-                "tokens_stripped": tokens_stripped,
-                "scrape_duration": round(scrape_duration, 2),
-            })
-
-            # Update database in transaction
-            timestamp = datetime.now(timezone.utc).isoformat()
-            with data_db_locked() as db:
-                db.execute("BEGIN TRANSACTION")
-                try:
-                    db.execute(
-                        """
-                        INSERT OR REPLACE INTO scrape 
-                        (url, url_hash, url_hash_short, kind, timestamp, status_code, error, data)
-                        VALUES (?, ?, ?, ?, ?, ?, NULL, ?)
-                        """,
-                        (url, hash_value, hash_short, kind, timestamp, status_code, data_json),
-                    )
-                    db.commit()
-                except Exception:
-                    db.rollback()
-                    raise
-        except Exception as e:
-            # Clean up file if DB update failed
-            if scrape_path.exists():
-                scrape_path.unlink()
-            raise RuntimeError(f"Failed to save scrape atomically: {e}") from e
-
-        # Update stats
-        try:
-            stats = get_stats()
-            with stats.lock:
-                stats.scraped_pages.new.add(url)
-        except RuntimeError:
-            pass
-
-        logger.info(f"Successfully scraped {url} (kind={kind}, status={status_code})")
-        return scrape_path
-
+        # Write to a temporary file first: a half-written file would count as a cache hit
+        tmp_path = scrape_path.with_name(f"{scrape_path.name[: -len('.html.zst')]}.tmp.html.zst")
+        with smart_open(tmp_path, "wt", encoding="utf-8") as f:
+            f.write(content)
+        tmp_path.replace(scrape_path)
     except Exception as e:
-        error_msg = str(e)
-        logger.error(f"Failed to scrape {url} (kind={kind}): {error_msg}")
+        logger.error(f"Failed to scrape {url}: {e}")
+        _count_page(url, "errors", str(e))
+        raise RuntimeError(f"Scraping failed: {e}") from e
 
-        # Cache error in database
-        timestamp = datetime.now(timezone.utc).isoformat()
-        with data_db_locked() as db:
-            db.execute(
-                """
-                INSERT OR REPLACE INTO scrape 
-                (url, url_hash, url_hash_short, kind, timestamp, status_code, error)
-                VALUES (?, ?, ?, ?, ?, NULL, ?)
-                """,
-                (url, hash_value, hash_short, kind, timestamp, error_msg),
-            )
-
-        # Update stats
-        try:
-            stats = get_stats()
-            with stats.lock:
-                stats.scraped_pages.errors[url] = error_msg
-        except RuntimeError:
-            pass
-
-        raise RuntimeError(f"Scraping failed: {error_msg}") from e
+    _count_page(url, "new")
+    logger.info(f"Successfully scraped {url} (status={status_code})")
+    return scrape_path
 
 
+def _count_page(url: str, outcome: str, error: str | None = None) -> None:
+    """Record the outcome (new, cached or errors) of a scrape in the run's stats, if there is one."""
+    try:
+        stats = get_stats()
+        with stats.lock:
+            if outcome == "errors":
+                stats.scraped_pages.errors[url] = error
+            else:
+                getattr(stats.scraped_pages, outcome).add(url)
+    except RuntimeError:
+        pass  # No active stats context

@@ -14,8 +14,8 @@ import sys
 from pathlib import Path
 from urllib.parse import urlparse
 
-from terminal import console, run
 from shallow_review.entries import add_entry
+from terminal import console, run
 
 
 def is_valid_url(url: str) -> bool:

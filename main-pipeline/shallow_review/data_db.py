@@ -3,7 +3,6 @@
 All data stored in a single SQLite database: data/data.db
 
 Tables:
-- scrape: Scraped page metadata
 - entries: One row per URL: status, source label and the classification result
 - feedback: Human decisions (include / exclude / reclassify) per URL
 """
@@ -46,21 +45,6 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
     """Create all tables and indexes in the data database."""
     _rename_old_tables(data_db)
     statements = [
-        # Scrape table
-        """CREATE TABLE IF NOT EXISTS scrape (
-            url TEXT PRIMARY KEY,
-            url_hash TEXT NOT NULL UNIQUE,
-            url_hash_short TEXT,
-            kind TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            status_code INTEGER,
-            error TEXT,
-            data JSON
-        )""",
-        "CREATE INDEX IF NOT EXISTS idx_scrape_url_hash ON scrape(url_hash)",
-        "CREATE INDEX IF NOT EXISTS idx_scrape_url_hash_short ON scrape(url_hash_short)",
-        "CREATE INDEX IF NOT EXISTS idx_scrape_kind ON scrape(kind)",
-        "CREATE INDEX IF NOT EXISTS idx_scrape_timestamp ON scrape(timestamp)",
         # Entries table
         """CREATE TABLE IF NOT EXISTS entries (
             url TEXT PRIMARY KEY,
@@ -68,9 +52,6 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
             source TEXT NOT NULL,
             added_at TEXT NOT NULL,
             processed_at TEXT,
-            ai_safety_relevance REAL,
-            shallow_review_inclusion REAL,
-            kind TEXT,
             data JSON,
             error TEXT,
             CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
@@ -78,9 +59,6 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
         "CREATE INDEX IF NOT EXISTS idx_entries_status ON entries(status)",
         "CREATE INDEX IF NOT EXISTS idx_entries_source ON entries(source)",
         "CREATE INDEX IF NOT EXISTS idx_entries_added_at ON entries(added_at)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_ai_safety_relevance ON entries(ai_safety_relevance)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_shallow_review_inclusion ON entries(shallow_review_inclusion)",
-        "CREATE INDEX IF NOT EXISTS idx_entries_kind ON entries(kind)",
         # Feedback table
         """CREATE TABLE IF NOT EXISTS feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -158,7 +136,7 @@ def data_db_locked():
     
     Example:
         with data_db_locked() as db:
-            cursor = db.execute("SELECT * FROM scrape WHERE url = ?", (url,))
+            cursor = db.execute("SELECT * FROM entries WHERE url = ?", (url,))
             row = cursor.fetchone()
             db.execute("INSERT INTO entries ...", (...))
             

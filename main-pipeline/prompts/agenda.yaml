@@ -92,13 +92,12 @@ write_agenda:
     {% if item.organizations %}<organizations>{{ item.organizations | join(", ") }}</organizations>{% endif %}
     <date>{{ item.date }}</date>
     <summary>{{ item.summary }}</summary>
-    {% if item.key_result %}<key_result>{{ item.key_result }}</key_result>{% endif %}
     </output>
     {% endfor %}
 
     # Output format
 
-    Write the header fields for this agenda. Return JSON in a markdown code block (```json and ```), like this:
+    Write the header fields for this agenda. Return JSON like this:
 
     ```json
     {

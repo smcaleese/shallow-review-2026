@@ -2,11 +2,11 @@
 """
 Export The Draft
 Walks the taxonomy tree and writes a markdown draft: one section per category with its agenda fields (empty ones are
-left for editors) and the classified items that pass the score thresholds, sorted by shallow_review_inclusion.
+left for editors) and the classified items, best fit first.
 Human feedback (include / exclude / reclassify) is applied on top of the LLM's output.
 
 Basic usage (from the main-pipeline folder):
-    uv run python src/export_draft.py --min-shallow-review 0.4 -o draft.md
+    uv run python src/export_draft.py -o draft.md
 Reads taxonomy-enriched.yaml from the data folder if it exists, otherwise taxonomy.yaml.
 """
 
@@ -19,11 +19,11 @@ from pathlib import Path
 
 from rich.console import Console
 
-from terminal import run
 from shallow_review.common import DATA_PATH
 from shallow_review.data_db import data_db_locked
 from shallow_review.taxonomy import Category, load_taxonomy
 from shallow_review.utils import url_hash_short
+from terminal import run
 
 # Printed to stderr, because stdout may be the draft
 err_console = Console(stderr=True)
@@ -85,23 +85,10 @@ def load_feedback(feedback_source: str) -> dict[str, dict]:
     return feedback
 
 
-def query_rows(args, include_urls: set[str], kinds: set[str], sources: set[str]) -> list:
-    """Classified items that pass the thresholds, or have include feedback."""
-    thresholds = "ai_safety_relevance >= ? AND shallow_review_inclusion >= ?"
-    params = [args.min_ai_safety, args.min_shallow_review]
-    if include_urls:
-        where = f"({thresholds} OR url IN ({','.join('?' * len(include_urls))}))"
-        params += list(include_urls)
-    else:
-        where = thresholds
-    sql = f"""
-        SELECT url, ai_safety_relevance, shallow_review_inclusion, kind, data
-        FROM entries
-        WHERE status = 'done' AND {where}
-    """
-    if kinds:
-        sql += f" AND kind IN ({','.join('?' * len(kinds))})"
-        params += list(kinds)
+def query_rows(sources: set[str]) -> list:
+    """The classified items, from the given sources if any."""
+    sql = "SELECT url, data FROM entries WHERE status = 'done'"
+    params: list = []
     if sources:
         sql += f" AND source IN ({','.join('?' * len(sources))})"
         params += list(sources)
@@ -114,21 +101,18 @@ def query_rows(args, include_urls: set[str], kinds: set[str], sources: set[str])
 
 def in_review_window(item: dict, review_year: int) -> bool:
     """Items dated before 1 November of the year before the review year are dropped; undated items are kept."""
-    if item["date"]:
-        try:
-            return date.fromisoformat(item["date"]) >= date(review_year - 1, 11, 1)
-        except (ValueError, TypeError):
-            return True  # Invalid date format: include by default
-    if item["published_year"]:
-        try:
-            return int(item["published_year"]) >= review_year - 1  # Only a year: accept it and the one before
-        except (ValueError, TypeError):
-            return True
-    return True
+    parts = (item["date"] or "").split("-")
+    try:
+        year = int(parts[0])
+        month = int(parts[1]) if len(parts) > 1 else 12  # Only a year: accept it and the one before
+        day = int(parts[2]) if len(parts) > 2 else 1
+        return date(year, month, day) >= date(review_year - 1, 11, 1)
+    except (ValueError, IndexError):
+        return True  # Undated or invalid date: include
 
 
 def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int) -> tuple[dict, dict]:
-    """Returns ({category id: items sorted by inclusion score}, counts of what the feedback changed)."""
+    """Returns ({category id: items, best fit first}, counts of what the feedback changed)."""
     items_by_category = defaultdict(list)
     counts = defaultdict(int)
 
@@ -162,26 +146,15 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
         else:
             category_ids = [categories[0]["id"]]
 
-        if (
-            feedback
-            and feedback["has_include"]
-            and (row["shallow_review_inclusion"] < args.min_shallow_review or row["ai_safety_relevance"] < args.min_ai_safety)
-        ):
-            counts["included_by_feedback"] += 1
-
         item = {
             "url": url,
             "url_hash_short": url_hash_short(url),
             "title": data.get("title", "Untitled"),
             "authors": data.get("authors", []),
-            "organization": data.get("organization", ""),
-            "date": data.get("date", ""),
-            "published_year": data.get("published_year"),
-            "venue": data.get("venue", ""),
-            "kind": row["kind"],
-            "shallow_review_inclusion": row["shallow_review_inclusion"],
+            "organizations": data.get("author_organizations", []),
+            "date": data.get("date") or "",
+            "score": categories[0]["score"],
             "summary": data.get("summary", ""),
-            "key_points": data.get("key_points", []),
             "needs_recategorization": needs_recategorization,
             "obsolete_llm_category": obsolete_llm,
             "category_count": len(category_ids),
@@ -191,23 +164,19 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
                 items_by_category[category_id].append(item)
 
     for items in items_by_category.values():
-        items.sort(key=lambda item: item["shallow_review_inclusion"], reverse=True)
+        items.sort(key=lambda item: item["score"], reverse=True)
     return items_by_category, counts
 
 
 # ---------------------------------------------------------------- markdown
 
 
-def render_header(args, kinds: set[str], sources: set[str], counts: dict, items_by_category: dict, year: int) -> list[str]:
+def render_header(args, sources: set[str], counts: dict, items_by_category: dict, year: int) -> list[str]:
     lines = [
         f"# AI Safety Shallow Review {year}",
         "",
         f"**Generated:** {datetime.now().strftime('%Y-%m-%d')}",
-        "",
-        f"**Filters:** shallow_review≥{args.min_shallow_review}, ai_safety≥{args.min_ai_safety}",
     ]
-    if kinds:
-        lines.append(f"**Kinds:** {', '.join(sorted(kinds))}")
     if sources:
         lines.append(f"**Sources:** {', '.join(sorted(sources))}")
     if args.respect_feedback:
@@ -215,7 +184,6 @@ def render_header(args, kinds: set[str], sources: set[str], counts: dict, items_
         for key, label in [
             ("excluded", "Excluded by feedback"),
             ("reclassified", "Reclassified by feedback"),
-            ("included_by_feedback", "Included by feedback (below thresholds)"),
             ("needs_recategorization", "⚠️ Needs recategorization (obsolete CSV category)"),
             ("obsolete_llm", "🔄 Re-classified (obsolete LLM category, one-time)"),
         ]:
@@ -235,10 +203,10 @@ def render_header(args, kinds: set[str], sources: set[str], counts: dict, items_
 
 
 def render_item(item: dict) -> str:
-    """One list entry: - **Title**, *Authors*, Date, Venue [stats] Summary • Key points"""
+    """One list entry: - **Title**, *Authors*, Date [markers] Summary"""
     authors = ", ".join(item["authors"][:3]) + (" et al." if len(item["authors"]) > 3 else "")
-    byline = f"*{authors}*" if authors else (f"*{item['organization']}*" if item["organization"] else "")
-    date_part = item["date"] or (str(item["published_year"]) if item["published_year"] else "")
+    organizations = ", ".join(item["organizations"][:3])
+    byline = f"*{authors}*" if authors else (f"*{organizations}*" if organizations else "")
 
     markers = ""
     if item["needs_recategorization"]:
@@ -249,22 +217,16 @@ def render_item(item: dict) -> str:
         markers += f"✌️(in {item['category_count']} categories)"
     if markers:
         markers += " "
-    stats = (
-        f'<span style="{GREY}">[{markers}{item["kind"]}, sr={item["shallow_review_inclusion"]:.2f}, '
-        f'id:{item["url_hash_short"]}]</span>'
-    )
+    stats = f'<span style="{GREY}">[{markers}fit={item["score"]:.2f}, id:{item["url_hash_short"]}]</span>'
 
     summary = item["summary"].replace("\n", " ").strip()
-    key_points = " • ".join(kp.replace("\n", " ").strip() for kp in item["key_points"][:3])
 
     parts = [
         f"**[{item['title']}]({item['url']})**",
         byline,
-        date_part,
-        item["venue"],
+        item["date"],
         stats,
         f'<span style="{GREY}">Summary: {summary}</span>' if summary else "",
-        f'<span style="{GREY}">Key points: {key_points}</span>' if key_points else "",
     ]
     return "- " + ", ".join(part for part in parts if part)
 
@@ -333,9 +295,6 @@ def main() -> None:
         epilog=__doc__,
     )
     parser.add_argument("-o", "--output", type=Path, help="Draft file to write (default: stdout, mixed with log lines)")
-    parser.add_argument("--min-shallow-review", type=float, default=0.1, help="Minimum shallow_review_inclusion score")
-    parser.add_argument("--min-ai-safety", type=float, default=0.1, help="Minimum ai_safety_relevance score")
-    parser.add_argument("--kinds", default="", help="Comma-separated list of accepted kinds (default: all)")
     parser.add_argument("--source", default="", help="Comma-separated list of accepted sources (default: all)")
     parser.add_argument(
         "--respect-feedback",
@@ -360,19 +319,17 @@ def main() -> None:
         taxonomy_path = DATA_PATH / "taxonomy.yaml"
     err_console.print(f"Taxonomy: {taxonomy_path}")
     taxonomy = load_taxonomy(taxonomy_path)
-    kinds = split_list(args.kinds)
     sources = split_list(args.source)
 
     feedback_by_url = load_feedback(args.feedback_source) if args.respect_feedback else {}
-    include_urls = {url for url, fb in feedback_by_url.items() if fb["has_include"]}
-    rows = query_rows(args, include_urls, kinds, sources)
+    rows = query_rows(sources)
     if not rows and not feedback_by_url:
         err_console.print("[yellow]No items found matching filters[/yellow]")
         return
 
     items_by_category, counts = group_by_category(rows, feedback_by_url, args, taxonomy.year)
 
-    lines = render_header(args, kinds, sources, counts, items_by_category, taxonomy.year)
+    lines = render_header(args, sources, counts, items_by_category, taxonomy.year)
     empty_fields: list[str] = []  # "category_id: field", for --strict
     for top_category in taxonomy.taxonomy:
         render_category(top_category, 1, taxonomy, items_by_category, lines, empty_fields)

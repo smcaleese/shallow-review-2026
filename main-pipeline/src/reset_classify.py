@@ -10,39 +10,22 @@ Basic usage (from the main-pipeline folder):
 
 import argparse
 
-from terminal import console, run
-from shallow_review.common import SCRAPED_PATH, EntryStatus
+from shallow_review.common import EntryStatus
 from shallow_review.data_db import data_db_locked
 from shallow_review.scrape import get_scrape_path
-from shallow_review.utils import url_hash
+from terminal import console, run
 
 
 def delete_scrapes(urls: list[str]) -> int:
-    """Delete the scrape rows and cached files of the URLs. Returns the number of rows deleted."""
-    with data_db_locked() as db:
-        placeholders = ",".join("?" * len(urls))
-        cursor = db.execute(f"DELETE FROM scrape WHERE url IN ({placeholders})", urls)
-        rows_deleted = cursor.rowcount
-        db.commit()
-    console.print(f"[green]✓ Deleted {rows_deleted} scrape table rows[/green]")
-
+    """Delete the cached pages of the URLs. Returns the number of files deleted."""
     files_deleted = 0
-    stripped_deleted = 0
     for url in urls:
         scrape_path = get_scrape_path(url)
         if scrape_path.exists():
             scrape_path.unlink()
             files_deleted += 1
-        # Stripped HTML file, saved when SAVE_STRIPPED_HTML is enabled
-        stripped_path = SCRAPED_PATH / f"{url_hash(url)}-stripped.html"
-        if stripped_path.exists():
-            stripped_path.unlink()
-            stripped_deleted += 1
-    if files_deleted:
-        console.print(f"[green]✓ Deleted {files_deleted} scrape files[/green]")
-    if stripped_deleted:
-        console.print(f"[green]✓ Deleted {stripped_deleted} stripped HTML files[/green]")
-    return rows_deleted
+    console.print(f"[green]✓ Deleted {files_deleted} scrape files[/green]")
+    return files_deleted
 
 
 def main() -> None:
@@ -51,7 +34,6 @@ def main() -> None:
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
-    parser.add_argument("--kind", help="Only entries of this kind")
     parser.add_argument("--source", help="Only entries from this source")
     parser.add_argument("--status", help="Only entries with this current status")
     parser.add_argument("--remove-scrapes", action="store_true", help="Also delete scrapes for matching URLs")
@@ -59,7 +41,7 @@ def main() -> None:
 
     conditions = []
     params = []
-    for column, value in [("kind", args.kind), ("source", args.source), ("status", args.status)]:
+    for column, value in [("source", args.source), ("status", args.status)]:
         if value:
             conditions.append(f"{column} = ?")
             params.append(value)
