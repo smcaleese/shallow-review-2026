@@ -46,7 +46,7 @@ def process_line(line: str) -> str:
 
 def main():
     """Process the markdown file."""
-    input_file = Path('/home/dev/proj/shallow-review/main-pipeline/data/2025-12-16-draft-post-review/source.md')
+    input_file = Path('/home/dev/proj/shallow-review/main-pipeline/archive/data-2025/2025-12-16-draft-post-review/source.md')
     
     # Read the file
     with open(input_file, 'r', encoding='utf-8') as f:

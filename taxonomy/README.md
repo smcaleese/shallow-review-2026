@@ -17,7 +17,8 @@ tag filters to it; here the papers are filtered to the Chain of thought monitori
 - `input/` – everything the scripts read, copied in from elsewhere in the repo (re-copy to update):
   - `arxiv-papers-shortlisted.csv` – the combined 2026 arXiv shortlist (Jan–Oct), from
     `scraping-scripts/arxiv-scraper/results/shortlisted/2026/arxiv-papers-shortlisted.csv`.
-  - `taxonomy-2025.yaml` – last year's agendas, from `main-pipeline/data/taxonomy-2025.yaml`.
+  - `taxonomy-2025.yaml` – last year's agendas. It was copied from `main-pipeline/data/taxonomy-2025.yaml` (with a
+    `year: 2025` header line removed), which was then deleted, so this is now the canonical copy.
 - `facets.yaml` – the facets and their allowed tags (evidence, scientific contribution, paper type, concept,
   method). Bump `version` after editing it so the papers get retagged.
 - `src/tag_papers.py` – sends each paper to Claude, which tags it against `facets.yaml` and the 2025 agendas.

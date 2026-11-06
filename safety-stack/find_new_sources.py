@@ -91,7 +91,7 @@ def load_reference():
     add("lw", "shortlisted", read_csvs(fs / "lw-notable-posts.csv"), ["url", "link_url"])
 
     links = [l.strip() for l in open(ROOT / "main-pipeline/data/sources-links-candidates/arxiv-2026.txt") if l.startswith("http")]
-    db = sqlite3.connect(ROOT / "main-pipeline/data-2026/data.db")
+    db = sqlite3.connect(ROOT / "safety-stack/data-2026/data.db")
     links += [u for (u,) in db.execute("select url from collect")]
     add("main-pipeline", "shortlisted", pd.DataFrame({"url": links}), ["url"])
     return pd.DataFrame(rows)

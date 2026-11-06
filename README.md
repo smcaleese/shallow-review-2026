@@ -13,22 +13,22 @@ Authors: [@gavento](https://github.com/gavento) and [@smcaleese](https://github.
 
 ### Exported agendas and outputs
 
-The exported agendas (86) and included output items (827) are also available as CSV files in the [`main-pipeline/data/2025-12-16-draft-post-review`](main-pipeline/data/2025-12-16-draft-post-review) directory as `agendas.csv` and `papers.csv`. Note that these do not contain all the information available in the machine-readable data below (e.g. some extra attributes for "Labs" agendas, subsections of outputs, etc.) but may be suitable for simple analysis and data processing. Note that in `papers.csv`, the `link_text` column is what we are using in the review (it may or may not match the `title` column). The agendas do not contain the China and Other "Labs" agendas, and the other "Labs" agendas use slightly different attributes from all the others, limiting their usefulness for further processing (feel free to filter them out).
+The exported agendas (86) and included output items (827) are also available as CSV files in the [`main-pipeline/archive/data-2025/2025-12-16-draft-post-review`](main-pipeline/archive/data-2025/2025-12-16-draft-post-review) directory as `agendas.csv` and `papers.csv`. Note that these do not contain all the information available in the machine-readable data below (e.g. some extra attributes for "Labs" agendas, subsections of outputs, etc.) but may be suitable for simple analysis and data processing. Note that in `papers.csv`, the `link_text` column is what we are using in the review (it may or may not match the `title` column). The agendas do not contain the China and Other "Labs" agendas, and the other "Labs" agendas use slightly different attributes from all the others, limiting their usefulness for further processing (feel free to filter them out).
 
 You can also find the tables as Google sheets here: [agendas](https://docs.google.com/spreadsheets/d/1uwqeSkl1fGO7bWbbDdNi5QbJ_Zw_a6HO-XlnO18ohLc/edit?gid=249818450#gid=249818450), [outputs](https://docs.google.com/spreadsheets/d/1uwqeSkl1fGO7bWbbDdNi5QbJ_Zw_a6HO-XlnO18ohLc/edit?gid=803096912#gid=803096912).
 
 ### Full machine-readable data
 
-The machine-readable export of the final version is stored in the [`main-pipeline/data/2025-12-16-draft-post-review`](main-pipeline/data/2025-12-16-draft-post-review) directory as both JSON and YAML (same data). [`source.md`](main-pipeline/data/2025-12-16-draft-post-review/source.md) is the final version of the reviewer document as Markdown the data was extracted from with `uv run ./process_draft.py parse []...]`.
+The machine-readable export of the final version is stored in the [`main-pipeline/archive/data-2025/2025-12-16-draft-post-review`](main-pipeline/archive/data-2025/2025-12-16-draft-post-review) directory as both JSON and YAML (same data). [`source.md`](main-pipeline/archive/data-2025/2025-12-16-draft-post-review/source.md) is the final version of the reviewer document as Markdown the data was extracted from with `uv run ./process_draft.py parse []...]`.
 
-[`main-pipeline/data/taxonomy.yaml`](main-pipeline/data/taxonomy.yaml) is the taxonomy of the categories and subcategories as of the final version of the source document.
+[`taxonomy/input/taxonomy-2025.yaml`](taxonomy/input/taxonomy-2025.yaml) is the taxonomy of the categories and subcategories as of the final version of the source document.
 
 ### Data.db
 
-The main SQLite database file is [`main-pipeline/data/data.db`](main-pipeline/data/data.db) and has the following tables (no foreign key constraints though there are relations between the tables):
+The main SQLite database file is [`main-pipeline/archive/data-2025/data.db`](main-pipeline/archive/data-2025/data.db) and has the following tables (no foreign key constraints though there are relations between the tables):
 
 - The `classify` table has the most valuable informationcontains the information about all the collected links, and for most of them their extracted metadata (title, authors, summary, etc.) and their classification scores (ai_safety_relevance, shallow_review_inclusion). Note that some of the category IDs suggested there do not match the current `taxonomy.yaml`, as the hierarchy has been evolving throughout our process.
-- The `scrape` table contains the metadata for the scraped links. These are stored under `main-pipeline/data/scraped`.
+- The `scrape` table contains the metadata for the scraped links. These are stored under `main-pipeline/data/scraped` (the 2025 pages are no longer tracked).
 - The `collect` is an auxiliary table collecting pages to collect additional paper links from, and the collection results.
 
 The database is the main source of truth about the outputs (scrapes, metadata, LLM classification etc.) but also stores the state of each record, allowing for incremental processing of various stages of the pipeline.
@@ -39,7 +39,7 @@ All the links were scraped with a selenium browser, and the HTML was stored in t
 
 ### URL lists
 
-We collected URLs from a variety of sources. Most (but not all) of them can be found in various forms under the `main-pipeline/data/sources-links` directory.
+We collected URLs from a variety of sources. Most (but not all) of them can be found in various forms under the `main-pipeline/archive/data-2025/sources-links-2025` directory.
 
 ## Pipeline code
 

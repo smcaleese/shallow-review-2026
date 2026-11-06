@@ -1,6 +1,6 @@
 # Shallow Review 2026 taxonomy (draft, 2026-11-03)
 #
-# Same format as taxonomy-2025.yaml. Tested against the 502 sources on the facets site
+# Same format as the 2025 taxonomy. Tested against the 502 sources on the facets site
 # (https://shallow-review-facets.netlify.app): every item has a primary sub-area. The per-item
 # assignments are in taxonomy-2026-assignments.csv; they were made from summaries and not yet checked by a person.
 #
