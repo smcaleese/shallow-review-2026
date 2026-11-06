@@ -8,11 +8,10 @@ Scraping fetches and caches HTML content for later processing. All scrapes are c
 
 ## Key Functions
 
-**`compute_scrape(url, kind, wait_for="load")`**
-- Scrapes URL with playwright
-- Stores HTML in `data/scraped/<hash>.html.zst` (Zstandard compression level 15)
-- Records metadata in `scrape` table
-- Returns path to scraped file
+**`compute_scrape(url, headless=True, wait_for="networkidle", scroll=True)`**
+- Scrapes the URL (Selenium by default, Playwright if `USE_SELENIUM` is False)
+- Stores the HTML in `data/scraped/<hash>.html.zst` (Zstandard compression level 15)
+- Returns the path; if the file already exists, returns it without scraping
 - Raises on scrape failure
 
 **`get_scrape_path(url)`**
@@ -26,9 +25,7 @@ Scraping fetches and caches HTML content for later processing. All scrapes are c
 - **User agent**: Realistic browser UA with playwright
 - **Wait strategy**: Configurable wait_for parameter ("load", "networkidle", etc.)
 - **Scrolling**: Scrolls page to trigger lazy-loaded content
-- **Caching**: Both successful and failed scrapes cached
-- **Deduplication**: One scrape per URL (regardless of `kind` parameter)
-- **kind parameter**: Stored in DB for context but doesn't affect caching
+- **Caching**: successful scrapes only, by file existence. One file per URL.
 
 ## LessWrong and Alignment Forum
 
@@ -39,11 +36,6 @@ otherwise display names) and date at the top, then the post body.
 
 ## Error Handling
 
-- Network errors, timeouts: Cached as `scrape_error`
-- HTTP errors (4xx, 5xx): Cached with status_code
-- Errors NOT retried automatically (cache prevents re-scraping)
-
-## Database Schema
-
-See `docs/DATA.md` for scrape table schema.
-
+- Network errors, timeouts: raise `RuntimeError`; nothing is cached. `classify_entries.py` marks the entry `scrape_error`
+  and does not retry it until `reset_classify.py` resets it.
+- HTTP errors (4xx, 5xx): the response body is saved like any page; the classifier marks it `error_detected`.

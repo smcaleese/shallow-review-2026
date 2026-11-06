@@ -12,7 +12,7 @@ Details live in `docs/` (see the end of this file). This README only covers the 
 URL lists ──add──▶ entries table
                         │
                     classify          scrape each URL, then one LLM call with the taxonomy in the prompt:
-                        │             relevance scores, kind, 1-3 leaf categories, title, authors, date, summary
+                        │             1-3 leaf categories with fit scores, title, authors, date, summary
                         ▼
                data/data.db  ◀── import_feedback (human include / exclude / reclassify)
                         │
@@ -29,11 +29,11 @@ URL lists ──add──▶ entries table
    entries table. `../scraping-scripts/export_for_pipeline.py` writes the arXiv and LessWrong scrapers' results as URL
    lists in `data/sources-links/`.
 2. **Classify.** `src/classify_entries.py` scrapes each queued URL (cached in `data/scraped/`) and sends the page to the
-   LLM with the whole taxonomy in the system prompt. The LLM returns `ai_safety_relevance` and
-   `shallow_review_inclusion` scores (0-1), a `kind` (paper, blog post, ...), 1-3 leaf category IDs with fit
-   scores, and metadata. This is the only step that reads the taxonomy to assign categories.
+   LLM with the whole taxonomy in the system prompt. The LLM returns 1-3 leaf category IDs with fit scores (0-1) and
+   basic metadata (title, authors, organizations, date, one-sentence summary). It doesn't judge whether an entry belongs
+   in the review: the sources are selected upstream. This is the only step that reads the taxonomy to assign categories.
 3. **Feedback (optional).** `src/import_feedback.py <csv>` records human decisions, such as including a
-   below-threshold item, excluding one or moving it to another category. Export applies them on top of the LLM's
+   item the classifier missed, excluding one or moving it to another category. Export applies them on top of the LLM's
    output.
 4. **Enrich the taxonomy.** `src/enrich_taxonomy.py` makes one LLM call per leaf category with its items, the
    list of all categories and an index of all items, and writes every agenda field (summary, theory of change, see
@@ -41,7 +41,7 @@ URL lists ──add──▶ entries table
    with an `agenda` block per category. The hand-written `taxonomy.yaml` is not modified. Agendas already in the
    enriched file are kept (so hand edits survive) unless `--overwrite` or `--only`.
 5. **Export the draft.** `src/export_draft.py -o draft.md` walks the taxonomy tree and lists, under each
-   category, the classified items that pass the score thresholds, sorted by `shallow_review_inclusion`. Each
+   category, the classified items filed under it, best fit first. Each
    category gets empty agenda fields (summary, theory of change, key people, ...) for editors to fill in.
 6. **Process the edited draft.** After people edit the draft, `process_draft.py parse` splits it into agendas and
    papers, fills paper metadata from the database and uses an LLM to extract agenda attributes. Then
@@ -55,8 +55,8 @@ URL lists ──add──▶ entries table
 - **Taxonomy:** `taxonomy.yaml` in the data folder (`DATA_PATH`, see "Things to watch for"). It's a tree of `id`, `name`, `description` and `children`, and only leaves
   can be assigned. Leaves may also have `examples`, and nodes may have `sr2024` (context from the 2024 review), which
   export prints. Optional top-level `year` and `agenda_fields` set the draft's year and the agenda fields printed
-  under each category (see `docs/DATA.md`). Year-specific copies sit next to it (`taxonomy-2025.yaml`, `taxonomy-2026.yaml`); the pipeline
-  only reads `taxonomy.yaml`.
+  under each category (see `docs/DATA.md`). It is the only hand-written
+  taxonomy file (it holds the 2026 taxonomy); `enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it.
 
 ## Setup
 
@@ -71,38 +71,70 @@ system Python and fails with `ModuleNotFoundError`). Scraping uses Selenium by d
 
 ## Usage
 
-The scripts in `src/` are the pipeline's stages, in order; the code they share lives in `shallow_review/`.
+Run the scripts from this folder with `uv run python ...`. The pipeline has four phases.
+
+### Phase 1: Taxonomy
+
+1. **Write the taxonomy.** Edit `data/taxonomy.yaml`: a tree of categories with an `id`, `name` and `description`, where only the leaves receive entries.
+   Its format is described under "Inputs" and in `docs/DATA.md`.
+2. **Enrich it.** An LLM writes each category's agenda fields (summary, theory of change, key people, ...) into a copy of the taxonomy:
+
+| Task | Command | Output |
+|---|---|---|
+| Write each category's agenda fields | `uv run python src/enrich_taxonomy.py [--only id1,id2] [--overwrite]` | `data/taxonomy-enriched.yaml` (`taxonomy.yaml` is not modified) |
+
+The agendas are written from each category's classified entries, so before phase 3 the fields are left empty. Rerun this
+after phase 3 to fill them in; agendas already in the file are kept unless you pass `--overwrite` or `--only`.
+
+### Phase 2: Add the sources
+
+One URL list per source goes into the `entries` table, labelled with the file's name:
 
 | Task | Command | Output |
 |---|---|---|
 | Queue URLs | `uv run python src/add_entries.py data/sources-links/facets-arxiv-2026.txt` | rows in `data/data.db`, labelled `facets-arxiv-2026` (override with `--source`) |
 | Show the number of entries in the `entries` table, and its first rows | `uv run python src/show_info.py [--source X] [--rows N]` | entries by status (`New`, `Done`, `Scrape Errors`, `Classify Errors`); after adding, all are `New`. Then the first 10 rows (`--rows N` for more). `--source` limits both to one source. Also prints the paths and score histograms |
-| Scrape and classify queued URLs | `uv run python src/classify_entries.py --limit 500 --workers 4` | scores and categories in `data/data.db` |
-| Retry items that failed | `uv run python src/classify_entries.py --retry-errors` | |
-| Write each category's agenda fields with an LLM | `uv run python src/enrich_taxonomy.py [--only id1,id2] [--overwrite]` | `data/taxonomy-enriched.yaml` |
-| Export the draft | `uv run python src/export_draft.py --min-shallow-review 0.4 -o draft.md` | `draft.md` (also `--min-ai-safety`, `--kinds`, `--source`) |
-| Export the draft from the enriched taxonomy | `uv run python src/export_draft.py --min-shallow-review 0 --min-ai-safety 0 --strict -o draft.md` | `--strict` fails if any agenda field is empty |
+
+### Phase 3: Classify the sources
+
+Each entry is scraped (the page is cached in `data/scraped/`) and sent to the LLM with the whole taxonomy in the prompt.
+The LLM returns 1-3 leaf categories with fit scores and basic metadata, which are saved on the entry.
+
+| Task | Command | Output |
+|---|---|---|
+| Scrape and classify the queued entries | `uv run python src/classify_entries.py --limit 500 --workers 4` | scores and categories in `data/data.db` |
+| Check progress | `uv run python src/show_info.py` | `New` entries become `Done` |
+| Retry entries that failed | `uv run python src/classify_entries.py --retry-errors` | |
+| Classify again after changing the taxonomy | `uv run python src/reset_classify.py [--source X] [--remove-scrapes]` | entries are back to `New`; then rerun `classify_entries.py` |
+
+### Phase 4: Output the draft
+
+The draft is a single markdown file with one section per taxonomy category, listing the classified entries that pass the
+score thresholds. If `taxonomy-enriched.yaml` exists, its agenda fields are used.
+
+| Task | Command | Output |
+|---|---|---|
+| Import human feedback (optional; columns `URL,CATEGORY_ID,PAPER_ID,LINK_TEXT`) | `uv run python src/import_feedback.py feedback.csv --source <label>` | include / exclude / reclassify decisions applied at export |
+| Export the draft | `uv run python src/export_draft.py -o draft.md` | `draft.md` (`--source` limits it to some sources) |
+| Export the draft from the enriched taxonomy, failing on empty fields | `uv run python src/export_draft.py --strict -o draft.md` | `--strict` fails if any agenda field is empty |
+
+After people have edited the draft, `process_draft.py` turns it into the final document:
+
+| Task | Command | Output |
+|---|---|---|
 | List every link in a draft | `uv run process_draft.py collect-links draft.md` | |
 | Parse an edited draft | `uv run process_draft.py parse draft.md -o parsed` | `parsed.json` / `parsed.yaml` |
 | Render the parsed draft | `uv run process_draft.py format parsed.json -o final.md` | `final.md` |
 
-Maintenance:
-
-| Task | Command |
-|---|---|
-| Put entries back in the queue for classification | `uv run python src/reset_classify.py [--source X] [--remove-scrapes]` |
-| Import human feedback (columns `URL,CATEGORY_ID,PAPER_ID,LINK_TEXT`) | `uv run python src/import_feedback.py feedback.csv --source <label>` |
-
 ## Changing the taxonomy
 
 Categories are assigned when an item is classified, so editing `data/taxonomy.yaml` doesn't move items that were
-already classified. To use a new taxonomy:
+already classified. After editing it, classify again:
 
 ```bash
-cp data/taxonomy-2026.yaml data/taxonomy.yaml
 uv run python src/reset_classify.py
 uv run python src/classify_entries.py --limit 1000 --workers 4
-uv run python src/export_draft.py --min-shallow-review 0.4 -o draft-2026.md
+uv run python src/export_draft.py -o draft-2026.md
 ```
 
 With no filters, `reset_classify.py` re-queues every item without asking; add `--source` to limit it. Scrapes are
@@ -119,32 +151,27 @@ for s in arxiv lw org safetystack; do
   uv run python src/add_entries.py data/sources-links/facets-$s-2026.txt
 done
 uv run python src/classify_entries.py --limit 600 --workers 4
-uv run python src/export_draft.py --min-shallow-review 0 --min-ai-safety 0 \
+uv run python src/export_draft.py \
   --source facets-arxiv-2026,facets-lw-2026,facets-org-2026,facets-safetystack-2026 -o draft-2026-facets.md
 ```
 
-- `data/data.db` also holds the 2025 items. None of the 502 are among them, and `--source` keeps the 2025 items
-  out of the export.
-- `classify_entries.py` has no source filter, so it also processes anything else still queued (30 items left over from 2025).
-- The thresholds are 0 because these sources were already selected. Raise them to let the classifier drop some.
-- Items are filed under whatever `data/taxonomy.yaml` holds when `classify` runs. It is currently a copy of
-  `taxonomy-2026.yaml`. To export or re-run the 2025 items, copy `taxonomy-2025.yaml` back first, since their
-  categories come from that taxonomy.
-- The worked examples in `prompts/classify.yaml` use category IDs from an older taxonomy. If the LLM copies one,
-  the item is marked `classify_error`; rerun those with `classify_entries.py --retry-errors`.
+- `classify_entries.py` has no source filter, so it processes everything still queued.
+- Items are filed under whatever `taxonomy.yaml` holds when `classify_entries.py` runs, which is the 2026 taxonomy.
+- The worked examples in `prompts/classify.yaml` use category IDs from an older taxonomy. If the LLM returns an ID that
+  is not a leaf of the current one, the item is marked `classify_error`; rerun those with `classify_entries.py --retry-errors`.
 
 ## Data
 
 - `data/data.db`: the single SQLite database (schemas in `docs/DATA.md`)
 - `data/scraped/`: cached pages as `<hash>.html.zst`
 - `runs/`: a log file per run
-- `data/<date>-...`: snapshots of earlier drafts and their parsed versions
+- `archive/data-2025/`: the archived 2025 review (its database, dated draft snapshots, source lists). Not used by the scripts
 
 ## Things to watch for
 
-- **The data folder is set in code.** `DATA_PATH` in `shallow_review/common.py` decides which database, taxonomy and
-  caches are used. It currently points to `data-2026-facets/`, which holds only the 502 selected 2026 sources; set it
-  back to `data` for the 2025 items.
+- **The data folder is set in code.** `DATA_PATH` in `shallow_review/common.py` (`data/`) decides which database,
+  taxonomy and caches are used. `data/` holds only the 2026 review; the 2025 review is archived in `archive/data-2025/` (its
+  `data.db` still opens with the scripts if you point `DATA_PATH` there).
 - **Write the draft with `-o`.** Without it `export_draft.py` prints the draft to stdout, where log messages end up
   too; delete the lines before `# AI Safety Shallow Review`.
 - **The draft's year comes from the taxonomy.** Export reads `year` from the taxonomy file for the heading, the

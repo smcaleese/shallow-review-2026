@@ -273,3 +273,35 @@ leaf_ids = tax.get_all_leaf_ids()  # 103 items
 - Dropped the stored hashes from `entries` and `feedback`: `url_hash_short(url)` is computed where the id is shown
   (export, agendas). The `scrape` table still stores `url_hash` / `url_hash_short` (its schema has `url_hash NOT NULL
   UNIQUE`, so removing it needs a table rebuild for old databases).
+- Removed `data/taxonomy-2025.yaml` and `data/taxonomy-2026.yaml` (the latter was identical to `taxonomy.yaml`). `taxonomy.yaml`
+  is the only hand-written taxonomy file and holds the 2026 taxonomy; the 2025 one lives in `taxonomy/input/` and git history.
+- Archived the 2025 review in `data-2025/` (dated draft folders, `data.db`, 2025 source lists, data dump) and moved the
+  2026 database, scraped pages, LLM cache and `taxonomy-enriched.yaml` from `data-2026-facets/` into `data/`, which now
+  holds only 2026 data. `DATA_PATH` is `data/`; `data-2026-facets/` is gone. The older `data-2026/` run moved to
+  `safety-stack/data-2026/`, since only `safety-stack/find_new_sources.py` reads its `data.db`.
+- Moved `data-2025/` to `archive/data-2025/`.
+- Dropped litellm. `llm.py` calls the Anthropic SDK directly (`anthropic>=2.6`, default model `claude-sonnet-5-5`) and gets
+  structured output from `client.messages.parse()` instead of asking for a JSON code block and extracting it. Responses
+  are cached with diskcache in `<data>/.llm_cache`. Thinking is adaptive, controlled by `effort` (the old
+  `thinking_budget` is gone: `budget_tokens` returns a 400 on current models); `max_tokens` is 16000 so thinking
+  doesn't cut the answer off. Retries come from the SDK (`max_retries=5`); a response that fails validation is asked again
+  without the cache. Cost is computed from a small price table in `llm.py` (litellm did it before). Model names no longer
+  take the `anthropic/` prefix. `process_draft.py` lost its litellm setup and the `--cache-dir` option.
+- Code used by one script now lives in that script: `shallow_review/classify.py`, `agendas.py` and `feedback.py` were merged into
+  `src/classify_entries.py`, `enrich_taxonomy.py` and `import_feedback.py`. `shallow_review/` keeps only code shared by
+  several scripts (`common`, `data_db`, `entries`, `llm`, `scrape`, `stats`, `taxonomy`, `utils`). AGENTS.md no longer
+  requires everything to live in `shallow_review/`.
+- Removed the `scrape` table. The cache is the directory `data/scraped/`: a page is cached when its file exists (written
+  to a temporary name, then renamed). Failed scrapes are no longer cached; they show up as `scrape_error` entries. Dropped
+  the scrape metrics (sizes, durations, status codes), the `kind` argument of `compute_scrape`, `SAVE_STRIPPED_HTML` and
+  the scrape histograms in `show_info.py`. Old databases keep an unused `scrape` table.
+- Moved `preprocess_html` and `count_tokens` from `shallow_review/utils.py` into `src/classify_entries.py`, the only script that uses them.
+- Narrowed the classifier to filing entries under the taxonomy. Scraping and selection happen upstream, so the model no
+  longer scores `ai_safety_relevance` / `shallow_review_inclusion`, nor returns `kind`, `contribution_type`, `key_result`,
+  `venue`, `published_year`, `category_comment` or `confidence`. It returns `content_available`, title, authors,
+  organizations, date, a one-sentence summary and 1-3 categories with fit scores. `prompts/classify.yaml` shrank from 346
+  to ~100 lines (3 short examples; no scoring rubrics) and the taxonomy moved to the system prompt so it is prompt-cached
+  (about $0.02 per entry instead of $0.03+). The `entries` table lost the score and `kind` columns; export lost
+  `--min-shallow-review`, `--min-ai-safety` and `--kinds` and sorts by category fit; `enrich_taxonomy.py` no longer
+  gets `key_result`; `reset_classify.py` lost `--kind`; `import_feedback.py` lost `--min-shallow-review`;
+  `process_draft.py --sort-by-relevancy` sorts by category fit. `EntryKind` is gone.

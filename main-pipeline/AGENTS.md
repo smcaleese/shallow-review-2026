@@ -37,9 +37,9 @@ For detailed coding conventions, see `docs/CODE.md`. Key points:
 
 **Platform:** Linux x64, Python>=3.11, uv for package management, ruff and mypy for linting and typechecking, GitHub private repo, pre-commit
 
-**Core libraries:** polars, numpy, scipy, litellm, jinja2, pyyaml, rich, argparse, typer (process_draft.py only), beautifulsoup4, requests, playwright, tenacity, python-dotenv, pydantic
+**Core libraries:** polars, numpy, scipy, anthropic, diskcache, jinja2, pyyaml, rich, argparse, typer (process_draft.py only), beautifulsoup4, requests, playwright, tenacity (draft parsing), python-dotenv, pydantic
 
-**Module structure:** Shared code in `shallow_review/`; the pipeline stages are scripts in `src/` (`uv run python src/<script>.py`). See CODE.md for notable files.
+**Module structure:** The pipeline stages are scripts in `src/` (`uv run python src/<script>.py`). Code used by one script lives in that script; `shallow_review/` holds only code shared by several scripts. See CODE.md for notable files.
 
 **Database:** Single `data/data.db` with lazy singleton access via `get_data_db()`. See DATA.md for schemas.
 
@@ -49,7 +49,7 @@ For detailed coding conventions, see `docs/CODE.md`. Key points:
 
 **Stats:** Global thread-safe singleton via `get_stats()`. Always use lock when updating.
 
-**LLM calls:** Via `get_completion()` with automatic retries, caching, JSON extraction, stats tracking.
+**LLM calls:** Via `get_completion()` (Anthropic SDK, structured outputs, response cache, stats tracking).
 
 **Prompts:** YAML files in `prompts/`, jinja2 templates, request JSON output in markdown code blocks.
 
@@ -61,7 +61,7 @@ For detailed coding conventions, see `docs/CODE.md`. Key points:
 
 ### Technology stack
 
-**Observability:** Using Helicone.ai callback for LLM monitoring - automatically configured if `HELICONE_API_KEY` env var is set
+**Observability:** `process_draft.py parse` goes through the Helicone.ai proxy (needs `HELICONE_API_KEY`); other LLM calls don't
 
 **Instructions:**
 - Use these libraries and features unless there is a new functionality required. If there is, make suggestions to the user before moving ahead.
@@ -71,20 +71,18 @@ For detailed coding conventions, see `docs/CODE.md`. Key points:
 
 - Stored in YAML files under `prompts/`, split into YAML files by main task.
 - Each YAML file contains system and user prompts for several subtasks, each a jinja2 template formatted as MD.
-- Most prompts ask for JSON output. Each system prompt should list the requested fields with their type, detailed description (form but also purpose) and several examples to show the desired format, level of detail, etc. Each user prompt should finish with a reminder to output JSON in MD code blocks (i.e. "```json" and "```") and an abstract example output (e.g.: ```json\n{\n  "url": <the original url string>,\n  "priority": <priority as a number between 0.0 and 100.0>\n}\n```)
+- Prompts that return JSON use structured outputs (the Pydantic model is the schema), so they don't need output-format reminders or code-block instructions. Each system prompt should still say what each requested field means and give a few short examples.
 
 ### Library and scripts
 
-Almost all the python code is stored under `shallow_review/` module. 
+Each stage is a script in `src/` that contains its own logic. Put a function in `shallow_review/` only when several scripts use it (like `llm.py`); code used by a single script stays in that script, even if the script gets long. `src/terminal.py` holds what the scripts share about running in a terminal.
 
 Notable files:
-- `common.py` contains all the *shared* type definitions, constants, pydantic dataclasses, etc. that are used across the codebase. Do NOT include those local to a single module or tied to its functionality.
+- `common.py` contains all the *shared* type definitions, constants, pydantic dataclasses, etc. that are used by several scripts. Do NOT include those used by a single script.
 - `data_db.py` contains the unified database access (lazy singleton pattern).
-- `llm.py` contains initialization code for litellm and basic instrumentation tools
+- `llm.py` contains the Anthropic client, structured outputs, the response cache and token/cost tracking
 - `utils.py` functions such as `smart_open()` that seamlessly opens or creates plain or compressed file (.zst), logging setup (to rich, see below), rich console object, etc.
 - `stats.py` contains a global properly mutex-locked object to record stats from all the threads, and code to print them as tables or otherwise.
-
-**Exception:** the stage scripts in `src/` (add_entries, classify_entries, enrich_taxonomy, export_draft, import_feedback, reset_classify, show_info) are thin argparse entry points over `shallow_review/`; `src/terminal.py` holds what they share.
 
 **Exception:** Tests in the tests/ folder.
 
@@ -97,7 +95,7 @@ Do not write tests unless instructed, or when hunting for a bug that might be ca
 ### Data
 
 - Scraped files kept as `data/scraped/<hash>.html.zst`. These should be by default scraped with playwright, with realistic user agents and other settings, waiting for a full load and scrolling a bit. 
-- The scraped file metadata and all intermediate and final result recors are stored in `data/data.db`. See `docs/DATA.md`.
+- Scraped pages are cached as files in `data/scraped/`; all intermediate and final results are stored in `data/data.db`. See `docs/DATA.md`.
 - By default, do not store failed tasks (e.g. those that raised a general exception). Never for tasks that raised RuntimeError or similar. Example exception: Scrapes returning 400 or 4xx should be cached.
 - The data output might be parquet. Always write parquets with zstandard compression, level 15.
 

@@ -1,184 +1,63 @@
 # Classify Process
 
-Documentation for the classification phase: determining AI safety/alignment relevance.
+Documentation for the classification step: filing each entry under the taxonomy's categories.
 
 ## Purpose
 
-Classify processes candidate URLs (added with `src/add_entries.py`) to determine if they are relevant AI safety/alignment content and extract detailed metadata.
-
-**AI Safety Scope**: Following the Shallow Review 2024 definition, we target "work that intends to prevent very competent cognitive systems from having large unintended effects on the world." This includes:
-- Technical AI alignment and safety research
-- Interpretability and understanding of AI systems
-- AI control, monitoring, and evaluation methods
-- Multi-agent AI safety and coordination
-- Formal methods, verification, and provable safety
-- Agent foundations and theoretical alignment work
-- Governance-adjacent technical work (evals, standards, etc.)
-- Borderline technical topics that offer novel causal perspectives on AI X-risk
-
-**Intent over method**: If work aims to understand or prevent unintended effects from advanced AI systems, it's relevant, regardless of the specific technical approach or framing used.
-
-**Content types**: Papers, blog posts, videos, social media announcements (see criteria in DATA.md), etc. - format matters less than content and intent.
-
-## Design Philosophy
-
-- **Rich metadata extraction**: Extracts title, authors, topics, summary, etc.
-- **Flexible sources**: Any URL list can be added, labelled with `--source`
+`src/classify_entries.py` takes the entries added with `src/add_entries.py` and puts each one under 1-3 leaf categories of
+`data/taxonomy.yaml`, plus basic metadata (title, authors, organizations, date, one-sentence summary). It does not decide
+whether an entry belongs in the review: the sources are selected and filtered upstream (the scraping scripts and the
+facets selection), so the classifier only decides *where* each one goes.
 
 ## Process Flow
 
-1. **Add candidates**:
-   - `src/add_entries.py <file> [--source "label"]` (the label defaults to the file name without extension)
-   - URLs added to `entries` table with status='new'
-   - Optional source label for tracking
-
-2. **Run classification**: `src/classify_entries.py --limit N --workers W`
-   - Queries `entries` table WHERE status='new'
-   - For each candidate:
-     a. Scrape page (kind="classify")
-     b. Preprocess HTML
-     c. Check token limit
-     d. Send to LLM with classification prompt
-     e. Parse and validate JSON response
-     f. Store results in `entries.data` JSON field
-     g. Update status to 'done' or error status
+1. **Add entries**: `src/add_entries.py <file> [--source "label"]` (the label defaults to the file name without extension)
+   puts URLs in the `entries` table with status `new`.
+2. **Classify**: `src/classify_entries.py --limit N --workers W` takes the `new` entries and, for each:
+   a. Scrape the page (cached in `data/scraped/`)
+   b. Preprocess the HTML and check the token limit
+   c. Send the page to the LLM; the whole taxonomy is in the system prompt, which is prompt-cached for an hour
+   d. Validate the response (structured output) and the category IDs
+   e. Store the result in `entries.data` and set the status to `done`, or to an error status
 
 ## Configuration
 
-Via `RunClassifyConfig` in `common.py`:
-- `limit`: Max candidates to process (default: 100)
-- `workers`: Thread pool size (default: 4, max: 32)
-- `model`: LLM model (default: "claude-sonnet-4")
-- `max_html_tokens`: Token limit (default: 100,000)
+Via `RunClassifyConfig` in `common.py` and the script's options: `--limit` (default 100), `--workers`, `--model`
+(default `claude-sonnet-5-5`), `--max-tokens` (HTML tokens after preprocessing, default 100,000), `--retry-errors`.
 
-## Classification Output
+## Output
 
-Stored as columns:
-- `ai_safety_relevance`: 0.0-1.0 score (how relevant is the topic to AI safety/alignment)
-- `shallow_review_inclusion`: 0.0-1.0 score (how suitable for Shallow Review - technical contribution level)
-- `kind`: Content type - independent of relevancy/inclusion (see EntryKind enum in DATA.md)
-  - Example: `paper_page` can have high safety relevance (0.9) but low inclusion (0.1) if not technical
-  - All content gets a kind and both scores
-  - For `social_media` kind: stricter criteria apply (see DATA.md) - only announcements and major events etc.
-- `category`: 1-3 leaf category IDs from taxonomy (see taxonomy section below)
+Stored in `entries.data` (schema in `DATA.md`): `title`, `authors`, `author_organizations`, `date`, `summary` and
+`categories`, a list of 1-3 `{id, score}` with leaf category IDs, best fit first. The score (0-1) is how well the
+category fits; the draft files the entry under its first category. The script adds `tokens_full`, `tokens_stripped`
+and `classify_duration`.
 
-LLM extracts detailed metadata (stored in data JSON):
-- `tokens_full`: Full HTML token count
-- `tokens_stripped`: Stripped HTML token count
-- `title`: Paper/post title
-- `authors`: List of authors
-- `published_date`: Publication date (if available)
-- `topics`: List of topics (alignment, interpretability, etc.)
-- `summary`: 2-3 sentence summary
-- `key_points`: List of key points
-- `venue`: Publication venue (if applicable)
-- `arxiv_id`: ArXiv ID (if applicable)
-- `organization`: Affiliated organization (if applicable)
-
-**Exact schema TBD** - prompts not yet implemented.
+The model also returns `content_available`. When it is false (error page, paywall, empty text) the entry gets
+`classify_error` and no categories.
 
 ## Taxonomy
 
-**Ground truth:** `data/taxonomy.yaml` (see DATA.md for details)
-
-Each classified item must be assigned to exactly ONE leaf category from the taxonomy. The taxonomy has 8 top-level categories with 103 assignable leaf categories (including 8 "other" catch-alls for truly novel work):
-
-1. **Understand existing models** - Evals, interpretability, learning dynamics, model psychology
-2. **Control the thing** - Alignment, monitoring, control, deception detection
-3. **Alternative architectures** - Safer-by-design AI systems
-4. **Better data** - Data quality, filtering, attribution for safety
-5. **Make AI solve it** - Scalable oversight, debate, task decomposition
-6. **Theory** - Agent foundations, corrigibility, cooperation theory
-7. **Sociotechnical** - Approaches combining technical and social elements
-8. **Misc / for new agenda clustering** - Items not yet fitting other categories
-
-**Usage:**
-- Load: `from shallow_review.taxonomy import load_taxonomy; tax = load_taxonomy()`
-- Format for prompts: `format_taxonomy_for_prompt(tax)` → hierarchical markdown
-- Validate: `tax.validate_category_id(cat_id)` → bool (checks if valid leaf)
-- Get all leaves: `tax.get_all_leaf_ids()` → list[str]
-
-The taxonomy is formatted hierarchically in prompts, with non-leaf categories as headers and leaf categories as bulleted items with IDs.
+**Ground truth:** `data/taxonomy.yaml` (see DATA.md). Only leaf categories can be assigned. The taxonomy is formatted
+hierarchically in the system prompt, with non-leaf categories as headers and leaves as bullets with their IDs. A returned
+ID that is not a leaf fails the entry with `classify_error`.
 
 ## HTML Preprocessing
 
-Before classification the page HTML is cleaned:
-- Remove completely: `<script>`, `<style>`, `<noscript>`, `<svg>` tags
-- Remove: HTML comments (via BeautifulSoup)
-- Remove: Base64-encoded images (data: URIs)
-- Unwrap (keep content): `<div>`, `<span>` tags
-- Strip attributes: Keep only href on links, src/alt on images
-- Collapse excessive whitespace
-- Track token counts (tokens_full, tokens_stripped stored in data JSON)
-
-
-## Deduplication
-
-- **URL is primary key**: Each URL classified only once
-- Duplicate additions fail silently (ON CONFLICT DO NOTHING)
-- Stats track "already_exists" count
+Before classification the page HTML is cleaned: scripts, styles, `<noscript>`, `<svg>`, comments and base64 images are
+removed, `<div>` and `<span>` are unwrapped, attributes other than `href` (links) and `src`/`alt` (images) are dropped, and
+whitespace is collapsed. Token counts before and after are stored.
 
 ## Error Handling
 
-**scrape_error:**
-- Failed to fetch the page
-- Cached in scrape table, propagated to classify
-- NOT retried automatically
+- **scrape_error:** the page could not be fetched. Not retried until `reset_classify.py` resets the entry.
+- **classify_error:** the LLM call or validation failed, the page has no readable content, the category is not a leaf, or the
+  HTML exceeds `--max-tokens`. Retry with `--retry-errors` (uses the cached page).
 
-**classify_error:**
-- LLM call failed or JSON parsing/validation failed
-- Can retry with `--retry-errors` flag (re-runs LLM, uses cached HTML)
-- Error message stored with 2 levels of traceback
+## Prompt
 
-**Token limit exceeded:**
-- HTML exceeds max_html_tokens after preprocessing
-- Status set to classify_error
-
-## Prompt Design
-
-**TODO:** `prompts/classify.yaml` not yet implemented.
-
-**Planned aspects:**
-- Clear definition of AI safety/alignment scope
-- Examples of relevant vs irrelevant content
-- Detailed output schema specification
-- Instructions for extracting metadata
-- JSON output format with validation
-
-## CLI Flags
-
-**`classify` command:**
-- `--limit N`: Process at most N candidates
-- `--workers W`: Use W worker threads (default: 4)
-- `--relevancy R`: Min relevancy for high priority (default: 0.5)
-- `--model M`: LLM model to use
-- `--retry-errors`: Retry classify_error items (uses cached HTML)
+`prompts/classify.yaml`: the system prompt holds the task and the taxonomy; the user prompt holds the page, the steps, the
+fields and two short examples. Changing the taxonomy requires classifying again (`reset_classify.py`).
 
 ## Statistics
 
-Tracked per run:
-- Candidates: new, cached, errors (by type)
-- Tokens: HTML size (full vs stripped, mean, std, min, max)
-- Tokens: LLM usage (cache_read, cache_write, uncached, cost)
-- AI safety relevance distribution: How many at each ai_safety_relevance score level
-- Shallow review inclusion distribution: How many at each shallow_review_inclusion score level
-- Confidence distribution: How many at each confidence score level
-- Kind distribution: Count by content type
-
-## Implementation Status
-
-- **Database**: ✅ Fully implemented (`entries` table in data.db)
-- **CLI**: ✅ `src/add_entries.py`
-- **Processing**: ❌ `compute_classify()` not yet implemented
-- **Prompts**: ❌ `prompts/classify.yaml` not yet created
-- **CLI command**: ❌ `classify` command not yet implemented
-
-## Notes
-
-- Reuses scraping and preprocessing infrastructure
-- No multi-threading yet (deferred for MVP)
-
-## Database Schema
-
-See `docs/DATA.md` for entries table schema and JSON structures.
-
+Tracked per run: candidates (new, cached, errors), HTML tokens (full vs stripped), LLM tokens and cost.

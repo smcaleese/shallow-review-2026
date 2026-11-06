@@ -12,7 +12,7 @@
 
 **Core Libraries:**
 - **Data**: polars, numpy, scipy
-- **LLM**: litellm, jinja2, pyyaml, pydantic, tenacity
+- **LLM**: anthropic, diskcache, jinja2, pyyaml, pydantic
 - **Web**: beautifulsoup4, requests, playwright
 - **UI**: rich, argparse (pipeline scripts), typer (`process_draft.py`)
 - **Utils**: python-dotenv, zstandard
@@ -23,25 +23,25 @@
 
 ## Module Structure
 
-Shared code is in the `shallow_review/` module (installed editable by `uv sync`). The pipeline stages are scripts in
-`src/` (one `argparse` script per stage, run with `uv run python src/<script>.py`); `src/terminal.py` holds what they
-share: `.env` loading, logging, Ctrl+C handling and `run_parallel`. `process_draft.py` at the root is a separate typer CLI.
+The pipeline stages are scripts in `src/` (one `argparse` script per stage, run with `uv run python src/<script>.py`),
+each containing the code only it uses (classification in `classify_entries.py`, agenda writing in `enrich_taxonomy.py`,
+feedback import in `import_feedback.py`). Code used by several scripts is in the `shallow_review/` module (installed editable by `uv sync`); `src/terminal.py` holds what they
+share: `.env` loading, logging, and Ctrl+C handling (`run`). `process_draft.py` at the root is a separate typer CLI.
 
 ### Notable Files
 
 - **`common.py`**: Shared types, constants, enums, pydantic models, global state (e.g. shutdown flag). Only includes items used across multiple modules.
 - **`data_db.py`**: Unified database access (lazy singleton pattern)
-- **`llm.py`**: Litellm initialization, retry logic, JSON extraction, token tracking
+- **`llm.py`**: Anthropic client, structured outputs, response cache, token and cost tracking
 - **`utils.py`**: File I/O (`smart_open`), logging setup, console object, token counting
 - **`stats.py`**: Global thread-safe stats tracking
 - **`taxonomy.py`**: Classification taxonomy loader and utilities (loads `data/taxonomy.yaml`)
 - **`scrape.py`**: Web scraping with playwright
 - **`entries.py`**: Adding URLs to the `entries` table (`add_entry`)
-- **`classify.py`**: Classification phase logic
 
 ## Database Access
 
-**Single database file:** `data/data.db` (contains `scrape`, `entries`, `feedback` tables)
+**Single database file:** `data/data.db` (contains `entries`, `feedback` tables)
 
 **Pattern:** Lazy singleton with thread-safe initialization
 
@@ -64,41 +64,36 @@ db.commit()  # Explicit commits required
 
 ## LLM Integration
 
-**Setup:** Call `setup_litellm()` once at startup (lazy singleton, thread-safe)
+**Client:** the Anthropic SDK directly (`anthropic.Anthropic`, shared across threads). The SDK retries rate limits, connection errors and 5xx responses with backoff (`max_retries=5`).
 
-**Disk caching:** Automatic via litellm (stored in `data/.llm_cache/`)
+**Model:** `claude-sonnet-5-5` by default. Thinking is adaptive; `effort` ("low" to "max") sets how much of it to use.
 
-**Helicone observability:** Configured automatically if `HELICONE_API_KEY` env var is set
-- Uses Helicone callback (`litellm.success_callback = ["helicone"]`)
-- Logs all LLM requests/responses to Helicone for monitoring and analytics
-- Set `HELICONE_API_KEY` in environment or `.env` file
+**Structured outputs:** with `response_type=<Pydantic model>`, `get_completion()` uses `client.messages.parse()`, so the API returns JSON that matches the schema and the validated model comes back. A response that still fails validation is asked again (without the cache), up to 3 attempts.
+
+**Disk caching:** responses are cached by request in `<data>/.llm_cache/` (diskcache). Prompt caching of the system prompt uses `system_cache_ttl`.
+
+**Helicone:** only `process_draft.py parse` (`draft_processing.py`) goes through the Helicone proxy and needs `HELICONE_API_KEY`.
 
 **Usage pattern:**
 
 ```python
-from .llm import get_completion, setup_litellm
+from .llm import get_completion
 
-# At startup
-setup_litellm()
-
-# Make LLM call with automatic retries, JSON extraction, stats tracking
 result = get_completion(
     template_vars={"url": url, "html": html},
-    model="claude-3-5-sonnet-20241022",
     stats_subtree="classify_tokens",  # Stats key for tracking
-    response_type=MyPydanticModel,  # Validates JSON response
+    response_type=MyPydanticModel,  # Structured output
     system_prompt_template=prompts["task"]["system"],
     user_prompt_template=prompts["task"]["user"],
+    effort="medium",
 )
 ```
 
 **Features:**
-- Automatic retry with exponential backoff (rate limits, API errors)
-- JSON extraction from markdown code blocks
-- Pydantic validation of responses
-- Token tracking (cache hits/misses, costs)
-- Stats integration via `stats_subtree` parameter
-- Graceful shutdown on budget exceeded or repeated failures
+- Structured outputs validated by Pydantic
+- Disk cache of responses
+- Token and cost tracking (cache hits/misses) via the `stats_subtree` parameter
+- Raises on refusals and on responses cut off at `max_tokens`
 
 ## Prompts
 
@@ -313,13 +308,13 @@ except Exception as e:
 - **Don't cache:** General exceptions, RuntimeError, API errors
 
 **Retries:** 
-- Configured in `llm.py` via tenacity
-- Retries: rate limits, API errors, validation errors (with cache bypass)
-- No retry: budget exceeded, shutdown requested
+- LLM API errors: retried by the Anthropic SDK (`max_retries=5`)
+- Responses that fail validation: asked again, skipping the cache (`llm.py`)
+- No retry: refusals, truncated responses, shutdown requested
 
 **Timeouts:**
 - Scraping: 60 seconds (playwright `timeout=60000`)
-- LLM calls: 120 seconds (litellm `timeout=120.0`)
+- LLM calls: 300 seconds (`timeout=300.0` on the client in `llm.py`)
 - Prevents indefinite hangs
 
 **Stats update failures:**
@@ -342,12 +337,8 @@ except Exception as e:
 
 **Approximation via tiktoken:**
 
-```python
-from .utils import estimate_tokens
-
-# Approximate token count for LLM context
-token_count = estimate_tokens(text, model="gpt-4")
-```
+`count_tokens(text)` in `src/classify_entries.py` estimates the size of a page before it is sent to the LLM (tiktoken, or
+characters / 4 without it).
 
 **Actual tracking:** Done automatically by `get_completion()` and stored in stats.
 
@@ -361,7 +352,6 @@ token_count = estimate_tokens(text, model="gpt-4")
 
 **Scrape caching:**
 - Write HTML atomically (temp file + rename)
-- Update DB metadata in same transaction
 - Hash is computed from URL only
 
 **Transactions:**
@@ -374,7 +364,7 @@ token_count = estimate_tokens(text, model="gpt-4")
 1. Get items with status='new' from DB
 2. Check shutdown flag in loop
 3. For each item:
-   - Call processing function (scrape, compute_classify)
+   - Call processing function (scrape, classify)
    - Update stats with lock
    - Update DB status and commit
    - Log progress

@@ -6,8 +6,8 @@
 
 ```
 data/
-├── .llm_cache/          # Litellm disk cache (gitignored)
-├── data.db              # Unified database (scrape, entries, feedback tables)
+├── .llm_cache/          # LLM response cache (gitignored)
+├── data.db              # Unified database (entries, feedback tables)
 ├── taxonomy.yaml        # Classification category taxonomy (ground truth)
 └── scraped/             # Scraped HTML content
     └── <hash>.html.zst  # Zstandard-compressed HTML files
@@ -19,60 +19,14 @@ All tables stored in `data/data.db` with **NO foreign key constraints**.
 
 **Note on column order:** Schemas below show the canonical column order for tables created from scratch. Databases migrated from earlier versions may have different column orders (with migrated columns at the end) due to SQLite's `ALTER TABLE` behavior. This is functionally equivalent - SQLite doesn't care about column order, and all queries use column names.
 
-### scrape table
+### Scraped pages
 
-Stores metadata for scraped web pages.
-
-```sql
-CREATE TABLE scrape (
-    url TEXT PRIMARY KEY,
-    url_hash TEXT NOT NULL UNIQUE,
-    url_hash_short TEXT,
-    kind TEXT NOT NULL,
-    timestamp TEXT NOT NULL,
-    status_code INTEGER,
-    error TEXT,
-    data JSON
-);
-
-CREATE INDEX idx_scrape_url_hash ON scrape(url_hash);
-CREATE INDEX idx_scrape_url_hash_short ON scrape(url_hash_short);
-CREATE INDEX idx_scrape_kind ON scrape(kind);
-CREATE INDEX idx_scrape_timestamp ON scrape(timestamp);
-```
-
-**Fields:**
-- `url`: Original URL (primary key - unique)
-- `url_hash`: SHA256(url) - full 64-char hex for file naming
-- `url_hash_short`: First 8 chars of SHA256(url) - for human-readable IDs
-- `kind`: Context/type of scrape (e.g., "classify")
-- `timestamp`: ISO 8601 UTC timestamp with timezone
-- `status_code`: HTTP status code (if successful)
-- `error`: Error message (if failed)
-- `data`: JSON with scrape metrics (see below)
-
-**data JSON structure** (when successful):
-```json
-{
-  "size_full": 1234567,
-  "size_compressed": 234567,
-  "tokens_full": 50000,
-  "tokens_stripped": 15000,
-  "scrape_duration": 3.45
-}
-```
-
-**Notes:**
-- `size_full`: Full HTML size in bytes
-- `size_compressed`: Compressed file size in bytes (.zst)
-- `tokens_full`: Token count of full HTML
-- `tokens_stripped`: Token count after preprocessing (scripts/styles removed)
-- `scrape_duration`: Time taken to scrape in seconds
-- Each URL scraped only once, cached indefinitely
-- Failed scrapes are cached to avoid repeated failures
-- File path: `data/scraped/{url_hash}.html.zst`
-- Debug file (stripped HTML): `data/scraped/{url_hash}-stripped.html` (uncompressed, for inspection)
-- Use `get_scrape_path(url)` or `open_scraped(url, mode)` to access files
+There is no scrape table: the cache is the directory `data/scraped/`. The page of a URL is the file
+`data/scraped/{url_hash}.html.zst`, where `url_hash` is the SHA-256 of the normalized URL (`utils.url_hash`). If the file exists the
+page is not scraped again; the file is written to a temporary name first and renamed, so it is never half-written.
+Failed scrapes are not cached: `classify_entries.py` records them as `scrape_error` on the entry. HTTP error pages (404, 403) are
+saved like any other page and the classifier marks them `error_detected`. Use `get_scrape_path(url)` or
+`open_scraped(url, mode)` to access files. Databases made before this change may still contain an unused `scrape` table.
 
 ### entries table
 
@@ -84,7 +38,7 @@ unused `url_hash` / `url_hash_short` columns in `entries` and `url_hash_short` i
 shown in drafts) is computed from the URL with `url_hash_short(url)` instead of stored.
 
 
-One row per URL: its processing status, source label and, once classified, the LLM's result (AI safety/alignment relevance, kind, categories, metadata).
+One row per URL: its processing status, source label and, once classified, the LLM's result (categories and basic metadata).
 
 ```sql
 CREATE TABLE entries (
@@ -93,9 +47,6 @@ CREATE TABLE entries (
     source TEXT NOT NULL,
     added_at TEXT NOT NULL,
     processed_at TEXT,
-    ai_safety_relevance REAL,
-    shallow_review_inclusion REAL,
-    kind TEXT,
     data JSON,
     error TEXT,
     CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
@@ -104,9 +55,6 @@ CREATE TABLE entries (
 CREATE INDEX idx_entries_status ON entries(status);
 CREATE INDEX idx_entries_source ON entries(source);
 CREATE INDEX idx_entries_added_at ON entries(added_at);
-CREATE INDEX idx_entries_ai_safety_relevance ON entries(ai_safety_relevance);
-CREATE INDEX idx_entries_shallow_review_inclusion ON entries(shallow_review_inclusion);
-CREATE INDEX idx_entries_kind ON entries(kind);
 ```
 
 **Fields:**
@@ -115,54 +63,36 @@ CREATE INDEX idx_entries_kind ON entries(kind);
 - `source`: Label given with `add_entries.py --source` (default: the URL file's name without extension)
 - `added_at`: ISO 8601 UTC timestamp when added
 - `processed_at`: ISO 8601 UTC timestamp when completed
-- `ai_safety_relevance`: AI safety/alignment topic relevance score 0.0-1.0 (from LLM)
-- `shallow_review_inclusion`: Suitability for Shallow Review inclusion score 0.0-1.0 (from LLM)
-- `kind`: Content type - independent of relevancy (see EntryKind enum below)
 - `data`: JSON with classification results and preprocessing info (see below)
 - `error`: Error message if failed
 
 **data JSON structure** (when status='done'):
 ```json
 {
-  "tokens_full": 50000,
-  "tokens_stripped": 15000,
-  "classify_duration": 8.76,
+  "content_available": true,
   "title": "...",
   "authors": ["Author 1", "Author 2"],
   "author_organizations": ["Anthropic", "OpenAI"],
   "date": "2025-01-15",
-  "published_year": 2025,
-  "venue": "NeurIPS 2025",
-  "kind": "paper_published",
-  "contribution_type": "empirical_results",
-  "summary": "2-3 sentence summary of the work",
-  "key_result": "Main finding or contribution",
-  "ai_safety_relevance": 0.85,
-  "shallow_review_inclusion": 0.90,
+  "summary": "One sentence on what the work does",
   "categories": [
     {"id": "interpretability_mech", "score": 0.95},
     {"id": "evals_safety", "score": 0.75}
   ],
-  "category_comment": "Explanation of category assignments",
-  "confidence": 0.88
+  "tokens_full": 50000,
+  "tokens_stripped": 15000,
+  "classify_duration": 8.76
 }
 ```
 
 **Notes:**
-- `tokens_full`: Token count of full HTML
-- `tokens_stripped`: Token count after preprocessing
-- `classify_duration`: Total time for classification process in seconds
-- `title`, `authors`, `author_organizations`, `summary`, `key_result`: Basic metadata
-- `date`: Publication date in ISO format YYYY-MM-DD (nullable)
-- `published_year`: Publication year as integer (nullable)
-- `venue`: Publication venue (nullable)
-- `kind`: Content type (one of EntryKind enum values, also stored as column)
-- `contribution_type`: Type of contribution (e.g., "empirical_results", "theoretical_framework")
-- `ai_safety_relevance`, `shallow_review_inclusion`: Scores 0.0-1.0 (also stored as columns)
-- `categories`: List of 1-3 category assignments with taxonomy leaf IDs and fit scores
-- `category_comment`: Explanation for category assignments
-- `confidence`: Overall classification confidence 0.0-1.0
-- Other fields are LLM-extracted
+- `title`, `authors`, `author_organizations`, `summary`: Basic metadata from the LLM
+- `date`: `YYYY-MM-DD`, or `YYYY-MM` / `YYYY` if that is all the page gives (nullable)
+- `categories`: 1-3 assignments with taxonomy leaf IDs and fit scores 0.0-1.0, best fit first
+- `tokens_full`, `tokens_stripped`: Token counts of the full and the preprocessed HTML (set by the script)
+- `classify_duration`: Total time for classification in seconds
+- Databases made before the classifier was narrowed to categories may have the columns `ai_safety_relevance`,
+  `shallow_review_inclusion` and `kind`, and more fields in `data` (scores, `kind`, `confidence`, ...). The code ignores them.
 
 ### feedback table
 
@@ -202,7 +132,7 @@ CREATE UNIQUE INDEX idx_feedback_unique_reclassify
 - `feedback_source`: Source of feedback (e.g., "SR2025-WIP-doc", "manual-review")
 - `feedback_timestamp`: ISO 8601 UTC timestamp when feedback was recorded
 - `action`: What to do with this item
-  - `include`: Force inclusion in exports (even if below thresholds)
+  - `include`: Marks the entry as wanted (kept when detecting exclusions)
   - `exclude`: Force exclusion from exports (even if above thresholds)
   - `reclassify`: Override LLM category with human category
   - `note`: Annotation only (no effect on inclusion/exclusion, used for tracking)
@@ -235,7 +165,7 @@ CREATE UNIQUE INDEX idx_feedback_unique_reclassify
 1. Most recent feedback (by timestamp) takes precedence for same URL+source
 2. `exclude` action always wins (safety-first approach) - EXCEPT when `--reclassify-obsolete-llm` applies
 3. `reclassify` overrides LLM category in exports
-4. `include` forces inclusion regardless of scores
+4. `include` marks the entry as wanted
 
 **Note keywords (for robust matching in code):**
 - `NEEDS_RECATEGORIZATION`: Paper from CSV with obsolete category ID
@@ -265,14 +195,14 @@ Export behavior:
 
 **Example formatting:**
 ```markdown
-- **[Paper Title](url)**, *Authors*, 2025, Venue, [🔄 ✌️(in 2 categories) paper_preprint, sr=0.75, id:abc12345] Summary...
+- **[Paper Title](url)**, *Authors*, 2025, Venue, [🔄 ✌️(in 2 categories) fit=0.75, id:abc12345] Summary...
 ```
 This indicates: re-classified due to obsolete LLM category, appears in 2 categories total
 
 ## Classification Taxonomy
 
-**Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data-2026-facets/taxonomy.yaml`.
-It is hand-written; `enrich-taxonomy` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
+**Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data/taxonomy.yaml`.
+It is hand-written and holds the 2026 taxonomy; `src/enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
 which export uses when present. A paper's category is always its highest-scoring one in `entries.data.categories`.
 
 The classification taxonomy defines a hierarchical category structure for classifying AI safety/alignment content. Each classified item must be assigned to exactly one **leaf category**.
@@ -301,8 +231,8 @@ The classification taxonomy defines a hierarchical category structure for classi
   - `children`: List of subcategories (empty for leaf categories)
   - `examples`: Optional list of example items from 2024 (ONLY allowed on leaf categories)
   - `is_leaf`: Can be explicitly set in YAML, otherwise inferred from presence of children
-  - `agenda`: Only in the enriched taxonomy (`taxonomy-enriched.yaml`, written by `enrich-taxonomy`,
-    `shallow_review/agendas.py`, prompt `prompts/agenda.yaml`). Agenda field values keyed by agenda field name, as
+  - `agenda`: Only in the enriched taxonomy (`taxonomy-enriched.yaml`, written by `src/enrich_taxonomy.py`,
+    `src/enrich_taxonomy.py`, prompt `prompts/agenda.yaml`). Agenda field values keyed by agenda field name, as
     markdown (`Key people` is a list; `See also` links to `#<category id>`; `Critiques` links cited items, or is an
     LLM-written sentence marked "unsourced"). Also `Comment (internal)`, the LLM's notes for editors, not printed
 
@@ -350,63 +280,6 @@ When used, parquet files written with:
 
 ## Enums and Constants
 
-### EntryKind (entries.kind)
-
-Content type classification (independent of AI safety/alignment relevancy).
-
-**Important:** `kind` describes the content type only. AI safety/alignment relevance is determined by two independent scores (0.0-1.0 each):
-- `ai_safety_relevance`: How relevant the topic is to AI safety/alignment
-- `shallow_review_inclusion`: How suitable for inclusion in Shallow Review (technical contribution)
-
-Any kind can have any combination of scores.
-
-Examples:
-- `paper_published` + `ai_safety_relevance=0.9` + `shallow_review_inclusion=0.9` → relevant technical AI safety paper
-- `paper_published` + `ai_safety_relevance=0.1` + `shallow_review_inclusion=0.1` → irrelevant paper (e.g., biology)
-- `blog_post` + `ai_safety_relevance=0.8` + `shallow_review_inclusion=0.7` → relevant technical alignment post
-- `news_announcement` + `ai_safety_relevance=0.8` + `shallow_review_inclusion=0.3` → news about safety work (no original research)
-
-**Kind values:**
-
-Research outputs:
-- `paper_published` - Peer-reviewed paper in journal or conference proceedings
-- `paper_preprint` - Preprint (arXiv, SSRN, etc.)
-- `blog_post` - Blog post or article (general blogs, personal blogs)
-- `lesswrong` - LessWrong or AI Alignment Forum post (special category due to importance in AI safety community)
-- `video` - Video, talk recording, lecture
-- `podcast` - Podcast episode or audio content
-- `code_tool` - Software, library, tool, implementation
-- `dataset_benchmark` - Dataset or benchmark release
-- `agenda_manifesto` - Research agenda, roadmap, or manifesto
-- `news_announcement` - News article or official announcement
-- `social_media` - Social media post (strict criteria: major announcements only - see below)
-- `course_educational` - Course materials, tutorials, educational content
-
-Non-research content:
-- `commercial` - Product/service pages, company pages
-- `personal_page` - Personal homepages, bios
-
-Access issues:
-- `blocked` - Blocked access (captcha, login wall, paywall - content exists but inaccessible)
-- `error_detected` - Content could not be accessed (429, 404, 5xx, format errors, parsing failures, etc.)
-- `other` - Other content type
-
-**Social media inclusion criteria:**
-
-Social media posts (`social_media` kind) should be included ONLY when they are significant announcements:
-- ✅ Include: New agenda announcements, breakthrough discoveries, major paper releases, significant research updates
-- ❌ Exclude: Commentary, opinions, discussions, retweets, summaries of others' work
-
-Examples of what to include:
-- "Announcing our new research agenda on X"
-- "We've discovered Y breakthrough result"
-- "Released: new paper on Z" (if from authors)
-
-Examples of what to exclude:
-- "Here's my take on recent AI developments..."
-- "Thread: Why I think approach X won't work"
-- "Great paper by @someone on topic Y" (unless adding substantial new insight)
-
 ### Status Values
 
 **EntryStatus:**
@@ -417,7 +290,7 @@ Examples of what to exclude:
 
 ## Data Flow
 
-1. **Scraping**: URL → `scrape` table + `data/scraped/<hash>.html.zst`
+1. **Scraping**: URL → `data/scraped/<hash>.html.zst`
 2. **Classification**: URL → `entries` table with results
 
 **Key points:**
