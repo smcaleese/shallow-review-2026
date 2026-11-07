@@ -4,7 +4,7 @@ Add URLs To The Pipeline
 Reads URLs (one per line, '#' for comments) and queues them for classification in data/data.db. Nothing is scraped or
 classified yet; classify_entries.py does that. URLs already in the database are skipped, so reruns are safe.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/add_entries.py data/sources-links/facets-arxiv-2026.txt
 The entries are labelled with a source, by default the file name without extension (here facets-arxiv-2026).
 """

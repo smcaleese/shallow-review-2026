@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-Export the selected sources (the ~500 items on the site) as URL lists for main-pipeline.
+Export the selected sources (the ~500 items on the site) as URL lists for draft-pipeline.
 
 Usage (from facets-shared/):
     uv run python src/export_for_pipeline.py
 Reads output/selected-sources.csv (src/select_budget.py) and writes one list per source to
-../main-pipeline/data/sources-links/facets-<source>-2026.txt, in the format scraping-scripts/export_for_pipeline.py
+../draft-pipeline/data/sources-links/facets-<source>-2026.txt, in the format scraping-scripts/export_for_pipeline.py
 uses: a '#' header line, then one URL per line. Items that are both an arXiv paper and a LW post are in the arXiv list.
-Load them in main-pipeline with:
+Load them in draft-pipeline with:
     uv run pipeline.py add data/sources-links/facets-arxiv-2026.txt --phase classify --source facets-arxiv-2026
 """
 
@@ -18,7 +18,7 @@ from datetime import date
 from common import OUTPUT, ROOT
 
 SELECTED_CSV = OUTPUT / "selected-sources.csv"
-OUT_DIR = ROOT.parent / "main-pipeline" / "data" / "sources-links"
+OUT_DIR = ROOT.parent / "draft-pipeline" / "data" / "sources-links"
 NAMES = {"arxiv": "arxiv", "lesswrong": "lw", "org": "org", "safety_stack": "safetystack"}
 
 

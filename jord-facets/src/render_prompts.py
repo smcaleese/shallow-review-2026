@@ -9,7 +9,7 @@ Run from the jord-facets folder after fetching bodies (data/bodies.json):
 import json, os, subprocess, sys
 
 R = "../scraping-scripts/AF-and-LW-scraper/results"
-T = "../main-pipeline/data/taxonomy.yaml"
+T = "../draft-pipeline/data/taxonomy.yaml"
 EXAMPLE_TEXT_CHARS = 1200   # keep example post text short in the rendered file
 
 STEPS = [

@@ -5,7 +5,7 @@ Walks the taxonomy tree and writes a markdown draft: one section per category wi
 left for editors) and the classified items, best fit first.
 Human feedback (include / exclude / reclassify) is applied on top of the LLM's output.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/export_draft.py -o draft.md
 Reads taxonomy-enriched.yaml from the data folder if it exists, otherwise taxonomy.yaml.
 """

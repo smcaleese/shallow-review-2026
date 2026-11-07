@@ -5,7 +5,7 @@ Makes one LLM call per leaf category, with its classified items, and writes ever
 change, see also, ...) to a copy of the taxonomy with an `agenda` block per category. The hand-written taxonomy.yaml
 is not modified. Agendas already in the output file are kept (so hand edits survive) unless --overwrite or --only.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/enrich_taxonomy.py --workers 4
 Reads data/taxonomy.yaml and writes data/taxonomy-enriched.yaml (inside the data folder set by DATA_PATH).
 """

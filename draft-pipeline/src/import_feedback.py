@@ -4,7 +4,7 @@ Import Human Feedback
 Records human decisions from a CSV (include, exclude, reclassify) in the feedback table of data/data.db.
 export_draft.py applies them on top of the LLM's output.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/import_feedback.py feedback.csv --source SR2025-WIP-doc
 The CSV has the columns URL,CATEGORY_ID,PAPER_ID,LINK_TEXT.
 """

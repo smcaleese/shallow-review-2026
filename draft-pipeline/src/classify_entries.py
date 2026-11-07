@@ -3,7 +3,7 @@
 Classify Queued URLs
 Scrapes each queued URL (cached in data/scraped/) and sends the page to the LLM with the whole taxonomy. The LLM returns 1-3 leaf categories with fit scores and basic metadata (title, authors, date, summary), which are saved in data/data.db.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/classify_entries.py --limit 500 --workers 4
 Only entries with status 'new' are processed; add --retry-errors to include 'classify_error' entries too.
 """

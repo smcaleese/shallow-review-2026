@@ -4,7 +4,7 @@ Show Pipeline Info
 Prints the configured paths and, for the entries table of data/data.db, the number of entries per
 status and histograms of category fit scores, token counts and durations, then the first rows of the entries table.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/show_info.py
     uv run python src/show_info.py --source facets-arxiv-2026 --rows 20
 """

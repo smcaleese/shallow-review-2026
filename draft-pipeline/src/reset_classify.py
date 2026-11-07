@@ -4,7 +4,7 @@ Reset Classify Queue
 Puts matching entries back to status 'new' so that classify_entries.py processes them again, optionally
 deleting their cached scrapes. With no filters every entry is reset.
 
-Basic usage (from the main-pipeline folder):
+Basic usage (from the draft-pipeline folder):
     uv run python src/reset_classify.py --source arxiv-2026 --remove-scrapes
 """
 
