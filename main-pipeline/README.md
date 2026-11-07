@@ -116,6 +116,7 @@ score thresholds. If `taxonomy-enriched.yaml` exists, its agenda fields are used
 |---|---|---|
 | Import human feedback (optional; columns `URL,CATEGORY_ID,PAPER_ID,LINK_TEXT`) | `uv run python src/import_feedback.py feedback.csv --source <label>` | include / exclude / reclassify decisions applied at export |
 | Export the draft | `uv run python src/export_draft.py -o draft.md` | `draft.md` (`--source` limits it to some sources) |
+| Export the draft with each item's fit score, id and summary | `uv run python src/export_draft.py --details -o draft.md` | By default each item shows only its title link, authors and date |
 | Export the draft from the enriched taxonomy, failing on empty fields | `uv run python src/export_draft.py --strict -o draft.md` | `--strict` fails if any agenda field is empty |
 
 After people have edited the draft, `process_draft.py` turns it into the final document:

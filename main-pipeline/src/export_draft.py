@@ -171,6 +171,32 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
 # ---------------------------------------------------------------- markdown
 
 
+def is_printed(cat: Category, items_by_category: dict) -> bool:
+    """Leaf categories are always printed; non-leaf ones only if some leaf below them has items."""
+    return cat.is_leaf or any(leaf_id in items_by_category for leaf_id in cat.get_all_leaf_ids())
+
+
+def render_taxonomy(taxonomy, items_by_category: dict) -> list[str]:
+    """The taxonomy as a numbered outline linking to each category's section, with its one-line description."""
+    lines = [f"# {taxonomy.year} Taxonomy", ""]
+
+    def walk(categories: list[Category], prefix: str, depth: int) -> None:
+        number = 0
+        for cat in categories:
+            if not is_printed(cat, items_by_category):
+                continue
+            number += 1
+            label = f"{prefix}{number}"
+            link = f"[{cat.name}](#{cat.id})"
+            text = f"**{label}. {link}**" if depth == 0 else f"{label} {link}"
+            lines.append(f"{'  ' * depth}- {text}: {cat.description.strip()}")
+            walk(cat.children, f"{label}.", depth + 1)
+
+    walk(taxonomy.taxonomy, "", 0)
+    lines += ["", "---", ""]
+    return lines
+
+
 def render_header(args, sources: set[str], counts: dict, items_by_category: dict, year: int) -> list[str]:
     lines = [
         f"# AI Safety Shallow Review {year}",
@@ -180,7 +206,6 @@ def render_header(args, sources: set[str], counts: dict, items_by_category: dict
     if sources:
         lines.append(f"**Sources:** {', '.join(sorted(sources))}")
     if args.respect_feedback:
-        lines.append("**Human feedback:** Respected" + (f" (source: {args.feedback_source})" if args.feedback_source else ""))
         for key, label in [
             ("excluded", "Excluded by feedback"),
             ("reclassified", "Reclassified by feedback"),
@@ -188,7 +213,7 @@ def render_header(args, sources: set[str], counts: dict, items_by_category: dict
             ("obsolete_llm", "🔄 Re-classified (obsolete LLM category, one-time)"),
         ]:
             if counts[key] > 0:
-                lines.append(f"  - {label}: {counts[key]}")
+                lines.append(f"**{label}:** {counts[key]}")
     lines.append("")
     # Unique URLs, since a paper can appear in several categories
     unique_urls = {item["url"] for items in items_by_category.values() for item in items}
@@ -202,8 +227,8 @@ def render_header(args, sources: set[str], counts: dict, items_by_category: dict
     return lines
 
 
-def render_item(item: dict) -> str:
-    """One list entry: - **Title**, *Authors*, Date [markers] Summary"""
+def render_item(item: dict, details: bool) -> str:
+    """One list entry: - **[Title](url)**, *Authors*, Date; with details also the grey [markers fit, id] and Summary."""
     authors = ", ".join(item["authors"][:3]) + (" et al." if len(item["authors"]) > 3 else "")
     organizations = ", ".join(item["organizations"][:3])
     byline = f"*{authors}*" if authors else (f"*{organizations}*" if organizations else "")
@@ -221,13 +246,9 @@ def render_item(item: dict) -> str:
 
     summary = item["summary"].replace("\n", " ").strip()
 
-    parts = [
-        f"**[{item['title']}]({item['url']})**",
-        byline,
-        item["date"],
-        stats,
-        f'<span style="{GREY}">Summary: {summary}</span>' if summary else "",
-    ]
+    parts = [f"**[{item['title']}]({item['url']})**", byline, item["date"]]
+    if details:
+        parts += [stats, f'<span style="{GREY}">Summary: {summary}</span>' if summary else ""]
     return "- " + ", ".join(part for part in parts if part)
 
 
@@ -263,26 +284,25 @@ def render_agenda_fields(cat: Category, taxonomy, empty_fields: list[str]) -> li
     return lines
 
 
-def render_category(cat: Category, level: int, taxonomy, items_by_category: dict, lines: list[str], empty_fields: list[str]) -> None:
+def render_category(
+    cat: Category, level: int, taxonomy, items_by_category: dict, lines: list[str], empty_fields: list[str], details: bool
+) -> None:
     """Append the category's section and, recursively, its children's. Non-leaf categories without items are skipped."""
-    if not cat.is_leaf and not any(leaf_id in items_by_category for leaf_id in cat.get_all_leaf_ids()):
+    if not is_printed(cat, items_by_category):
         return
 
     heading = "#" * (level + 1)
-    lines.append(
-        f'{heading} <span id="{cat.id}" style="font-size:{HEADING_SIZES[level]}">{cat.name}</span> '
-        f'<span style="color:#bbb">[cat:{cat.id}]</span>\n'
-    )
+    lines.append(f'{heading} <span id="{cat.id}" style="font-size:{HEADING_SIZES[level]}">{cat.name}</span>\n')
     if cat.is_leaf:
         lines += render_agenda_fields(cat, taxonomy, empty_fields)
         items = items_by_category.get(cat.id, [])
         if items:
-            lines += [render_item(item) for item in items]
+            lines += [render_item(item, details) for item in items]
             lines.append("")
     lines.append("\n---\n")
     if not cat.is_leaf:
         for child in cat.children:
-            render_category(child, level + 1, taxonomy, items_by_category, lines, empty_fields)
+            render_category(child, level + 1, taxonomy, items_by_category, lines, empty_fields, details)
 
 
 # ---------------------------------------------------------------- main
@@ -308,6 +328,11 @@ def main() -> None:
         type=Path,
         help="Taxonomy to export (default: taxonomy-enriched.yaml in the data folder if present, else taxonomy.yaml)",
     )
+    parser.add_argument(
+        "--details",
+        action="store_true",
+        help="Also print each item's grey fit score, id and summary (default: only title link, authors and date)",
+    )
     parser.add_argument("--strict", action="store_true", help="Fail if any agenda field of a printed category is empty")
     args = parser.parse_args()
 
@@ -329,10 +354,10 @@ def main() -> None:
 
     items_by_category, counts = group_by_category(rows, feedback_by_url, args, taxonomy.year)
 
-    lines = render_header(args, sources, counts, items_by_category, taxonomy.year)
+    lines = render_taxonomy(taxonomy, items_by_category) + render_header(args, sources, counts, items_by_category, taxonomy.year)
     empty_fields: list[str] = []  # "category_id: field", for --strict
     for top_category in taxonomy.taxonomy:
-        render_category(top_category, 1, taxonomy, items_by_category, lines, empty_fields)
+        render_category(top_category, 1, taxonomy, items_by_category, lines, empty_fields, args.details)
 
     if args.strict and empty_fields:
         err_console.print(f"[red]--strict: {len(empty_fields)} empty agenda fields, nothing written:[/red]")
