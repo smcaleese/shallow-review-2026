@@ -341,12 +341,20 @@ def main() -> None:
         sys.exit(1)
 
     draft = "\n".join(lines) + "\n"
+    # Every item is one list line that starts with its link, so count those lines
+    links = sum(1 for line in lines if line.startswith("- **["))
+    available = sum(len(items) for items in items_by_category.values())
     if args.output:
         args.output.write_text(draft)
         err_console.print(f"Wrote {args.output}")
     else:
         # Plain print, not the rich console, which would add formatting
         print(draft, end="")
+    err_console.print(f"Added {links} links to the draft")
+    if links < available:
+        err_console.print(
+            f"[yellow]{available - links} items were left out: their category is not in the taxonomy[/yellow]"
+        )
 
 
 if __name__ == "__main__":

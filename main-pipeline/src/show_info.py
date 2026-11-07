@@ -82,6 +82,7 @@ def show_entry_rows(db, source: str | None, limit: int) -> None:
     table.add_column("Category", overflow="ellipsis", no_wrap=True, min_width=8)
     table.add_column("Fit", justify="right", no_wrap=True, min_width=4)
     table.add_column("Added", no_wrap=True, min_width=16)
+    table.add_column("Data", overflow="ellipsis", no_wrap=True, min_width=10, max_width=50)
 
     for row in rows:
         categories = json.loads(row["data"])["categories"] if row["data"] else []
@@ -93,6 +94,7 @@ def show_entry_rows(db, source: str | None, limit: int) -> None:
             top.get("id", ""),
             f"{top['score']:.2f}" if top else "",
             row["added_at"][:16],
+            row["data"] or "",  # JSON, cut to the column width with an ellipsis
         )
     console.print(table)
 
