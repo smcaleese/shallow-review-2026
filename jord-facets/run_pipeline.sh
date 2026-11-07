@@ -30,7 +30,7 @@ cd "$(dirname "$0")"
 PY=${PYTHON:-python3}
 SCRAPER=../scraping-scripts/AF-and-LW-scraper
 R=$SCRAPER/results
-T=../main-pipeline/data/taxonomy.yaml
+T=../draft-pipeline/data/taxonomy.yaml
 AS_OF=${AS_OF:-$(date +%F)}
 OFFLINE=0
 for arg in "$@"; do

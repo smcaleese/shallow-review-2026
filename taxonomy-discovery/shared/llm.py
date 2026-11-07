@@ -17,7 +17,7 @@ from pydantic import BaseModel
 from shared.data import CACHE, REPO, ROOT
 
 load_dotenv(ROOT / ".env")
-for other in ("facets-shared", "taxonomy", "main-pipeline"):  # otherwise reuse a key another pipeline already has
+for other in ("facets-shared", "taxonomy", "draft-pipeline"):  # otherwise reuse a key another pipeline already has
     load_dotenv(REPO / other / ".env")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s", datefmt="%H:%M:%S")
 logging.getLogger("httpx").setLevel(logging.WARNING)

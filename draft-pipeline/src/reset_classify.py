@@ -1,0 +1,88 @@
+#!/usr/bin/env python3
+"""
+Reset Classify Queue
+Puts matching entries back to status 'new' so that classify_entries.py processes them again, optionally
+deleting their cached scrapes. With no filters every entry is reset.
+
+Basic usage (from the draft-pipeline folder):
+    uv run python src/reset_classify.py --source arxiv-2026 --remove-scrapes
+"""
+
+import argparse
+
+from shallow_review.common import EntryStatus
+from shallow_review.data_db import data_db_locked
+from shallow_review.scrape import get_scrape_path
+from terminal import console, run
+
+
+def delete_scrapes(urls: list[str]) -> int:
+    """Delete the cached pages of the URLs. Returns the number of files deleted."""
+    files_deleted = 0
+    for url in urls:
+        scrape_path = get_scrape_path(url)
+        if scrape_path.exists():
+            scrape_path.unlink()
+            files_deleted += 1
+    console.print(f"[green]✓ Deleted {files_deleted} scrape files[/green]")
+    return files_deleted
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(
+        description="Reset entries to 'new' so they are classified again.",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=__doc__,
+    )
+    parser.add_argument("--source", help="Only entries from this source")
+    parser.add_argument("--status", help="Only entries with this current status")
+    parser.add_argument("--remove-scrapes", action="store_true", help="Also delete scrapes for matching URLs")
+    args = parser.parse_args()
+
+    conditions = []
+    params = []
+    for column, value in [("source", args.source), ("status", args.status)]:
+        if value:
+            conditions.append(f"{column} = ?")
+            params.append(value)
+    where = " WHERE " + " AND ".join(conditions) if conditions else ""
+
+    with data_db_locked() as db:
+        rows = db.execute(f"SELECT url, status FROM entries{where}", params).fetchall()
+    if not rows:
+        console.print("[yellow]No matching entries found[/yellow]")
+        return
+
+    already_new = sum(1 for row in rows if row["status"] == EntryStatus.NEW.value)
+    to_change = len(rows) - already_new
+    console.print(f"[bold]Found {len(rows)} matching entries[/bold]")
+    if to_change == 0:
+        console.print("[yellow]All entries are already 'new', nothing to change[/yellow]")
+        if not args.remove_scrapes:
+            return
+    else:
+        console.print(f"  - {already_new} already 'new'")
+        console.print(f"  - {to_change} will be reset to 'new'")
+    console.print()
+
+    if to_change > 0:
+        with data_db_locked() as db:
+            db.execute(
+                f"UPDATE entries SET status = ?{where or ' WHERE 1=1'} AND status != ?",
+                [EntryStatus.NEW.value, *params, EntryStatus.NEW.value],
+            )
+            db.commit()
+        console.print(f"[green]✓ Reset {to_change} entries to 'new'[/green]")
+
+    scrapes_deleted = delete_scrapes([row["url"] for row in rows]) if args.remove_scrapes else 0
+
+    console.print()
+    console.print("[bold]Summary:[/bold]")
+    console.print(f"  Total affected: {len(rows)}")
+    console.print(f"  Changed to 'new': {to_change}")
+    if args.remove_scrapes:
+        console.print(f"  Scrapes deleted: {scrapes_deleted}")
+
+
+if __name__ == "__main__":
+    run(main)

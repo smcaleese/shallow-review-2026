@@ -32,13 +32,13 @@ Run each scraper's scripts from inside its folder with `uv run python ...` (plai
 | --- | --- | --- |
 | Scrape, filter and shortlist arXiv papers | `uv run python src/scrape_arxiv_papers.py`<br>`uv run python src/filter_arxiv_papers.py`<br>`uv run python src/shortlist_arxiv_papers.py` | `arxiv-scraper/results/raw/`, `filtered/` and `shortlisted/`, one folder per year and month (e.g. `results/shortlisted/2026/jan/`) |
 | Scrape and filter forum posts | `uv run python src/scrape_forum_posts.py`<br>`uv run python src/filter_forum_posts.py`<br>`uv run python src/annotate_forum_posts.py`<br>`uv run python src/generate_taxonomy_and_editorial.py` | `AF-and-LW-scraper/results/1-lw-posts-raw.csv` to `4-lw-taxonomy-and-editorial.md` |
-| Export to the main pipeline | `uv run python export_for_pipeline.py --label 2026` (from this folder) | `main-pipeline/data/sources-links/<source>-2026.txt`: one URL per line, ready for `pipeline.py add` |
+| Export to the main pipeline | `uv run python export_for_pipeline.py --label 2026` (from this folder) | `draft-pipeline/data/sources-links/<source>-2026.txt`: one URL per line, ready for `pipeline.py add` |
 
 `export_for_pipeline.py` still expects the previous pipelines' outputs (`arxiv-scraper/results/6-arxiv_curated_relevant_only.csv` and `AF-and-LW-scraper/results/1-af_raw_posts.csv` / `1-lw_raw_posts.csv`), so it needs updating before it works with the current ones.
 
 ### Options
 
-- `export_for_pipeline.py`: `--label` (output file suffix, default `2026`), `--out-dir` (default `main-pipeline/data/sources-links/`), `--arxiv` / `--af` / `--lw` (input CSVs), `--af-top` / `--lw-top` (keep only the top N posts by karma; default all AF posts and 300 LW posts)
+- `export_for_pipeline.py`: `--label` (output file suffix, default `2026`), `--out-dir` (default `draft-pipeline/data/sources-links/`), `--arxiv` / `--af` / `--lw` (input CSVs), `--af-top` / `--lw-top` (keep only the top N posts by karma; default all AF posts and 300 LW posts)
 - For each scraper's script options, see its README.
 
 Run any script with `--help` for details.

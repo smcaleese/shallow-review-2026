@@ -18,7 +18,7 @@ embedding similarity. In both, Claude only *names* the clusters at the end; it d
 ## Running it
 
 From this folder, with `ANTHROPIC_API_KEY` set (or in `.env` here; otherwise the key in `taxonomy/.env` or
-`main-pipeline/.env` is used):
+`draft-pipeline/.env` is used):
 
 ```bash
 uv sync
