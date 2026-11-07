@@ -1,11 +1,15 @@
 """Web scraping utilities with playwright and selenium."""
 
 import html
+import io
 import logging
+import os
 import re
 import threading
+import time
 from pathlib import Path
 from typing import IO, Any, Literal
+from urllib.parse import urlparse
 
 import requests
 from playwright.sync_api import Browser, sync_playwright
@@ -283,6 +287,158 @@ def scrape_forum_api(url: str) -> tuple[str, int]:
     return (page, 200)
 
 
+USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+
+
+def is_pdf_url(url: str) -> bool:
+    """Whether the URL serves a PDF, judged by the file name or, failing that, by the Content-Type after redirects.
+
+    The browser backends cannot read PDFs (they return an empty viewer page), so PDFs are downloaded and converted to
+    text instead. Short links such as anthropic.com/<name>-system-card redirect to a PDF, hence the HEAD request.
+    """
+    if urlparse(url).path.lower().endswith(".pdf"):
+        return True
+    try:
+        response = requests.head(url, allow_redirects=True, timeout=15, headers={"User-Agent": USER_AGENT})
+        return "application/pdf" in response.headers.get("Content-Type", "").lower()
+    except requests.RequestException:
+        return False  # Let the browser backend try
+
+
+def pdf_to_html(content: bytes, header: str = "") -> str:
+    """Convert PDF bytes to a simple HTML page: optional header HTML, then one <pre> block per PDF page.
+
+    Raises if the PDF has no extractable text (e.g. scanned images).
+    """
+    from pypdf import PdfReader
+
+    reader = PdfReader(io.BytesIO(content))
+    pages = [(page.extract_text() or "").strip() for page in reader.pages]
+    if not any(pages):
+        raise RuntimeError("PDF has no extractable text")
+    title = html.escape((reader.metadata.title if reader.metadata else None) or "")
+    body = "\n".join(f"<pre>{html.escape(text)}</pre>" for text in pages if text)
+    return f"<html><head><title>{title}</title></head><body>\n{header}{body}\n</body></html>"
+
+
+def scrape_pdf(url: str) -> tuple[str, int]:
+    """Download a PDF and return its text as a simple HTML page. Returns (html, status_code)."""
+    response = requests.get(url, timeout=120, headers={"User-Agent": USER_AGENT})
+    response.raise_for_status()
+    return (pdf_to_html(response.content), 200)
+
+
+# arXiv papers: the metadata comes from the arXiv API and the text from the PDF (always available, unlike the HTML
+# version). Requests are spaced out to respect arXiv's rate limit (one request per 3 seconds for the API).
+ARXIV_RE = re.compile(r"^https?://(?:www\.)?arxiv\.org/(?:abs|pdf|html)/(\d{4}\.\d{4,5})(?:v\d+)?(?:\.pdf)?/?$")
+ARXIV_DELAY_SECONDS = 3.0
+_arxiv_lock = threading.Lock()
+_arxiv_last_request = 0.0
+
+
+def _arxiv_wait() -> None:
+    """Sleep until ARXIV_DELAY_SECONDS have passed since the last arXiv request. Call with _arxiv_lock held."""
+    global _arxiv_last_request
+    time.sleep(max(0.0, _arxiv_last_request + ARXIV_DELAY_SECONDS - time.monotonic()))
+    _arxiv_last_request = time.monotonic()
+
+
+def scrape_arxiv(url: str) -> tuple[str, int]:
+    """Get an arXiv paper as a simple HTML page: title, authors, date and abstract from the API, then the PDF text.
+
+    Returns (html, status_code); 404 if the API has no such paper. Raises if the download or text extraction fails.
+    """
+    import arxiv
+
+    match = ARXIV_RE.match(url)
+    assert match, f"Not an arXiv URL: {url}"
+    arxiv_id = match.group(1)
+
+    with _arxiv_lock:  # One arXiv request at a time, so the delay holds with several workers
+        _arxiv_wait()
+        results = list(arxiv.Client(num_retries=3).results(arxiv.Search(id_list=[arxiv_id])))
+        if not results:
+            return (f"<html><body>No paper {arxiv_id} on arXiv</body></html>", 404)
+        paper = results[0]
+        _arxiv_wait()
+        response = requests.get(f"https://arxiv.org/pdf/{arxiv_id}", timeout=120, headers={"User-Agent": USER_AGENT})
+        response.raise_for_status()
+
+    header = (
+        f"<h1>{html.escape(paper.title)}</h1>\n"
+        f"<p>By {html.escape(', '.join(a.name for a in paper.authors))}</p>\n"
+        f"<p>Submitted {paper.published:%Y-%m-%d} to arXiv ({html.escape(paper.primary_category)})</p>\n"
+        f"<p>Abstract: {html.escape(' '.join((paper.summary or '').split()))}</p>\n"
+    )
+    return (pdf_to_html(response.content, header), 200)
+
+
+# Firecrawl: last-resort fallback when the browser gets a blocked, empty or error page. It needs FIRECRAWL_API_KEY in
+# .env; without it the fallback is skipped. Costs credits, so it only runs for pages that look bad.
+FIRECRAWL_URL = "https://api.firecrawl.dev/v2/scrape"
+MIN_VISIBLE_CHARS = 3000  # Browser pages with less visible text than this are retried with Firecrawl
+
+
+def visible_text_length(content: str) -> int:
+    """Number of characters of visible text in the HTML (scripts and styles excluded)."""
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(content, "html.parser")
+    for tag in soup(["script", "style", "noscript", "svg"]):
+        tag.decompose()
+    return len(" ".join(soup.get_text(" ").split()))
+
+
+def scrape_firecrawl(url: str) -> tuple[str, int]:
+    """Fetch the page with Firecrawl as markdown, wrapped in a simple HTML page. Returns (html, status_code).
+
+    Raises if there is no API key or the request fails.
+    """
+    api_key = os.environ.get("FIRECRAWL_API_KEY")
+    if not api_key:
+        raise RuntimeError("FIRECRAWL_API_KEY is not set")
+    response = requests.post(
+        FIRECRAWL_URL,
+        json={"url": url, "formats": ["markdown"], "onlyMainContent": True},
+        headers={"Authorization": f"Bearer {api_key}"},
+        timeout=120,
+    )
+    response.raise_for_status()
+    data = response.json().get("data") or {}
+    markdown = data.get("markdown") or ""
+    metadata = data.get("metadata") or {}
+    title = html.escape(metadata.get("title") or "")
+    status_code = metadata.get("statusCode") or 200
+    return (f"<html><head><title>{title}</title></head><body>\n<pre>{html.escape(markdown)}</pre>\n</body></html>", status_code)
+
+
+def scrape_browser(url: str, headless: bool, wait_for: str, scroll: bool) -> tuple[str, int]:
+    """Scrape with the browser backend, falling back to Firecrawl if the page is an error page or has little text.
+
+    The Firecrawl result replaces the browser's only if it has more visible text.
+    """
+    if USE_SELENIUM:
+        content, status_code = scrape_selenium(url, headless=headless, scroll=scroll)
+    else:
+        with _playwright_lock:
+            content, status_code = scrape_playwright(url, headless=headless, wait_for=wait_for, scroll=scroll)
+
+    if status_code < 400 and visible_text_length(content) >= MIN_VISIBLE_CHARS:
+        return (content, status_code)
+    if not os.environ.get("FIRECRAWL_API_KEY"):
+        logger.warning(f"{url} looks blocked or empty (status={status_code}); set FIRECRAWL_API_KEY to retry with Firecrawl")
+        return (content, status_code)
+    logger.info(f"{url} looks blocked or empty (status={status_code}); trying Firecrawl")
+    try:
+        fc_content, fc_status = scrape_firecrawl(url)
+    except Exception as e:
+        logger.warning(f"Firecrawl failed for {url}: {e}")
+        return (content, status_code)
+    if visible_text_length(fc_content) > visible_text_length(content):
+        return (fc_content, fc_status)
+    return (content, status_code)
+
+
 def compute_scrape(
     url: str,
     headless: bool = True,
@@ -326,11 +482,13 @@ def compute_scrape(
         if FORUM_POST_RE.match(url):
             # LessWrong / Alignment Forum: API instead of the browser (which gets 403)
             content, status_code = scrape_forum_api(url)
-        elif USE_SELENIUM:
-            content, status_code = scrape_selenium(url, headless=headless, scroll=scroll)
+        elif ARXIV_RE.match(url):
+            content, status_code = scrape_arxiv(url)
+        elif is_pdf_url(url):
+            # PDFs: download and extract the text, as browsers cannot read them
+            content, status_code = scrape_pdf(url)
         else:
-            with _playwright_lock:
-                content, status_code = scrape_playwright(url, headless=headless, wait_for=wait_for, scroll=scroll)
+            content, status_code = scrape_browser(url, headless=headless, wait_for=wait_for, scroll=scroll)
 
         # Write to a temporary file first: a half-written file would count as a cache hit
         tmp_path = scrape_path.with_name(f"{scrape_path.name[: -len('.html.zst')]}.tmp.html.zst")

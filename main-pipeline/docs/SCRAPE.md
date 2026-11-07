@@ -27,6 +27,22 @@ Scraping fetches and caches HTML content for later processing. All scrapes are c
 - **Scrolling**: Scrolls page to trigger lazy-loaded content
 - **Caching**: successful scrapes only, by file existence. One file per URL.
 
+## arXiv
+
+arXiv URLs (`arxiv.org/abs|pdf|html/<id>`, matched by `ARXIV_RE`) are not scraped with the browser. `scrape_arxiv`
+gets the title, authors, submission date, category and abstract from the arXiv API and the full text from
+`arxiv.org/pdf/<id>` (the PDF always exists, unlike the HTML version), and caches a small HTML page: that metadata
+followed by one `<pre>` block per PDF page. Requests are spaced `ARXIV_DELAY_SECONDS` (3 s) apart, shared across
+workers, so scraping 270 papers takes about 30 minutes.
+
+## PDFs
+
+Browsers return an empty viewer page for PDFs, so PDF URLs are downloaded and converted to text instead
+(`scrape_pdf`, using `pypdf`). A URL counts as a PDF if its path ends in `.pdf` or if a HEAD request, following
+redirects, returns `Content-Type: application/pdf` (short links like `anthropic.com/<name>-system-card` redirect to a
+PDF). The text is cached like any other page: a small HTML page with one `<pre>` block per PDF page. Scanned PDFs with
+no text layer fail with "PDF has no extractable text" (no OCR).
+
 ## LessWrong and Alignment Forum
 
 Both sites return 403 to the automated browser. Post URLs (`lesswrong.com/posts/<id>/...`,

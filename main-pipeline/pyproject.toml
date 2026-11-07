@@ -24,6 +24,8 @@ dependencies = [
     "tiktoken>=0.8.0",
     "typer>=0.19.2",
     "zstandard>=0.25.0",
+    "pypdf>=7.0.0",
+    "arxiv>=4.0.2",
 ]
 
 [dependency-groups]
