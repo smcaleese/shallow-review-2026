@@ -33,7 +33,7 @@ share: `.env` loading, logging, and Ctrl+C handling (`run`). `process_draft.py` 
 - **`common.py`**: Shared types, constants, enums, pydantic models, global state (e.g. shutdown flag). Only includes items used across multiple modules.
 - **`data_db.py`**: Unified database access (lazy singleton pattern)
 - **`llm.py`**: Anthropic client, structured outputs, response cache, token and cost tracking
-- **`utils.py`**: File I/O (`smart_open`), logging setup, console object, token counting
+- **`utils.py`**: File I/O (`smart_open`), logging setup, console object, token counting, HTML preprocessing for the LLM (`preprocess_html`) and the thread pool of the classify and score scripts (`run_parallel`)
 - **`stats.py`**: Global thread-safe stats tracking
 - **`taxonomy.py`**: Classification taxonomy loader and utilities (loads `data/taxonomy.yaml`)
 - **`scrape.py`**: Web scraping with playwright

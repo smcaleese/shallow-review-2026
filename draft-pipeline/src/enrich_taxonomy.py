@@ -57,19 +57,19 @@ def load_papers() -> list[dict]:
     """All classified items with the fields the prompt needs, best fit to their category first."""
     with data_db_locked() as db:
         rows = db.execute(
-            "SELECT url, data FROM entries WHERE status = 'done'"
+            "SELECT url, classifier_output FROM entries WHERE status = 'done'"
         ).fetchall()
     papers = []
     for row in rows:
-        data = json.loads(row["data"])
+        data = json.loads(row["classifier_output"])
         if not data.get("categories"):
             continue
         papers.append(
             {
                 "id": url_hash_short(row["url"]),
                 "url": row["url"],
-                "category": max(data["categories"], key=lambda c: c.get("score", 0))["id"],
-                "score": max(c.get("score", 0) for c in data["categories"]),
+                "category": max(data["categories"], key=lambda c: c.get("fit", 0))["id"],
+                "fit": max(c.get("fit", 0) for c in data["categories"]),
                 "title": data.get("title", ""),
                 "authors": data.get("authors", []),
                 "organizations": data.get("author_organizations", []),
@@ -77,7 +77,7 @@ def load_papers() -> list[dict]:
                 "summary": data.get("summary", ""),
             }
         )
-    papers.sort(key=lambda paper: paper["score"], reverse=True)
+    papers.sort(key=lambda paper: paper["fit"], reverse=True)
     return papers
 
 

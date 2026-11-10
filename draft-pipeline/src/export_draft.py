@@ -7,6 +7,8 @@ Human feedback (include / exclude / reclassify) is applied on top of the LLM's o
 
 Basic usage (from the draft-pipeline folder):
     uv run python src/export_draft.py -o draft.md
+    uv run python src/export_draft.py --top 10 -o draft.md   # each category's 10 most important items (score_entries.py)
+    uv run python src/export_draft.py --min-importance 0.5 --top 10 -o draft.md   # importance >= 0.5, at most 10 each
 Reads taxonomy-enriched.yaml from the data folder if it exists, otherwise taxonomy.yaml.
 """
 
@@ -87,7 +89,7 @@ def load_feedback(feedback_source: str) -> dict[str, dict]:
 
 def query_rows(sources: set[str]) -> list:
     """The classified items, from the given sources if any."""
-    sql = "SELECT url, data FROM entries WHERE status = 'done'"
+    sql = "SELECT url, classifier_output, importance FROM entries WHERE status = 'done'"
     params: list = []
     if sources:
         sql += f" AND source IN ({','.join('?' * len(sources))})"
@@ -124,12 +126,12 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
             continue
 
         try:
-            data = json.loads(row["data"])
+            data = json.loads(row["classifier_output"])
         except json.JSONDecodeError as e:
             err_console.print(f"[yellow]Warning: Failed to parse data for {url}: {e}[/yellow]")
             continue
-        # Sorted by score: older rows may not be
-        categories = sorted(data.get("categories", []), key=lambda c: c.get("score", 0), reverse=True)
+        # Sorted by fit: older rows may not be
+        categories = sorted(data.get("categories", []), key=lambda c: c.get("fit", 0), reverse=True)
         if not categories:
             err_console.print(f"[yellow]Warning: Item {url} has no categories, skipping[/yellow]")
             continue
@@ -153,7 +155,8 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
             "authors": data.get("authors", []),
             "organizations": data.get("author_organizations", []),
             "date": data.get("date") or "",
-            "score": categories[0]["score"],
+            "fit": categories[0]["fit"],
+            "importance": row["importance"],
             "summary": data.get("summary", ""),
             "needs_recategorization": needs_recategorization,
             "obsolete_llm_category": obsolete_llm,
@@ -163,8 +166,21 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
             for category_id in category_ids:
                 items_by_category[category_id].append(item)
 
-    for items in items_by_category.values():
-        items.sort(key=lambda item: item["score"], reverse=True)
+    for category_id, items in items_by_category.items():
+        if args.top or args.min_importance is not None:
+            unscored = [item["url"] for item in items if item["importance"] is None]
+            assert not unscored, f"--top / --min-importance need importance scores (run score_entries.py): {unscored}"
+            # Importance is coarse (a few distinct values), so equal scores are ordered by category fit
+            items.sort(key=lambda item: (item["importance"], item["fit"]), reverse=True)
+            keep = len(items)
+            if args.min_importance is not None:
+                keep = sum(1 for item in items if item["importance"] >= args.min_importance)
+            if args.top:
+                keep = min(keep, args.top)
+            counts["pruned"] += len(items) - keep
+            del items[keep:]
+        else:
+            items.sort(key=lambda item: item["fit"], reverse=True)
     return items_by_category, counts
 
 
@@ -205,6 +221,10 @@ def render_header(args, sources: set[str], counts: dict, items_by_category: dict
     ]
     if sources:
         lines.append(f"**Sources:** {', '.join(sorted(sources))}")
+    if args.top or args.min_importance is not None:
+        rule = [f"importance at least {args.min_importance}"] if args.min_importance is not None else []
+        rule += [f"at most the {args.top} most important"] if args.top else []
+        lines.append(f"**Kept per category:** {', '.join(rule)} ({counts['pruned']} pruned)")
     if args.respect_feedback:
         for key, label in [
             ("excluded", "Excluded by feedback"),
@@ -242,7 +262,8 @@ def render_item(item: dict, details: bool) -> str:
         markers += f"✌️(in {item['category_count']} categories)"
     if markers:
         markers += " "
-    stats = f'<span style="{GREY}">[{markers}fit={item["score"]:.2f}, id:{item["url_hash_short"]}]</span>'
+    importance = f'importance={item["importance"]:.2f}, ' if item["importance"] is not None else ""
+    stats = f'<span style="{GREY}">[{markers}fit={item["fit"]:.2f}, {importance}id:{item["url_hash_short"]}]</span>'
 
     summary = item["summary"].replace("\n", " ").strip()
 
@@ -332,6 +353,17 @@ def main() -> None:
         "--details",
         action="store_true",
         help="Also print each item's grey fit score, id and summary (default: only title link, authors and date)",
+    )
+    parser.add_argument(
+        "--top",
+        type=int,
+        help="Keep only each category's N most important items, most important first (needs score_entries.py)",
+    )
+    parser.add_argument(
+        "--min-importance",
+        type=float,
+        help="Keep only items with at least this importance, most important first (needs score_entries.py); "
+        "with --top, also at most N per category",
     )
     parser.add_argument("--strict", action="store_true", help="Fail if any agenda field of a printed category is empty")
     args = parser.parse_args()

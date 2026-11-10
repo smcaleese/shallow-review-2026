@@ -18,7 +18,7 @@ facets selection), so the classifier only decides *where* each one goes.
    b. Preprocess the HTML and check the token limit
    c. Send the page to the LLM; the whole taxonomy is in the system prompt, which is prompt-cached for an hour
    d. Validate the response (structured output) and the category IDs
-   e. Store the result in `entries.data` and set the status to `done`, or to an error status
+   e. Store the result in `entries.classifier_output` and set the status to `done`, or to an error status
 
 ## Configuration
 
@@ -27,8 +27,8 @@ Via `RunClassifyConfig` in `common.py` and the script's options: `--limit` (defa
 
 ## Output
 
-Stored in `entries.data` (schema in `DATA.md`): `title`, `authors`, `author_organizations`, `date`, `summary` and
-`categories`, a list of 1-3 `{id, score}` with leaf category IDs, best fit first. The score (0-1) is how well the
+Stored in `entries.classifier_output` (schema in `DATA.md`): `title`, `authors`, `author_organizations`, `date`, `summary` and
+`categories`, a list of 1-3 `{id, fit}` with leaf category IDs, best fit first. The fit (0-1) is how well the
 category fits; the draft files the entry under its first category. The script adds `tokens_full`, `tokens_stripped`
 and `classify_duration`.
 

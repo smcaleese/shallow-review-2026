@@ -97,6 +97,9 @@ class Stats:
         self.classify_tokens = TokenStats()
         self.classify_preprocessing: list[dict[str, float]] = []
 
+        # Importance scoring
+        self.score_tokens = TokenStats()
+
     def to_dict(self) -> dict[str, Any]:
         """Convert stats to dictionary format."""
         return {
@@ -107,6 +110,7 @@ class Stats:
             "classify_candidates_already_exist": self.classify_candidates_already_exist,
             "classify_tokens": self.classify_tokens.model_dump(),
             "classify_preprocessing": self.classify_preprocessing,
+            "score_tokens": self.score_tokens.model_dump(),
         }
 
     def save(self, output_dir: Path) -> Path:
@@ -173,6 +177,10 @@ class Stats:
             if self.classify_preprocessing:
                 self._print_preprocessing_stats("Classification Preprocessing", self.classify_preprocessing)
             
+            console.print()
+
+        if self.score_tokens.cost > 0:
+            self._print_token_stats("Importance Scoring Tokens", self.score_tokens)
             console.print()
 
     def _print_token_stats(self, title: str, tokens: TokenStats) -> None:

@@ -255,13 +255,13 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
             
             # Try normalized URL first, then original - get status and data
             row = db.execute(
-                "SELECT status, data FROM entries WHERE url = ? OR url = ?",
+                "SELECT status, classifier_output FROM entries WHERE url = ? OR url = ?",
                 (normalized, url)
             ).fetchone()
             
             if row:
                 status = row["status"]
-                data_json = row["data"]
+                data_json = row["classifier_output"]
                 
                 # Check for error statuses or missing data
                 if status in ("scrape_error", "classify_error") or (status == "new" and not data_json):
@@ -336,7 +336,7 @@ def enrich_papers_from_db(doc: ProcessedDocument, verbose: bool = False, list_er
             url_placeholders = ",".join("?" * len(urls_to_retry))
             update_query = f"""
                 UPDATE entries 
-                SET status = ?, data = NULL, error = NULL, processed_at = NULL
+                SET status = ?, classifier_output = NULL, classify_error_message = NULL, classified_at = NULL
                 WHERE url IN ({url_placeholders})
             """
             cursor = db.execute(update_query, [EntryStatus.NEW.value] + urls_to_retry)
@@ -764,12 +764,12 @@ def get_url_title_from_db(url: str) -> str | None:
         # Check entries table first (has more metadata)
         with data_db_locked() as db:
             row = db.execute(
-                "SELECT data FROM entries WHERE url = ? OR url = ?",
+                "SELECT classifier_output FROM entries WHERE url = ? OR url = ?",
                 (url, normalized)
             ).fetchone()
 
-            if row and row["data"]:
-                data = json.loads(row["data"])
+            if row and row["classifier_output"]:
+                data = json.loads(row["classifier_output"])
                 return data.get("title")
 
         return None
@@ -934,17 +934,17 @@ def _sort_papers_by_relevancy(doc: ProcessedDocument, verbose: bool = False) -> 
         # Batch query for all URLs
         placeholders = ','.join('?' * len(paper_urls))
         query = f"""
-            SELECT url, data
+            SELECT url, classifier_output
             FROM entries 
             WHERE url IN ({placeholders})
-            AND data IS NOT NULL
+            AND classifier_output IS NOT NULL
         """
         
         rows = db.execute(query, list(paper_urls)).fetchall()
         for row in rows:
-            categories = json.loads(row["data"]).get("categories")
+            categories = json.loads(row["classifier_output"]).get("categories")
             if categories:
-                url_to_score[row["url"]] = max(c["score"] for c in categories)
+                url_to_score[row["url"]] = max(c["fit"] for c in categories)
         
         if verbose:
             console.print(f"[dim]  Found scores for {len(url_to_score)}/{len(paper_urls)} papers[/dim]")

@@ -42,7 +42,7 @@ classify_content:
     - **author_organizations**: the research organizations or institutions of the authors, not news outlets (`[]` if unknown).
     - **date**: publication date as `YYYY-MM-DD`, or `YYYY-MM` or `YYYY` if that is all the page says (`null` if unknown).
     - **summary**: one sentence on what the work does (not its results or details).
-    - **categories**: a list of `{"id": "<leaf category id>", "score": <0.0-1.0>}`, best fit first.
+    - **categories**: a list of `{"id": "<leaf category id>", "fit": <0.0-1.0>}`, best fit first.
 
     # Examples
 
@@ -55,8 +55,8 @@ classify_content:
       "date": "2024-12-18",
       "summary": "Shows that Claude 3 Opus strategically complies with harmful queries during perceived training to preserve its preferred behavior.",
       "categories": [
-        {"id": "various_redteams", "score": 0.95},
-        {"id": "deception_other", "score": 0.85}
+        {"id": "various_redteams", "fit": 0.95},
+        {"id": "deception_other", "fit": 0.85}
       ]
     }
     ```
@@ -70,7 +70,7 @@ classify_content:
       "date": "2024-03-15",
       "summary": "Critiques common theories of how interpretability helps AI safety, arguing that most lack a clear path to helping with superhuman alignment.",
       "categories": [
-        {"id": "interp_criticisms", "score": 0.95}
+        {"id": "interp_criticisms", "fit": 0.95}
       ]
     }
     ```

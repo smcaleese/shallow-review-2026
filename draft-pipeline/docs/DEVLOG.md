@@ -305,3 +305,31 @@ leaf_ids = tax.get_all_leaf_ids()  # 103 items
   `--min-shallow-review`, `--min-ai-safety` and `--kinds` and sorts by category fit; `enrich_taxonomy.py` no longer
   gets `key_result`; `reset_classify.py` lost `--kind`; `import_feedback.py` lost `--min-shallow-review`;
   `process_draft.py --sort-by-relevancy` sorts by category fit. `EntryKind` is gone.
+
+## 2026-11-10: Importance scoring and pruning to the top N per category
+
+- Added `src/score_entries.py`, a step after classification that rates each `done` entry's importance for the review
+  (0-1, plus a one-sentence reason). It fetches attention first: Semantic Scholar citations (one batch call for arXiv /
+  DOI IDs, an exact-title match for other pages) and LessWrong karma. The LLM gets the cached page and the attention as
+  a rate per month since publication; the prompt (`prompts/score.yaml`) puts the work's significance, rigor and novelty
+  first and the authors' reputation and the attention second. Stored in new `entries` columns (`citation_count`,
+  `lw_karma`, `importance`, `importance_reason`), added in place to existing databases.
+- Kept separate from classification, which was narrowed to filing entries (see above): the score doesn't depend on the
+  category, so taxonomy changes don't force rescoring, and the rubric can change without reclassifying. The cost is
+  sending each page to the LLM twice.
+- Citations are a weak signal for this year's mostly months-old work, hence a rate and a minor weight. Semantic
+  Scholar's unauthenticated pool often returns 429 for minutes: title lookups that keep failing are reported and the
+  entry is scored without citations (`SEMANTIC_SCHOLAR_API_KEY` raises the limit).
+- `export_draft.py --top N` keeps each category's N most important entries, most important first, and fails if an
+  entry is unscored. The database is not changed, so the cut-off is easy to revisit.
+- Renamed the ambiguous `entries` columns: `data` → `classifier_output`, `processed_at` → `classified_at` (only
+  classification sets it, and scoring now also "processes" entries), `error` → `classify_error_message`; and in the
+  JSON, `categories[].score` → `fit`, so it can't be confused with `importance`. `data_db.py` renames them in place
+  in existing databases (`ALTER TABLE ... RENAME COLUMN`, and a rewrite of the JSON of each row with `score`).
+- Added `attention_checked_at`, so that a NULL citation count can be told apart from "not looked up": reruns no longer
+  repeat the slow Semantic Scholar title lookups of org pages that are not in Semantic Scholar.
+- Added `export_draft.py --min-importance X`: keeps items with importance ≥ X, combined with `--top N` as "at least X,
+  at most N per category". The scores are coarse (61% of entries are 0.50, 0.55 or 0.62), so at the `--top` cap
+  equal scores are often split by database order: with `--min-importance 0.5 --top 10`, 15 of 19 capped categories
+  tie at the cap. Ties are therefore broken by category fit: it measures belonging, not quality, but prefers entries
+  that are central to the agenda over ones filed there loosely, and is deterministic.

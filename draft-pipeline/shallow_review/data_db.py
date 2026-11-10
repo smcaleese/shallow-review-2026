@@ -7,6 +7,7 @@ Tables:
 - feedback: Human decisions (include / exclude / reclassify) per URL
 """
 
+import json
 import logging
 import sqlite3
 import threading
@@ -41,9 +42,58 @@ def _rename_old_tables(data_db: sqlite3.Connection) -> None:
         logger.info("Renamed table classify_feedback -> feedback")
 
 
+# Old name -> new name of columns of `entries`
+RENAMED_COLUMNS = {"data": "classifier_output", "processed_at": "classified_at", "error": "classify_error_message"}
+
+
+def _rename_old_columns(data_db: sqlite3.Connection) -> None:
+    """Databases made before the column renames get them renamed in place, and the fit scores in the classifier
+    output's categories renamed from `score` to `fit`."""
+    existing = {row[1] for row in data_db.execute("PRAGMA table_info(entries)")}
+    for old, new in RENAMED_COLUMNS.items():
+        if old in existing and new not in existing:
+            data_db.execute(f"ALTER TABLE entries RENAME COLUMN {old} TO {new}")
+            logger.info(f"Renamed column entries.{old} -> {new}")
+    if "classifier_output" not in existing and "data" not in existing:
+        return  # New database
+    rows = data_db.execute(
+        "SELECT url, classifier_output FROM entries WHERE classifier_output LIKE '%\"score\"%'"
+    ).fetchall()
+    renamed = 0
+    for url, output_json in rows:
+        output = json.loads(output_json)
+        categories = output.get("categories") or []
+        if not any("score" in category for category in categories):
+            continue  # "score" appears elsewhere in the JSON
+        output["categories"] = [
+            {("fit" if key == "score" else key): value for key, value in category.items()} for category in categories
+        ]
+        data_db.execute("UPDATE entries SET classifier_output = ? WHERE url = ?", (json.dumps(output), url))
+        renamed += 1
+    if renamed:
+        logger.info(f"Renamed categories[].score -> fit in the classifier output of {renamed} entries")
+
+
+def _add_missing_columns(data_db: sqlite3.Connection) -> None:
+    """Databases made before score_entries.py lack its columns of `entries`; add them in place."""
+    existing = {row[1] for row in data_db.execute("PRAGMA table_info(entries)")}
+    columns = [
+        ("citation_count", "INTEGER"),
+        ("lw_karma", "INTEGER"),
+        ("attention_checked_at", "TEXT"),
+        ("importance", "REAL"),
+        ("importance_reason", "TEXT"),
+    ]
+    for column, sql_type in columns:
+        if column not in existing:
+            data_db.execute(f"ALTER TABLE entries ADD COLUMN {column} {sql_type}")
+            logger.info(f"Added column entries.{column}")
+
+
 def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
     """Create all tables and indexes in the data database."""
     _rename_old_tables(data_db)
+    _rename_old_columns(data_db)
     statements = [
         # Entries table
         """CREATE TABLE IF NOT EXISTS entries (
@@ -51,9 +101,14 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
             status TEXT NOT NULL,
             source TEXT NOT NULL,
             added_at TEXT NOT NULL,
-            processed_at TEXT,
-            data JSON,
-            error TEXT,
+            classified_at TEXT,
+            classifier_output JSON,
+            classify_error_message TEXT,
+            citation_count INTEGER,
+            lw_karma INTEGER,
+            attention_checked_at TEXT,
+            importance REAL,
+            importance_reason TEXT,
             CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
         )""",
         "CREATE INDEX IF NOT EXISTS idx_entries_status ON entries(status)",
@@ -86,6 +141,8 @@ def _create_tables(data_db: sqlite3.Connection, db_path: str) -> None:
 
     for statement in statements:
         data_db.execute(statement)
+    _add_missing_columns(data_db)
+    data_db.execute("CREATE INDEX IF NOT EXISTS idx_entries_importance ON entries(importance)")
 
     data_db.commit()
     logger.info(f"Initialized unified database at {db_path}")

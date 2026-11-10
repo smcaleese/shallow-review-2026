@@ -5,9 +5,11 @@ import hashlib
 import logging
 import os
 import re
+from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import IO, Any, Iterable, Literal
+from typing import IO, Any, Iterable, Literal, TypeVar
 from urllib.parse import urlparse, urlunparse
 
 import numpy as np
@@ -15,7 +17,7 @@ import zstandard as zstd
 from rich.console import Console
 from rich.logging import RichHandler
 
-from .common import RUNS_PATH
+from .common import RUNS_PATH, is_shutdown_requested
 
 # Global rich console for all output
 console = Console()
@@ -412,3 +414,204 @@ def one_line_histogram(
     return result
 
 
+# Token counting - use tiktoken for approximation
+try:
+    import tiktoken
+
+    _tiktoken_available = True
+except ImportError:
+    _tiktoken_available = False
+
+
+def count_tokens(text: str, model: str = "gpt-4") -> int:
+    """
+    Count approximate tokens in text for a given model.
+
+    Uses tiktoken for accurate counting. Falls back to character-based estimate
+    if tiktoken is not available.
+
+    Args:
+        text: Text to count tokens for
+        model: Model name (e.g., "gpt-4", "claude-sonnet-4")
+
+    Returns:
+        Approximate token count
+    """
+    if not _tiktoken_available:
+        # Fallback: rough estimate (1 token ≈ 4 characters for English)
+        return len(text) // 4
+
+    # Map model names to tiktoken encodings
+    # Claude models use similar tokenization to GPT-4
+    if "claude" in model.lower() or "sonnet" in model.lower():
+        encoding_name = "cl100k_base"  # GPT-4/Claude approximation
+    elif "gpt-4" in model.lower():
+        encoding_name = "cl100k_base"
+    elif "gpt-3.5" in model.lower():
+        encoding_name = "cl100k_base"
+    else:
+        # Default to GPT-4 encoding
+        encoding_name = "cl100k_base"
+
+    try:
+        encoding = tiktoken.get_encoding(encoding_name)
+        return len(encoding.encode(text))
+    except Exception:
+        # Fallback on any error
+        return len(text) // 4
+
+
+def preprocess_html(html: str, model: str = "gpt-4") -> tuple[str, dict[str, int]]:
+    """
+    Preprocess HTML for LLM consumption by removing unnecessary elements.
+
+    Removes completely:
+    - <script> tags and content
+    - <style> tags and content
+    - <link> tags and content
+    - <noscript> tags and content
+    - <svg> tags and content
+    - HTML comments (via BeautifulSoup)
+    - Base64-encoded images (data: URIs in src/href attributes)
+    
+    Unwraps (removes tag but keeps content):
+    - <div> tags
+    - <span> tags
+    
+    Strips attributes:
+    - Keeps only href on <a>, src/alt on <img>
+    - Removes all other attributes (data-*, id, class, style, etc.)
+    
+    Cleans whitespace:
+    - Collapses excessive newlines and spaces
+
+    Args:
+        html: Raw HTML content
+        model: Model name for token counting
+
+    Returns:
+        Tuple of (cleaned_html, stats) where stats contains:
+        - tokens_before: Token count before cleaning
+        - tokens_after: Token count after cleaning
+        - tokens_saved: Tokens saved by cleaning
+        - reduction_pct: Percentage reduction
+    """
+    import re
+
+    from bs4 import BeautifulSoup, Comment
+
+    # Count tokens before
+    tokens_before = count_tokens(html, model)
+
+    # Parse HTML
+    soup = BeautifulSoup(html, "html.parser")
+
+    # Remove script tags
+    for script in soup.find_all("script"):
+        script.decompose()
+
+    # Remove style tags
+    for style in soup.find_all("style"):
+        style.decompose()
+
+    # Remove link tags (stylesheets, fonts, etc.)
+    for link in soup.find_all("link"):
+        link.decompose()
+
+    # Remove noscript tags
+    for noscript in soup.find_all("noscript"):
+        noscript.decompose()
+
+    # Remove svg tags
+    for svg in soup.find_all("svg"):
+        svg.decompose()
+
+    # Remove HTML comments (via BeautifulSoup, not regex)
+    for comment in soup.find_all(string=lambda text: isinstance(text, Comment)):
+        comment.extract()
+
+    # Remove base64 images (data: URIs) and clean up attributes
+    # Define which attributes to keep per tag
+    attributes_to_keep = {
+        "a": ["href"],
+        "img": ["src", "alt"],
+    }
+
+    for tag in soup.find_all(True):  # Find all tags
+        # Handle base64 in src/href first
+        if tag.has_attr("src") and tag["src"].startswith("data:"):
+            tag["src"] = "[base64-image-removed]"
+        if tag.has_attr("href") and tag["href"].startswith("data:"):
+            tag["href"] = "[base64-data-removed]"
+
+        # Remove all attributes except those we want to keep
+        tag_name = tag.name
+        keep_attrs = attributes_to_keep.get(tag_name, [])
+        
+        # Get list of attrs to remove (can't modify dict during iteration)
+        attrs_to_remove = [attr for attr in tag.attrs if attr not in keep_attrs]
+        
+        for attr in attrs_to_remove:
+            del tag[attr]
+
+    # Unwrap div and span tags (remove tag but keep contents)
+    for div in soup.find_all("div"):
+        div.unwrap()
+    for span in soup.find_all("span"):
+        span.unwrap()
+
+    # Get cleaned HTML
+    cleaned_html = str(soup)
+
+    # Remove excessive whitespace
+    cleaned_html = re.sub(r"\n\s*\n+", "\n\n", cleaned_html)
+    cleaned_html = re.sub(r"[ \t]+", " ", cleaned_html)
+
+    # Count tokens after
+    tokens_after = count_tokens(cleaned_html, model)
+    tokens_saved = tokens_before - tokens_after
+    reduction_pct = (tokens_saved / tokens_before * 100) if tokens_before > 0 else 0
+
+    stats = {
+        "tokens_before": tokens_before,
+        "tokens_after": tokens_after,
+        "tokens_saved": tokens_saved,
+        "reduction_pct": reduction_pct,
+    }
+
+    return cleaned_html, stats
+
+
+WORKERS_HELP = "Number of worker threads (safe with Selenium, use 1 with Playwright)"
+
+Item = TypeVar("Item")
+Result = TypeVar("Result")
+
+
+def run_parallel(
+    items: Iterable[Item],
+    work: Callable[[Item], Result],
+    workers: int,
+    on_done: Callable[[int, Item, Result], None],
+    on_error: Callable[[int, Item, Exception], None],
+) -> None:
+    """
+    Call work(item) for every item in a thread pool and report each finished item, numbered from 1.
+
+    on_done(n, item, result) or on_error(n, item, exception) is called as each item completes. Cancels the
+    remaining items once a shutdown has been requested (Ctrl+C).
+    """
+    with ThreadPoolExecutor(max_workers=workers) as executor:
+        futures = {executor.submit(work, item): item for item in items}
+        for n, future in enumerate(as_completed(futures), 1):
+            if is_shutdown_requested():
+                console.print("\n[yellow]Shutdown requested, stopping...[/yellow]")
+                executor.shutdown(wait=False, cancel_futures=True)
+                break
+            item = futures[future]
+            try:
+                result = future.result()
+            except Exception as e:
+                on_error(n, item, e)
+            else:
+                on_done(n, item, result)
