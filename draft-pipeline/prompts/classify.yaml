@@ -1,0 +1,90 @@
+# Prompts for the classify phase: filing a page under the taxonomy's categories
+
+classify_content:
+  system: |
+    You file pages from the AI safety literature under the leaf categories of a taxonomy, for the "Shallow Review 2026", an annual review of technical AI safety research. The pages have already been selected for the review, so do not judge whether a page belongs in it. Your job is to decide which category (or categories) each page's work belongs to, and to extract its basic metadata.
+
+    # Taxonomy
+
+    <document type="taxonomy">
+    <source>taxonomy.yaml</source>
+    <document_content>
+    {{taxonomy}}
+    </document_content>
+    </document>
+
+  user: |
+    # Page
+
+    <document type="content">
+    <source>{{url}}</source>
+    <document_content>
+    {{content}}
+    </document_content>
+    </document>
+
+    # Your task
+
+    1. Work out what the page is actually doing: its main contribution and the technical approach it takes.
+    2. Pick the 1 to 3 leaf categories of the taxonomy that fit best, best fit first.
+       - Only use leaf category IDs shown in the taxonomy.
+       - Choose by the technical work being done, not by the page's topic words. Read each category's description.
+       - Give a second or third category only when the work genuinely spans several areas.
+       - Each category gets a fit score from 0.0 to 1.0. The scores are independent (they need not sum to 1).
+         0.9 or more means an obvious fit; around 0.5 means a plausible but ambiguous fit.
+    3. Extract the metadata below.
+
+    # Fields
+
+    - **content_available**: `false` if the page is not the actual content (error page, paywall, login or captcha wall, empty or unreadable text), otherwise `true`. When `false`, leave the other fields empty (`""`, `[]`, `null`) and give no categories.
+    - **title**: the exact title of the work.
+    - **authors**: author names (`[]` if none are given).
+    - **author_organizations**: the research organizations or institutions of the authors, not news outlets (`[]` if unknown).
+    - **date**: publication date as `YYYY-MM-DD`, or `YYYY-MM` or `YYYY` if that is all the page says (`null` if unknown).
+    - **summary**: one sentence on what the work does (not its results or details).
+    - **categories**: a list of `{"id": "<leaf category id>", "score": <0.0-1.0>}`, best fit first.
+
+    # Examples
+
+    ```json
+    {
+      "content_available": true,
+      "title": "Alignment faking in large language models",
+      "authors": ["Ryan Greenblatt", "Carson Denison", "Benjamin Wright", "Evan Hubinger"],
+      "author_organizations": ["Anthropic", "Redwood Research"],
+      "date": "2024-12-18",
+      "summary": "Shows that Claude 3 Opus strategically complies with harmful queries during perceived training to preserve its preferred behavior.",
+      "categories": [
+        {"id": "various_redteams", "score": 0.95},
+        {"id": "deception_other", "score": 0.85}
+      ]
+    }
+    ```
+
+    ```json
+    {
+      "content_available": true,
+      "title": "Against Almost Every Theory of Impact of Interpretability",
+      "authors": ["Charbel-Raphaël Segerie"],
+      "author_organizations": [],
+      "date": "2024-03-15",
+      "summary": "Critiques common theories of how interpretability helps AI safety, arguing that most lack a clear path to helping with superhuman alignment.",
+      "categories": [
+        {"id": "interp_criticisms", "score": 0.95}
+      ]
+    }
+    ```
+
+    ```json
+    {
+      "content_available": false,
+      "title": "",
+      "authors": [],
+      "author_organizations": [],
+      "date": null,
+      "summary": "",
+      "categories": []
+    }
+    ```
+
+    The category IDs above are only illustrations; use the IDs of the taxonomy given.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Export scraper outputs as plain URL lists for `main-pipeline`.
+Export scraper outputs as plain URL lists for `draft-pipeline`.
 
 Reads the CSVs produced by arxiv-scraper and AF-and-LW-scraper and writes one
 `<name>-<label>.txt` file per source (one URL per line, '#' header) into the
@@ -18,7 +18,7 @@ HERE = Path(__file__).parent
 DEFAULT_ARXIV = HERE / "arxiv-scraper/results/6-arxiv_curated_relevant_only.csv"
 DEFAULT_AF = HERE / "AF-and-LW-scraper/results/1-af_raw_posts.csv"
 DEFAULT_LW = HERE / "AF-and-LW-scraper/results/1-lw_raw_posts.csv"
-DEFAULT_OUT_DIR = HERE.parent / "main-pipeline/data/sources-links"
+DEFAULT_OUT_DIR = HERE.parent / "draft-pipeline/data/sources-links"
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
