@@ -205,7 +205,7 @@ def import_feedback_from_csv(
             # Get all exportable URLs with their LLM-assigned categories
             cursor = db.execute(
                 """
-                SELECT url, data
+                SELECT url, classifier_output
                 FROM entries
                 WHERE status = 'done'
                 """
@@ -224,8 +224,8 @@ def import_feedback_from_csv(
             has_obsolete_llm_category = False
             if reclassify_obsolete_llm and row['data']:
                 try:
-                    data = json.loads(row['data'])
-                    categories = sorted(data.get('categories', []), key=lambda c: c.get('score', 0), reverse=True)
+                    data = json.loads(row['classifier_output'])
+                    categories = sorted(data.get('categories', []), key=lambda c: c.get('fit', 0), reverse=True)
                     if categories:
                         llm_category_id = categories[0]['id']
                         if llm_category_id not in valid_leaf_ids:

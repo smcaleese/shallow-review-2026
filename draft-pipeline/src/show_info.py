@@ -2,7 +2,8 @@
 """
 Show Pipeline Info
 Prints the configured paths and, for the entries table of data/data.db, the number of entries per
-status and histograms of category fit scores, token counts and durations, then the first rows of the entries table.
+status and histograms of category fit scores, importance scores, citations, karma, token counts and durations, then
+the first rows of the entries table.
 
 Basic usage (from the draft-pipeline folder):
     uv run python src/show_info.py
@@ -34,8 +35,8 @@ def select(db, sql: str, source: str | None) -> list:
 
 
 def json_values(rows: list, key: str) -> list:
-    """Truthy values of `key` in the JSON `data` column of the rows."""
-    values = (json.loads(row["data"]).get(key) for row in rows)
+    """Truthy values of `key` in the JSON `classifier_output` column of the rows."""
+    values = (json.loads(row["classifier_output"]).get(key) for row in rows)
     return [v for v in values if v]
 
 
@@ -59,15 +60,26 @@ def print_status_table(db, table: str, error_columns: dict[str, str], source: st
 def show_entries_stats(db, source: str | None) -> None:
     print_status_table(db, "entries", {"Scrape Errors": "scrape_error", "Classify Errors": "classify_error"}, source)
 
-    rows = select(db, "SELECT data FROM entries WHERE status = 'done' AND data IS NOT NULL", source)
-    print_histogram("top category fit", [json.loads(row["data"])["categories"][0]["score"] for row in rows])
+    rows = select(
+        db,
+        "SELECT classifier_output, importance, citation_count, lw_karma FROM entries"
+        " WHERE status = 'done' AND classifier_output IS NOT NULL",
+        source,
+    )
+    print_histogram("top category fit", [json.loads(row["classifier_output"])["categories"][0]["fit"] for row in rows])
+    for column in ["importance", "citation_count", "lw_karma"]:
+        print_histogram(column, [row[column] for row in rows if row[column] is not None])
     for key in ["tokens_full", "tokens_stripped", "classify_duration"]:
         print_histogram(key, json_values(rows, key))
 
 
+def or_empty(value) -> str:
+    return "" if value is None else str(value)
+
+
 def show_entry_rows(db, source: str | None, limit: int) -> None:
     """The first `limit` rows of the entries table, oldest first (the order classify_entries.py processes them)."""
-    sql = "SELECT url, source, status, data, added_at FROM entries"
+    sql = "SELECT url, source, status, classifier_output, added_at, importance, citation_count, lw_karma FROM entries"
     params: list = []
     if source:
         sql += " WHERE source = ?"
@@ -80,21 +92,27 @@ def show_entry_rows(db, source: str | None, limit: int) -> None:
     table.add_column("Source", overflow="ellipsis", no_wrap=True, min_width=8)
     table.add_column("Status", no_wrap=True, min_width=6)
     table.add_column("Category", overflow="ellipsis", no_wrap=True, min_width=8)
-    table.add_column("Fit", justify="right", no_wrap=True, min_width=4)
+    table.add_column("Category Fit", justify="right", no_wrap=True, min_width=12)
+    table.add_column("Importance", justify="right", no_wrap=True, min_width=10)
+    table.add_column("Citations", justify="right", no_wrap=True, min_width=9)
+    table.add_column("LW Karma", justify="right", no_wrap=True, min_width=8)
     table.add_column("Added", no_wrap=True, min_width=16)
-    table.add_column("Data", overflow="ellipsis", no_wrap=True, min_width=10, max_width=50)
+    table.add_column("Classifier Output (JSON)", overflow="ellipsis", no_wrap=True, min_width=10, max_width=50)
 
     for row in rows:
-        categories = json.loads(row["data"])["categories"] if row["data"] else []
+        categories = json.loads(row["classifier_output"])["categories"] if row["classifier_output"] else []
         top = categories[0] if categories else {}
         table.add_row(
             row["url"],
             row["source"],
             row["status"],
             top.get("id", ""),
-            f"{top['score']:.2f}" if top else "",
+            f"{top['fit']:.2f}" if top else "",
+            f"{row['importance']:.2f}" if row["importance"] is not None else "",
+            or_empty(row["citation_count"]),
+            or_empty(row["lw_karma"]),
             row["added_at"][:16],
-            row["data"] or "",  # JSON, cut to the column width with an ellipsis
+            row["classifier_output"] or "",  # JSON, cut to the column width with an ellipsis
         )
     console.print(table)
 

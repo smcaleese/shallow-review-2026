@@ -38,7 +38,8 @@ unused `url_hash` / `url_hash_short` columns in `entries` and `url_hash_short` i
 shown in drafts) is computed from the URL with `url_hash_short(url)` instead of stored.
 
 
-One row per URL: its processing status, source label and, once classified, the LLM's result (categories and basic metadata).
+One row per URL: its processing status, source label and, once classified, the LLM's result (categories and basic
+metadata); once scored, its attention (citations or karma) and importance.
 
 ```sql
 CREATE TABLE entries (
@@ -46,15 +47,21 @@ CREATE TABLE entries (
     status TEXT NOT NULL,
     source TEXT NOT NULL,
     added_at TEXT NOT NULL,
-    processed_at TEXT,
-    data JSON,
-    error TEXT,
+    classified_at TEXT,
+    classifier_output JSON,
+    classify_error_message TEXT,
+    citation_count INTEGER,
+    lw_karma INTEGER,
+    attention_checked_at TEXT,
+    importance REAL,
+    importance_reason TEXT,
     CHECK(status IN ('new', 'scrape_error', 'classify_error', 'done'))
 );
 
 CREATE INDEX idx_entries_status ON entries(status);
 CREATE INDEX idx_entries_source ON entries(source);
 CREATE INDEX idx_entries_added_at ON entries(added_at);
+CREATE INDEX idx_entries_importance ON entries(importance);
 ```
 
 **Fields:**
@@ -62,11 +69,27 @@ CREATE INDEX idx_entries_added_at ON entries(added_at);
 - `status`: Processing state (new → scrape_error/classify_error/done)
 - `source`: Label given with `add_entries.py --source` (default: the URL file's name without extension)
 - `added_at`: ISO 8601 UTC timestamp when added
-- `processed_at`: ISO 8601 UTC timestamp when completed
-- `data`: JSON with classification results and preprocessing info (see below)
-- `error`: Error message if failed
+- `classified_at`: ISO 8601 UTC timestamp when classification finished (or failed)
+- `classifier_output`: JSON with classification results and preprocessing info (see below)
+- `classify_error_message`: Why scraping or classification failed (scoring errors are not stored)
+- `citation_count`: Semantic Scholar citation count (`score_entries.py`): arXiv / DOI links by ID, other pages by
+  exact title. NULL for LessWrong posts, unknown papers and refused lookups
+- `lw_karma`: LessWrong karma (`baseScore`) of a LessWrong post (`score_entries.py`), NULL otherwise
+- `attention_checked_at`: ISO 8601 UTC timestamp of the citation / karma lookup (`score_entries.py`), so that NULL
+  citations and karma can be told apart: looked up and not found, or not looked up. NULL if not looked up or if
+  Semantic Scholar refused the lookup (retried on the next run)
+- `importance`: Importance of the work for the review, 0.0-1.0 (`score_entries.py`); `export_draft.py --top N` keeps
+  each category's N highest. NULL until scored
+- `importance_reason`: The LLM's one-sentence reason for `importance`
 
-**data JSON structure** (when status='done'):
+Databases made before the column renames have `processed_at`, `data` and `error` instead of `classified_at`,
+`classifier_output` and `classify_error_message`, and `score` instead of `fit` in the categories of the JSON; the code
+renames them in place the first time it opens the database (`_rename_old_columns` in `data_db.py`).
+
+Databases made before `score_entries.py` get the last five columns (and the index) added with `ALTER TABLE` the first
+time the code opens them.
+
+**classifier_output JSON structure** (when status='done'):
 ```json
 {
   "content_available": true,
@@ -76,8 +99,8 @@ CREATE INDEX idx_entries_added_at ON entries(added_at);
   "date": "2025-01-15",
   "summary": "One sentence on what the work does",
   "categories": [
-    {"id": "interpretability_mech", "score": 0.95},
-    {"id": "evals_safety", "score": 0.75}
+    {"id": "interpretability_mech", "fit": 0.95},
+    {"id": "evals_safety", "fit": 0.75}
   ],
   "tokens_full": 50000,
   "tokens_stripped": 15000,
@@ -92,7 +115,7 @@ CREATE INDEX idx_entries_added_at ON entries(added_at);
 - `tokens_full`, `tokens_stripped`: Token counts of the full and the preprocessed HTML (set by the script)
 - `classify_duration`: Total time for classification in seconds
 - Databases made before the classifier was narrowed to categories may have the columns `ai_safety_relevance`,
-  `shallow_review_inclusion` and `kind`, and more fields in `data` (scores, `kind`, `confidence`, ...). The code ignores them.
+  `shallow_review_inclusion` and `kind`, and more fields in `classifier_output` (scores, `kind`, `confidence`, ...). The code ignores them.
 
 ### feedback table
 
@@ -203,7 +226,7 @@ This indicates: re-classified due to obsolete LLM category, appears in 2 categor
 
 **Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data/taxonomy.yaml`.
 It is hand-written and holds the 2026 taxonomy; `src/enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
-which export uses when present. A paper's category is always its highest-scoring one in `entries.data.categories`.
+which export uses when present. A paper's category is always its highest-fit one in `entries.classifier_output.categories`.
 
 The classification taxonomy defines a hierarchical category structure for classifying AI safety/alignment content. Each classified item must be assigned to exactly one **leaf category**.
 
