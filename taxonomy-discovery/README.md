@@ -9,8 +9,8 @@ can be compared. Each method is self-contained: either LLM-only or embedding-onl
 | `2-llm-knn-graph/` | LLM nearest-neighbour graph + Leiden | Claude reads every item and lists each one's 15 nearest items by research agenda; Leiden finds communities in that graph |
 | `3-embedding-knn-graph/` | Embedding nearest-neighbour graph + Leiden (baseline) | Same as 2, but neighbours come from cosine similarity of local embeddings |
 | `4-human-taxonomy/` | Hand-written taxonomy | Categories from `4-human-taxonomy/taxonomy.yaml` (written by a person); the method 1 classifier sorts items into them |
-| `5-semantic-map/` | Interactive UMAP map (not scored) | The 502 selected sources embedded, laid out with UMAP and clustered at two levels; a local website. See its README |
-| `6-map-taxonomy/` | Taxonomy read off the semantic map | Categories written from scratch from the map's Ward tree over the 502 selected sources (`6-map-taxonomy/taxonomy.yaml`); the method 1 classifier sorts items into them |
+| `5-semantic-map/` | Interactive UMAP map, also scored as a taxonomy | The same 624 sources embedded, laid out with UMAP and clustered at two levels; a local website. See its README |
+| `6-map-taxonomy/` | Taxonomy read off the semantic map | Categories written from scratch from the map's Ward tree over the earlier 502 facets-shared sources (`6-map-taxonomy/taxonomy.yaml`, not rewritten for the current sources); the method 1 classifier sorts items into them |
 
 Methods 2 and 3 share everything after the neighbour lists (`shared/graph.py`), so comparing them isolates LLM vs.
 embedding similarity. In both, Claude only *names* the clusters at the end; it doesn't change membership.
@@ -22,13 +22,16 @@ From this folder, with `ANTHROPIC_API_KEY` set (or in `.env` here; otherwise the
 
 ```bash
 uv sync
-uv run python 3-embedding-knn-graph/run.py   # ~$0.25 (naming only); downloads the embedding model once
-uv run python 2-llm-knn-graph/run.py         # ~$5: 2 passes x 57 calls, the item list is prompt-cached
-uv run python 1-llm-taxonomy/run.py          # ~$2-3 with the default 1 refinement round
-uv run python 4-human-taxonomy/run.py        # ~$0.80: sorts items into taxonomy.yaml
-uv run python 6-map-taxonomy/run.py          # ~$1: sorts items into the map-derived taxonomy.yaml
-uv run python compare.py                     # ~$4: scores every method and writes results/comparison.md
+uv run python build_snapshot.py              # free: freezes the items (only when the source lists change)
+uv run python 3-embedding-knn-graph/run.py   # ~$0.50 (naming only); downloads the embedding model once
+uv run python 2-llm-knn-graph/run.py         # ~$28: 2 passes x ~130 calls, the item list is prompt-cached
+uv run python 1-llm-taxonomy/run.py          # ~$6 with the default 1 refinement round
+uv run python 4-human-taxonomy/run.py        # ~$1.70: sorts items into taxonomy.yaml
+uv run python 6-map-taxonomy/run.py          # ~$1.90: sorts items into the map-derived taxonomy.yaml
+uv run python 5-semantic-map/build.py        # ~$0.10: the map site and its taxonomy (clusters.json)
+uv run python compare.py                     # scores every method (2 levels x 624 items each) and writes results/comparison.md
 uv run python report.py                      # free: taxonomy.md + figures for each method
+uv run python bubble_chart.py                # free: results/agenda-bubbles.png, the data-driven taxonomy's agendas sized by sources
 ```
 
 Add `--limit 40` to any method to try it on a fixed random sample. Every Claude call is cached on disk in `cache/`,
@@ -39,12 +42,12 @@ Each method writes to its own `output/`:
 - `taxonomy.md` (from `report.py`): the taxonomy as a document, with descriptions, sizes, example items and scores
 - `graph.png` (from `report.py`): the categories drawn on a nearest-neighbour graph. A numbered overview with a
   legend, then one panel per top-level category with its members highlighted and its subcategories labelled.
-  Methods 1, 4 and 6 have no graph of their own, so they're drawn on method 2's LLM neighbour graph. The layout pulls items in the
+  Methods 1, 4, 5 and 6 have no graph of their own, so they're drawn on method 2's LLM neighbour graph. The layout pulls items in the
   same category together, so read spread and overlap from the panels, not from distances on the overview.
-- `matrix.png`: the neighbour graph as a 285 × 285 matrix, sorted by category. Good categories are dark squares on
+- `matrix.png`: the neighbour graph as a 624 × 624 matrix, sorted by category. Good categories are dark squares on
   the diagonal; shading off the diagonal is overlap. The title gives the share of all link strength that falls
-  inside categories (method 2: 69%, method 4 on method 2's graph: 61%, method 1 on method 2's graph: 58%,
-  method 3: 55%, method 6 on method 2's graph: 55%). No layout, so the most
+  inside categories (method 2: 79%, method 1 on method 2's graph: 68%, method 3: 66%, method 4 on method 2's graph: 65%,
+  method 6 on method 2's graph: 63%, method 5 on method 2's graph: 59%). No layout, so the most
   accurate of the graph views.
 - `category_map.png`: one circle per top-level category with lines for the most strongly linked pairs, and a
   heatmap of average link strength within and between every pair of categories.
@@ -55,12 +58,21 @@ Each method writes to its own `output/`:
 
 ## Input
 
-The 285 in-scope items from a frozen snapshot of facets-shared's items and tags (`data/items-2026-10-21.jsonl`,
-`data/tags-2026-10-21.jsonl`; facets-shared's live files have since grown to ~900 in-scope items, and the short ids
-below are positions in this list, so every method's results depend on it staying fixed) (the 2026 arXiv shortlist plus notable
-LW/AF posts, deduplicated), dropping the ones facets-shared's tagger marked out of scope. arXiv papers come with
-their abstract, LW posts with their opening ~2,000 characters. Items get short ids (`P001`...) in prompts. The whole
-set is about 130k tokens, so it fits in one prompt.
+The 624 sources in draft-pipeline's source lists (`draft-pipeline/data/sources-links/*-2026.txt`), frozen by
+`build_snapshot.py` into `data/items-2026-11-13.jsonl`:
+
+| Source | Items | Text |
+|---|---|---|
+| arXiv shortlist | 355 | abstract (from the shortlist CSV) |
+| LessWrong / AF shortlist | 160 | opening ~2,000 characters |
+| Org research pages (Lenz's list) | 80 | page opening (from facets-shared) |
+| Safety Stack | 29 | abstract or quotes (from facets-shared); 13 more are already in the arXiv shortlist |
+
+Items get short ids (`P001`...) in prompts. They are positions in the snapshot, so rerunning `build_snapshot.py`
+renumbers them and every method has to be rerun. The whole set is about 275k tokens, so it still fits in one prompt.
+
+Unlike the earlier snapshot of facets-shared (285 items, 21 October), these items have no scope or 2025 agenda tags,
+so nothing is dropped as out of scope and the "agreement with 2025" score is gone.
 
 ## Methods in more detail
 
@@ -97,13 +109,10 @@ each cluster from its members' titles and openings.
 | Most-confused pairs | Which categories the classifier mixes up: candidates to merge or redescribe |
 | Other | Share of items in "other" (coverage) |
 | Balance, sizes | Size entropy (1 = equal sizes) and smallest–largest top-level category |
-| NMI / ARI vs 2025 | Agreement of the top level with each item's 2025 top-level group (from facets-shared's first agenda tag) |
 | Agreement between methods | Adjusted Rand index between methods' top levels |
 
 Caveats:
 - Method 1 assigns items with the same kind of classifier the score uses, so its reassignment accuracy is partly
   self-consistency and will run higher. The graph methods' descriptions are written after the fact, so their score
   also tests how well the names describe the clusters.
-- The 2025 reference is coarse: 102 of 285 items only fit a new 2026 agenda and share one "new 2026" label, and
-  "Black-box safety" covers 81 items. Read the NMI/ARI columns as a rough check, not a target.
 - Not yet measured: stability across reruns (e.g. different Leiden seeds or item orderings).

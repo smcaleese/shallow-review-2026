@@ -2,7 +2,7 @@
 
 A result (output/clusters.json in each method folder):
     {
-      "method": "...", "n_items": 285, "params": {...},
+      "method": "...", "n_items": 624, "params": {...},
       "categories": [{"id": "c1", "name": ..., "description": ..., "parent": null},
                      {"id": "c1.1", "name": ..., "description": ..., "parent": "c1"}, ...],
       "assignments": {"P001": "c1.1", ...}   # a leaf (or a top category with no children), or "other"
@@ -22,6 +22,7 @@ from shared.data import item_block, write_json
 
 log = logging.getLogger("taxonomy")
 OTHER = "other"
+SOURCE_LABELS = {"arxiv": "arXiv", "lesswrong": "LW", "org": "org", "safety_stack": "Safety Stack"}
 
 
 # ---------- reading a result ----------
@@ -64,7 +65,7 @@ def category_listing(categories: list[dict], all_categories: list[dict] | None =
     return "\n".join(lines).strip()
 
 
-ASSIGN_SYSTEM = """You sort AI safety research (arXiv papers and LessWrong / Alignment Forum posts) into the categories \
+ASSIGN_SYSTEM = """You sort AI safety research (arXiv papers, LessWrong / Alignment Forum posts, and research pages from AI safety organisations) into the categories \
 of a taxonomy for the Shallow Review of Technical AI Safety.
 
 Put each item in the ONE category whose description best fits what the item is mainly about: the research \
@@ -123,7 +124,7 @@ def write_result(method_dir: Path, method: str, items: list[dict], categories: l
 
 
 def render_markdown(result: dict, items: list[dict]) -> str:
-    titles = {i["pid"]: f"{i['title']} ({'arXiv' if i['source'] == 'arxiv' else 'LW'})" for i in items}
+    titles = {i["pid"]: f"{i['title']} ({SOURCE_LABELS[i['source']]})" for i in items}
     members = defaultdict(list)
     for pid, cid in result["assignments"].items():
         members[cid].append(pid)

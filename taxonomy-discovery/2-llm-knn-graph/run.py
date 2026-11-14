@@ -30,7 +30,7 @@ from shared.taxonomy import write_result
 log = logging.getLogger("llm-knn")
 
 SYSTEM = """You map the field of technical AI safety for the Shallow Review of Technical AI Safety. Below are all \
-{n} items in this year's review (arXiv papers and LessWrong / Alignment Forum posts), each with an id in brackets.
+{n} items in this year's review (arXiv papers, LessWrong / Alignment Forum posts, and research pages from AI safety organisations), each with an id in brackets.
 
 You will be given target item ids. For each target, list the {k} OTHER items nearest to it by research agenda: \
 items working on the same research problem or advancing the same line of work, so that a reader of the review \

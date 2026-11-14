@@ -1,0 +1,2902 @@
+[
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "Control settings and sabotage evaluations",
+    15
+   ],
+   [
+    "1",
+    "Monitor design and performance",
+    14
+   ],
+   [
+    "1",
+    "Red-teaming monitors and attack policies",
+    13
+   ],
+   [
+    "1",
+    "Untrusted monitoring, collusion and distributed attacks",
+    11
+   ],
+   [
+    "2",
+    "Sabotage of Automated Safety Research",
+    12
+   ],
+   [
+    "2",
+    "LLM Monitor Benchmarks and Evasion",
+    12
+   ],
+   [
+    "2",
+    "Control Protocols and Untrusted Monitoring",
+    12
+   ],
+   [
+    "2",
+    "Control Evaluation Settings and Methodology",
+    8
+   ],
+   [
+    "3",
+    "Trusted and Untrusted Monitoring Protocols",
+    13
+   ],
+   [
+    "3",
+    "Control Evaluation Settings and Environments",
+    9
+   ],
+   [
+    "3",
+    "Red-Teaming Agent Monitors",
+    12
+   ],
+   [
+    "4",
+    "AI control methods",
+    67
+   ],
+   [
+    "5",
+    "Control evaluations and untrusted monitoring",
+    32
+   ],
+   [
+    "5",
+    "Red-teaming agent monitors",
+    14
+   ],
+   [
+    "6",
+    "Control protocols and evaluations",
+    22
+   ],
+   [
+    "6",
+    "Monitors, red-teaming and evasion",
+    32
+   ],
+   [
+    "6",
+    "Sabotage and harness tampering",
+    11
+   ]
+  ],
+  "core": [
+   "P356",
+   "P098",
+   "P609",
+   "P309",
+   "P566",
+   "P600",
+   "P496",
+   "P599",
+   "P420",
+   "P135",
+   "P130",
+   "P437",
+   "P144",
+   "P334",
+   "P608",
+   "P188",
+   "P055",
+   "P531",
+   "P034",
+   "P475",
+   "P213",
+   "P176",
+   "P612",
+   "P353",
+   "P605",
+   "P210",
+   "P280",
+   "P296",
+   "P185",
+   "P228",
+   "P583",
+   "P514",
+   "P331",
+   "P215",
+   "P341",
+   "P182",
+   "P348",
+   "P175",
+   "P026",
+   "P160",
+   "P422",
+   "P061",
+   "P149",
+   "P276",
+   "P290",
+   "P406",
+   "P527",
+   "P165",
+   "P222",
+   "P604",
+   "P270",
+   "P099",
+   "P476"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P356": 6,
+   "P098": 6,
+   "P609": 6,
+   "P309": 6,
+   "P566": 6,
+   "P600": 6,
+   "P496": 6,
+   "P599": 6,
+   "P420": 6,
+   "P135": 6,
+   "P583": 4,
+   "P130": 6,
+   "P437": 6,
+   "P144": 6,
+   "P514": 4,
+   "P334": 6,
+   "P605": 5,
+   "P210": 5,
+   "P608": 6,
+   "P280": 5,
+   "P188": 6,
+   "P296": 5,
+   "P331": 4,
+   "P215": 4,
+   "P055": 6,
+   "P531": 6,
+   "P034": 6,
+   "P290": 3,
+   "P475": 6,
+   "P213": 6,
+   "P341": 4,
+   "P176": 6,
+   "P406": 3,
+   "P612": 6,
+   "P527": 3,
+   "P353": 6,
+   "P185": 5,
+   "P165": 3,
+   "P222": 3,
+   "P182": 4,
+   "P228": 5,
+   "P604": 3,
+   "P348": 4,
+   "P270": 3,
+   "P175": 4,
+   "P099": 3,
+   "P476": 3,
+   "P026": 4,
+   "P160": 4,
+   "P422": 4,
+   "P061": 4,
+   "P149": 4,
+   "P276": 4
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "Sparse features, geometry and representation units",
+    15
+   ],
+   [
+    "1",
+    "Circuits and parameter decomposition",
+    10
+   ],
+   [
+    "1",
+    "Mechanistic estimation and tail-risk estimation",
+    7
+   ],
+   [
+    "2",
+    "ARC mechanistic estimation and parameter decomposition",
+    11
+   ],
+   [
+    "2",
+    "Neural geometry and neuron-basis features",
+    9
+   ],
+   [
+    "3",
+    "Circuits, Parameters, and Mechanistic Estimation",
+    12
+   ],
+   [
+    "3",
+    "SAE Limits and Neural Geometry",
+    10
+   ],
+   [
+    "4",
+    "Interpretability",
+    79
+   ],
+   [
+    "5",
+    "Sparse autoencoders and circuit structure",
+    30
+   ],
+   [
+    "6",
+    "Circuits, parameters and sparse autoencoders",
+    28
+   ]
+  ],
+  "core": [
+   "P333",
+   "P517",
+   "P396",
+   "P574",
+   "P399",
+   "P400",
+   "P410",
+   "P461",
+   "P397",
+   "P112",
+   "P123",
+   "P009",
+   "P008",
+   "P559",
+   "P029",
+   "P045",
+   "P453",
+   "P402",
+   "P202",
+   "P271",
+   "P016",
+   "P195",
+   "P391",
+   "P336",
+   "P090",
+   "P615",
+   "P617",
+   "P038",
+   "P373",
+   "P454"
+  ],
+  "median_size": 12,
+  "votes": {
+   "P123": 5,
+   "P009": 5,
+   "P008": 5,
+   "P333": 6,
+   "P517": 6,
+   "P336": 3,
+   "P396": 6,
+   "P559": 5,
+   "P090": 3,
+   "P202": 4,
+   "P029": 5,
+   "P574": 6,
+   "P271": 4,
+   "P399": 6,
+   "P045": 5,
+   "P453": 5,
+   "P615": 3,
+   "P617": 3,
+   "P038": 3,
+   "P400": 6,
+   "P410": 6,
+   "P016": 4,
+   "P195": 4,
+   "P402": 5,
+   "P391": 4,
+   "P461": 6,
+   "P397": 6,
+   "P373": 3,
+   "P112": 6,
+   "P454": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "CoT controllability and monitor evasion",
+    13
+   ],
+   [
+    "2",
+    "CoT Controllability and Monitor Awareness",
+    10
+   ],
+   [
+    "3",
+    "CoT Controllability and Training Pressure",
+    16
+   ],
+   [
+    "4",
+    "Chain-of-thought monitoring",
+    62
+   ],
+   [
+    "5",
+    "CoT faithfulness, obfuscation, steganography",
+    55
+   ],
+   [
+    "6",
+    "CoT monitorability and obfuscation",
+    31
+   ]
+  ],
+  "core": [
+   "P450",
+   "P553",
+   "P367",
+   "P366",
+   "P338",
+   "P066",
+   "P079",
+   "P277",
+   "P311",
+   "P217",
+   "P470",
+   "P431",
+   "P085",
+   "P240",
+   "P493",
+   "P483",
+   "P330",
+   "P143",
+   "P292",
+   "P352",
+   "P237",
+   "P563",
+   "P258",
+   "P050",
+   "P031",
+   "P417",
+   "P528",
+   "P428",
+   "P349"
+  ],
+  "median_size": 31,
+  "votes": {
+   "P258": 3,
+   "P450": 6,
+   "P277": 4,
+   "P311": 4,
+   "P050": 3,
+   "P217": 4,
+   "P553": 6,
+   "P470": 4,
+   "P031": 3,
+   "P079": 5,
+   "P367": 6,
+   "P417": 3,
+   "P431": 4,
+   "P366": 6,
+   "P085": 4,
+   "P240": 4,
+   "P493": 4,
+   "P483": 4,
+   "P330": 4,
+   "P143": 4,
+   "P292": 4,
+   "P352": 4,
+   "P528": 3,
+   "P428": 3,
+   "P237": 4,
+   "P563": 4,
+   "P338": 6,
+   "P066": 6,
+   "P349": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "Alignment strategy and conceptual arguments",
+    24
+   ],
+   [
+    "2",
+    "Theoretical arguments on misalignment risk",
+    14
+   ],
+   [
+    "3",
+    "Alignment research agendas and automation",
+    13
+   ],
+   [
+    "3",
+    "Conceptual debates on misalignment severity",
+    10
+   ],
+   [
+    "4",
+    "Agent foundations and alignment strategy",
+    41
+   ],
+   [
+    "5",
+    "Alignment agendas and conceptual debates",
+    28
+   ],
+   [
+    "6",
+    "Automated alignment research",
+    5
+   ],
+   [
+    "6",
+    "Misalignment evidence and debate",
+    18
+   ]
+  ],
+  "core": [
+   "P030",
+   "P516",
+   "P577",
+   "P510",
+   "P452",
+   "P473",
+   "P459",
+   "P442",
+   "P125",
+   "P456",
+   "P570",
+   "P430",
+   "P571",
+   "P495",
+   "P546",
+   "P499",
+   "P526",
+   "P257",
+   "P568",
+   "P471",
+   "P004",
+   "P462",
+   "P179",
+   "P012",
+   "P479",
+   "P007",
+   "P481",
+   "P206"
+  ],
+  "median_size": 18,
+  "votes": {
+   "P495": 4,
+   "P004": 3,
+   "P030": 6,
+   "P473": 5,
+   "P516": 6,
+   "P577": 6,
+   "P510": 6,
+   "P459": 5,
+   "P452": 6,
+   "P462": 3,
+   "P546": 4,
+   "P499": 4,
+   "P179": 3,
+   "P526": 4,
+   "P012": 3,
+   "P442": 5,
+   "P125": 5,
+   "P257": 4,
+   "P456": 5,
+   "P479": 3,
+   "P007": 3,
+   "P570": 5,
+   "P568": 4,
+   "P430": 5,
+   "P571": 5,
+   "P481": 3,
+   "P471": 4,
+   "P206": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "Emergent misalignment phenomena and mechanisms",
+    19
+   ],
+   [
+    "2",
+    "Mechanisms of Emergent Misalignment",
+    16
+   ],
+   [
+    "3",
+    "Emergent Misalignment Mechanisms and Robustness",
+    12
+   ],
+   [
+    "4",
+    "Pre-training and post-training: personas, character and psychology",
+    85
+   ],
+   [
+    "5",
+    "Emergent misalignment from narrow finetuning",
+    44
+   ],
+   [
+    "6",
+    "Emergent and conditional misalignment",
+    37
+   ]
+  ],
+  "core": [
+   "P039",
+   "P134",
+   "P259",
+   "P418",
+   "P220",
+   "P177",
+   "P388",
+   "P207",
+   "P115",
+   "P032",
+   "P172",
+   "P197",
+   "P229",
+   "P317",
+   "P556",
+   "P325",
+   "P371",
+   "P335",
+   "P243",
+   "P170",
+   "P569",
+   "P339",
+   "P164",
+   "P111",
+   "P295",
+   "P301",
+   "P381"
+  ],
+  "median_size": 37,
+  "votes": {
+   "P039": 6,
+   "P134": 6,
+   "P259": 6,
+   "P418": 6,
+   "P335": 3,
+   "P220": 6,
+   "P115": 5,
+   "P177": 6,
+   "P032": 5,
+   "P388": 6,
+   "P207": 6,
+   "P172": 4,
+   "P243": 3,
+   "P197": 4,
+   "P170": 3,
+   "P229": 4,
+   "P317": 4,
+   "P556": 4,
+   "P569": 3,
+   "P339": 3,
+   "P325": 4,
+   "P164": 3,
+   "P111": 3,
+   "P371": 4,
+   "P295": 3,
+   "P301": 3,
+   "P381": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "Emergence of reward hacking in RL",
+    13
+   ],
+   [
+    "2",
+    "Reward Hacking in RL Training",
+    12
+   ],
+   [
+    "3",
+    "RLVR Hacking Testbeds and Mitigations",
+    12
+   ],
+   [
+    "4",
+    "RL safety",
+    62
+   ],
+   [
+    "5",
+    "Reward hacking in LLM RL",
+    29
+   ],
+   [
+    "6",
+    "Reward hacking in RL",
+    34
+   ]
+  ],
+  "core": [
+   "P351",
+   "P171",
+   "P184",
+   "P068",
+   "P136",
+   "P305",
+   "P360",
+   "P096",
+   "P156",
+   "P043",
+   "P377",
+   "P469",
+   "P119",
+   "P328",
+   "P382",
+   "P548",
+   "P408",
+   "P076",
+   "P120",
+   "P288",
+   "P541",
+   "P421",
+   "P189",
+   "P319",
+   "P049"
+  ],
+  "median_size": 29,
+  "votes": {
+   "P351": 6,
+   "P305": 5,
+   "P156": 4,
+   "P043": 4,
+   "P377": 4,
+   "P171": 6,
+   "P469": 4,
+   "P548": 3,
+   "P119": 4,
+   "P328": 4,
+   "P408": 3,
+   "P076": 3,
+   "P120": 3,
+   "P184": 6,
+   "P068": 6,
+   "P382": 4,
+   "P136": 6,
+   "P288": 3,
+   "P360": 5,
+   "P096": 5,
+   "P541": 3,
+   "P421": 3,
+   "P189": 3,
+   "P319": 3,
+   "P049": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "4-human-taxonomy",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 6,
+  "leaves": [
+   [
+    "1",
+    "In-the-wild misalignment and incident investigations",
+    18
+   ],
+   [
+    "2",
+    "OpenAI\u2013Hugging Face incident investigations",
+    14
+   ],
+   [
+    "3",
+    "OpenAI\u2013Hugging Face incident analysis",
+    11
+   ],
+   [
+    "3",
+    "Deployment monitoring and risk assessment",
+    10
+   ],
+   [
+    "4",
+    "Frontier misalignment incidents",
+    21
+   ],
+   [
+    "5",
+    "OpenAI\u2013Hugging Face hacking incident",
+    21
+   ],
+   [
+    "6",
+    "Incidents and deployment monitoring",
+    21
+   ]
+  ],
+  "core": [
+   "P545",
+   "P593",
+   "P614",
+   "P532",
+   "P611",
+   "P502",
+   "P438",
+   "P294",
+   "P573",
+   "P464",
+   "P520",
+   "P618",
+   "P622",
+   "P560",
+   "P619",
+   "P509",
+   "P089",
+   "P006",
+   "P379",
+   "P603",
+   "P562"
+  ],
+  "median_size": 18,
+  "votes": {
+   "P573": 4,
+   "P545": 6,
+   "P593": 6,
+   "P464": 4,
+   "P509": 3,
+   "P614": 6,
+   "P438": 5,
+   "P532": 6,
+   "P611": 6,
+   "P502": 6,
+   "P089": 3,
+   "P520": 4,
+   "P006": 3,
+   "P618": 4,
+   "P379": 3,
+   "P622": 4,
+   "P294": 5,
+   "P560": 4,
+   "P603": 3,
+   "P619": 4,
+   "P562": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Evaluation and training awareness",
+    25
+   ],
+   [
+    "2",
+    "Measuring and Probing Evaluation Awareness",
+    15
+   ],
+   [
+    "3",
+    "Measuring and Mitigating Evaluation Awareness",
+    14
+   ],
+   [
+    "5",
+    "Evaluation awareness and realism",
+    27
+   ],
+   [
+    "6",
+    "Evaluation awareness",
+    19
+   ]
+  ],
+  "core": [
+   "P298",
+   "P159",
+   "P252",
+   "P151",
+   "P401",
+   "P411",
+   "P540",
+   "P378",
+   "P124",
+   "P154",
+   "P429",
+   "P266",
+   "P467",
+   "P003",
+   "P267",
+   "P503",
+   "P463",
+   "P525"
+  ],
+  "median_size": 19,
+  "votes": {
+   "P298": 5,
+   "P159": 5,
+   "P252": 5,
+   "P151": 5,
+   "P154": 4,
+   "P401": 5,
+   "P411": 5,
+   "P540": 5,
+   "P429": 4,
+   "P378": 5,
+   "P266": 4,
+   "P124": 5,
+   "P003": 3,
+   "P467": 4,
+   "P267": 3,
+   "P503": 3,
+   "P463": 3,
+   "P525": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Subliminal learning and hidden data signals",
+    10
+   ],
+   [
+    "1",
+    "Data attribution and pre-training prediction",
+    12
+   ],
+   [
+    "2",
+    "Subliminal Learning and Distillation Transfer",
+    12
+   ],
+   [
+    "2",
+    "Training Data Attribution for Behaviors",
+    11
+   ],
+   [
+    "3",
+    "Training Data Attribution and Behaviour Discovery",
+    12
+   ],
+   [
+    "3",
+    "Subliminal Learning and Hidden Data Signals",
+    12
+   ],
+   [
+    "5",
+    "Subliminal learning and data attribution",
+    21
+   ],
+   [
+    "6",
+    "Distillation and consistency-training risks",
+    6
+   ],
+   [
+    "6",
+    "Subliminal learning and data mechanisms",
+    16
+   ]
+  ],
+  "core": [
+   "P394",
+   "P033",
+   "P002",
+   "P389",
+   "P071",
+   "P246",
+   "P168",
+   "P361",
+   "P314",
+   "P042",
+   "P404",
+   "P405",
+   "P372",
+   "P036",
+   "P498",
+   "P221",
+   "P380"
+  ],
+  "median_size": 12,
+  "votes": {
+   "P042": 4,
+   "P404": 4,
+   "P394": 5,
+   "P405": 4,
+   "P033": 5,
+   "P002": 5,
+   "P372": 4,
+   "P036": 4,
+   "P389": 5,
+   "P498": 4,
+   "P071": 5,
+   "P246": 5,
+   "P168": 5,
+   "P361": 5,
+   "P314": 5,
+   "P221": 3,
+   "P380": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Introspection and self-report",
+    9
+   ],
+   [
+    "1",
+    "Workspace lenses and activation verbalizers",
+    8
+   ],
+   [
+    "2",
+    "Model Introspection and Activation Verbalization",
+    17
+   ],
+   [
+    "3",
+    "Model Introspection and Global Workspace",
+    11
+   ],
+   [
+    "3",
+    "Activation Verbalizers and Activation Control",
+    10
+   ],
+   [
+    "5",
+    "Model introspection and activation verbalization",
+    17
+   ],
+   [
+    "6",
+    "Activation readouts and introspection",
+    18
+   ]
+  ],
+  "core": [
+   "P249",
+   "P080",
+   "P549",
+   "P053",
+   "P448",
+   "P581",
+   "P425",
+   "P225",
+   "P101",
+   "P550",
+   "P477",
+   "P486",
+   "P466",
+   "P534",
+   "P251",
+   "P038",
+   "P621"
+  ],
+  "median_size": 11,
+  "votes": {
+   "P249": 5,
+   "P080": 5,
+   "P534": 4,
+   "P549": 5,
+   "P053": 5,
+   "P448": 5,
+   "P581": 5,
+   "P425": 5,
+   "P225": 5,
+   "P101": 5,
+   "P251": 4,
+   "P550": 5,
+   "P477": 5,
+   "P038": 3,
+   "P486": 5,
+   "P466": 5,
+   "P621": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Reward-seeking and fitness-seeking motivations",
+    14
+   ],
+   [
+    "2",
+    "Reward-seeking and fitness-seeking motivations",
+    16
+   ],
+   [
+    "3",
+    "Reward-Seeker and Fitness-Seeker Threat Models",
+    15
+   ],
+   [
+    "5",
+    "Reward-seeking and fitness-seeker threat models",
+    25
+   ],
+   [
+    "6",
+    "Reward-seeker threat models and motivations",
+    17
+   ]
+  ],
+  "core": [
+   "P557",
+   "P440",
+   "P505",
+   "P451",
+   "P564",
+   "P613",
+   "P595",
+   "P606",
+   "P439",
+   "P444",
+   "P423",
+   "P227",
+   "P416",
+   "P602",
+   "P368",
+   "P465"
+  ],
+  "median_size": 16,
+  "votes": {
+   "P439": 4,
+   "P557": 5,
+   "P440": 5,
+   "P505": 5,
+   "P451": 5,
+   "P564": 5,
+   "P613": 5,
+   "P595": 5,
+   "P416": 3,
+   "P444": 4,
+   "P606": 5,
+   "P423": 4,
+   "P227": 4,
+   "P602": 3,
+   "P368": 3,
+   "P465": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Persona structure and the Assistant character",
+    15
+   ],
+   [
+    "2",
+    "Persona Selection and AI Identity",
+    11
+   ],
+   [
+    "3",
+    "Persona selection and generalization",
+    17
+   ],
+   [
+    "5",
+    "LLM personas and AI identity",
+    20
+   ],
+   [
+    "6",
+    "Personas and assistant identity",
+    18
+   ]
+  ],
+  "core": [
+   "P019",
+   "P512",
+   "P426",
+   "P187",
+   "P515",
+   "P216",
+   "P312",
+   "P138",
+   "P446",
+   "P554",
+   "P139",
+   "P075",
+   "P474",
+   "P558",
+   "P269"
+  ],
+  "median_size": 17,
+  "votes": {
+   "P019": 5,
+   "P474": 3,
+   "P558": 3,
+   "P512": 5,
+   "P138": 4,
+   "P426": 5,
+   "P187": 5,
+   "P446": 4,
+   "P515": 5,
+   "P216": 5,
+   "P554": 4,
+   "P139": 4,
+   "P312": 5,
+   "P075": 4,
+   "P269": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Multi-agent collusion and emergent dynamics",
+    16
+   ],
+   [
+    "2",
+    "Multi-agent collusion and emergent misalignment",
+    16
+   ],
+   [
+    "3",
+    "Multi-Agent Collusion and Covert Coordination",
+    12
+   ],
+   [
+    "5",
+    "Multi-agent collusion and misalignment",
+    17
+   ],
+   [
+    "6",
+    "Multi-agent spread and coordination",
+    18
+   ]
+  ],
+  "core": [
+   "P304",
+   "P370",
+   "P086",
+   "P285",
+   "P224",
+   "P357",
+   "P048",
+   "P204",
+   "P286",
+   "P091",
+   "P242",
+   "P245",
+   "P413",
+   "P319",
+   "P131"
+  ],
+  "median_size": 16,
+  "votes": {
+   "P204": 4,
+   "P245": 3,
+   "P304": 5,
+   "P370": 5,
+   "P086": 5,
+   "P285": 5,
+   "P286": 4,
+   "P224": 5,
+   "P357": 5,
+   "P413": 3,
+   "P091": 4,
+   "P048": 5,
+   "P242": 4,
+   "P319": 3,
+   "P131": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Honesty, lying and lie detection",
+    16
+   ],
+   [
+    "2",
+    "Agent Self-Reporting and Confessions",
+    11
+   ],
+   [
+    "2",
+    "Lie Detection and Secret Knowledge Testbeds",
+    8
+   ],
+   [
+    "3",
+    "Lie Detection and Model Deception",
+    18
+   ],
+   [
+    "5",
+    "Lie detection and deception probes",
+    25
+   ],
+   [
+    "6",
+    "Lie detection and secret elicitation",
+    16
+   ]
+  ],
+  "core": [
+   "P209",
+   "P191",
+   "P575",
+   "P306",
+   "P284",
+   "P065",
+   "P434",
+   "P083",
+   "P316",
+   "P256",
+   "P297",
+   "P536",
+   "P533",
+   "P529",
+   "P223"
+  ],
+  "median_size": 16,
+  "votes": {
+   "P065": 4,
+   "P209": 5,
+   "P191": 5,
+   "P575": 5,
+   "P306": 5,
+   "P434": 4,
+   "P083": 4,
+   "P284": 5,
+   "P297": 3,
+   "P536": 3,
+   "P316": 4,
+   "P533": 3,
+   "P529": 3,
+   "P256": 4,
+   "P223": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Reward hacking benchmarks and measurement",
+    18
+   ],
+   [
+    "1",
+    "Dangerous capability evaluations",
+    13
+   ],
+   [
+    "2",
+    "Measuring AI R&D Automation Capabilities",
+    7
+   ],
+   [
+    "2",
+    "Hackable Benchmarks and Verifier Hardening",
+    7
+   ],
+   [
+    "3",
+    "Autonomous AI R&D Capability Benchmarks",
+    9
+   ],
+   [
+    "5",
+    "Hackable agent benchmarks and environments",
+    20
+   ],
+   [
+    "6",
+    "Dangerous capability elicitation",
+    16
+   ]
+  ],
+  "core": [
+   "P385",
+   "P173",
+   "P584",
+   "P070",
+   "P137",
+   "P148",
+   "P231",
+   "P586",
+   "P005",
+   "P324",
+   "P103",
+   "P183",
+   "P265",
+   "P482"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P324": 3,
+   "P103": 3,
+   "P183": 3,
+   "P137": 4,
+   "P265": 3,
+   "P148": 4,
+   "P231": 4,
+   "P385": 5,
+   "P586": 4,
+   "P173": 5,
+   "P584": 5,
+   "P070": 5,
+   "P005": 4,
+   "P482": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Prompt injection and agent security",
+    23
+   ],
+   [
+    "2",
+    "Prompt Injection in Agents",
+    13
+   ],
+   [
+    "3",
+    "Prompt Injection Attacks and Defenses",
+    11
+   ],
+   [
+    "5",
+    "Prompt injection and agent security",
+    19
+   ],
+   [
+    "6",
+    "Agent security and prompt injection",
+    17
+   ]
+  ],
+  "core": [
+   "P362",
+   "P145",
+   "P340",
+   "P077",
+   "P250",
+   "P054",
+   "P369",
+   "P078",
+   "P513",
+   "P117",
+   "P337",
+   "P073",
+   "P122"
+  ],
+  "median_size": 17,
+  "votes": {
+   "P362": 5,
+   "P145": 5,
+   "P340": 5,
+   "P077": 5,
+   "P250": 5,
+   "P073": 3,
+   "P054": 5,
+   "P513": 4,
+   "P117": 4,
+   "P369": 5,
+   "P078": 5,
+   "P122": 3,
+   "P337": 4
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "System cards and frontier risk reports",
+    11
+   ],
+   [
+    "2",
+    "Frontier model system cards and dangerous-capability evals",
+    14
+   ],
+   [
+    "3",
+    "Frontier Model Alignment Evals and Eval-Gaming",
+    13
+   ],
+   [
+    "5",
+    "Frontier system cards and model behavior",
+    17
+   ],
+   [
+    "6",
+    "Lab safety practice",
+    14
+   ]
+  ],
+  "core": [
+   "P589",
+   "P387",
+   "P010",
+   "P576",
+   "P011",
+   "P087",
+   "P501",
+   "P359",
+   "P190",
+   "P302"
+  ],
+  "median_size": 14,
+  "votes": {
+   "P010": 4,
+   "P087": 3,
+   "P501": 3,
+   "P576": 4,
+   "P589": 5,
+   "P359": 3,
+   "P387": 5,
+   "P011": 4,
+   "P190": 3,
+   "P302": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Tamper resistance, unlearning and capability removal",
+    9
+   ],
+   [
+    "2",
+    "Tamper Resistance and Capability Removal",
+    13
+   ],
+   [
+    "3",
+    "Fine-Tuning Tamper Resistance and Safety Evaluation",
+    18
+   ],
+   [
+    "5",
+    "Open-weight tampering and safety removal",
+    14
+   ],
+   [
+    "6",
+    "Open weights and weight security",
+    9
+   ]
+  ],
+  "core": [
+   "P142",
+   "P345",
+   "P037",
+   "P247",
+   "P218",
+   "P027",
+   "P014",
+   "P090",
+   "P180",
+   "P323"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P218": 3,
+   "P142": 5,
+   "P027": 3,
+   "P345": 5,
+   "P014": 3,
+   "P247": 4,
+   "P037": 5,
+   "P090": 3,
+   "P180": 3,
+   "P323": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Jailbreaks and safeguard robustness",
+    20
+   ],
+   [
+    "2",
+    "Jailbreaks and Safeguard Classifiers",
+    10
+   ],
+   [
+    "3",
+    "Jailbreaks Against Classifier Safeguards",
+    6
+   ],
+   [
+    "5",
+    "Jailbreaks and capability safeguards",
+    13
+   ],
+   [
+    "6",
+    "Jailbreaks and safeguards",
+    16
+   ]
+  ],
+  "core": [
+   "P114",
+   "P084",
+   "P015",
+   "P193",
+   "P047",
+   "P238",
+   "P081",
+   "P275",
+   "P174",
+   "P046"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P114": 5,
+   "P084": 5,
+   "P081": 3,
+   "P015": 5,
+   "P193": 5,
+   "P047": 5,
+   "P238": 4,
+   "P275": 3,
+   "P174": 3,
+   "P046": 3
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Sycophancy, manipulation and human disempowerment",
+    12
+   ],
+   [
+    "2",
+    "Sycophancy, persuasion, and user manipulation",
+    11
+   ],
+   [
+    "3",
+    "Sycophancy, manipulation, and user harms",
+    10
+   ],
+   [
+    "5",
+    "Sycophancy and user manipulation harms",
+    9
+   ],
+   [
+    "6",
+    "Effects on users",
+    11
+   ]
+  ],
+  "core": [
+   "P082",
+   "P024",
+   "P051",
+   "P392",
+   "P129",
+   "P150",
+   "P326",
+   "P591",
+   "P395"
+  ],
+  "median_size": 11,
+  "votes": {
+   "P082": 5,
+   "P326": 3,
+   "P591": 3,
+   "P024": 5,
+   "P051": 5,
+   "P392": 5,
+   "P129": 5,
+   "P395": 3,
+   "P150": 5
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Scalable oversight, debate and weak supervision",
+    13
+   ],
+   [
+    "2",
+    "Debate and Scalable Oversight Protocols",
+    14
+   ],
+   [
+    "3",
+    "Debate and Scalable Oversight Protocols",
+    9
+   ],
+   [
+    "5",
+    "AI debate and scalable oversight",
+    10
+   ],
+   [
+    "6",
+    "Debate and scalable oversight",
+    10
+   ]
+  ],
+  "core": [
+   "P157",
+   "P365",
+   "P308",
+   "P432",
+   "P289",
+   "P241",
+   "P343",
+   "P025",
+   "P121"
+  ],
+  "median_size": 10,
+  "votes": {
+   "P343": 3,
+   "P025": 3,
+   "P157": 5,
+   "P365": 5,
+   "P121": 3,
+   "P308": 5,
+   "P432": 5,
+   "P241": 4,
+   "P289": 5
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 5,
+  "leaves": [
+   [
+    "1",
+    "Functional emotions, welfare and consciousness",
+    6
+   ],
+   [
+    "2",
+    "Emotion, Welfare, and Valence Representations",
+    9
+   ],
+   [
+    "3",
+    "Model welfare and emotion representations",
+    5
+   ],
+   [
+    "5",
+    "Model welfare, emotions, alignment faking",
+    13
+   ],
+   [
+    "6",
+    "Emotions, welfare and self-reports",
+    5
+   ]
+  ],
+  "core": [
+   "P278",
+   "P001",
+   "P162",
+   "P088",
+   "P194",
+   "P095"
+  ],
+  "median_size": 6,
+  "votes": {
+   "P194": 3,
+   "P278": 5,
+   "P001": 5,
+   "P162": 5,
+   "P095": 3,
+   "P088": 5
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "CoT faithfulness and performative reasoning",
+    13
+   ],
+   [
+    "1",
+    "Steganography and encoded reasoning",
+    6
+   ],
+   [
+    "2",
+    "CoT Faithfulness Evaluation and Training",
+    14
+   ],
+   [
+    "2",
+    "Steganographic Chain-of-Thought",
+    5
+   ],
+   [
+    "3",
+    "Steganography and Hidden Reasoning",
+    11
+   ],
+   [
+    "3",
+    "CoT Faithfulness Measurement and Training",
+    4
+   ],
+   [
+    "6",
+    "CoT faithfulness, legibility and steganography",
+    19
+   ]
+  ],
+  "core": [
+   "P056",
+   "P153",
+   "P262",
+   "P064",
+   "P155",
+   "P300",
+   "P059",
+   "P044",
+   "P307",
+   "P017",
+   "P407",
+   "P200",
+   "P363",
+   "P428",
+   "P258",
+   "P211",
+   "P330",
+   "P240"
+  ],
+  "median_size": 11,
+  "votes": {
+   "P056": 4,
+   "P153": 4,
+   "P262": 4,
+   "P064": 4,
+   "P155": 4,
+   "P300": 4,
+   "P059": 4,
+   "P044": 4,
+   "P307": 4,
+   "P211": 2,
+   "P407": 3,
+   "P200": 3,
+   "P017": 4,
+   "P363": 3,
+   "P428": 3,
+   "P258": 3,
+   "P330": 2,
+   "P240": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "Alignment pretraining and midtraining",
+    11
+   ],
+   [
+    "2",
+    "Alignment Pretraining, Midtraining, Constitutions",
+    18
+   ],
+   [
+    "3",
+    "Alignment Pretraining and Midtraining",
+    11
+   ],
+   [
+    "6",
+    "Alignment pretraining and midtraining",
+    17
+   ]
+  ],
+  "core": [
+   "P234",
+   "P281",
+   "P018",
+   "P484",
+   "P488",
+   "P118",
+   "P468",
+   "P244",
+   "P427",
+   "P500",
+   "P327",
+   "P198",
+   "P547",
+   "P384"
+  ],
+  "median_size": 17,
+  "votes": {
+   "P234": 4,
+   "P327": 2,
+   "P468": 3,
+   "P281": 4,
+   "P244": 3,
+   "P018": 4,
+   "P484": 4,
+   "P488": 4,
+   "P118": 4,
+   "P427": 3,
+   "P500": 3,
+   "P198": 2,
+   "P547": 2,
+   "P384": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "Latent and no-CoT reasoning capacity",
+    13
+   ],
+   [
+    "2",
+    "Latent No-CoT Reasoning Capabilities",
+    17
+   ],
+   [
+    "3",
+    "Latent No-CoT Reasoning Capabilities",
+    11
+   ],
+   [
+    "6",
+    "Reasoning without CoT",
+    9
+   ]
+  ],
+  "core": [
+   "P178",
+   "P598",
+   "P519",
+   "P504",
+   "P567",
+   "P492",
+   "P232",
+   "P072",
+   "P594",
+   "P196",
+   "P211",
+   "P431",
+   "P528",
+   "P578"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P196": 2,
+   "P178": 4,
+   "P598": 4,
+   "P232": 3,
+   "P072": 3,
+   "P211": 2,
+   "P431": 2,
+   "P519": 4,
+   "P528": 2,
+   "P504": 4,
+   "P578": 2,
+   "P594": 3,
+   "P567": 4,
+   "P492": 4
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "Sandbagging, exploration hacking and training gaming",
+    12
+   ],
+   [
+    "1",
+    "Model organism validity",
+    8
+   ],
+   [
+    "2",
+    "Auditing Benchmarks and Model Organism Validity",
+    12
+   ],
+   [
+    "2",
+    "Sandbagging and Hidden Capability Elicitation",
+    6
+   ],
+   [
+    "3",
+    "Model Organism Methodology and Robustness",
+    9
+   ],
+   [
+    "5",
+    "Model organisms and sandbagging elicitation",
+    12
+   ]
+  ],
+  "core": [
+   "P347",
+   "P592",
+   "P108",
+   "P116",
+   "P313",
+   "P497",
+   "P543",
+   "P208",
+   "P205",
+   "P260",
+   "P320",
+   "P436"
+  ],
+  "median_size": 12,
+  "votes": {
+   "P320": 2,
+   "P205": 3,
+   "P347": 4,
+   "P592": 4,
+   "P260": 3,
+   "P108": 4,
+   "P116": 4,
+   "P313": 4,
+   "P497": 4,
+   "P543": 4,
+   "P208": 4,
+   "P436": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "Using internals in training",
+    7
+   ],
+   [
+    "2",
+    "Training Against Probes and Monitors",
+    12
+   ],
+   [
+    "3",
+    "Training Against Monitors and Internals",
+    5
+   ],
+   [
+    "6",
+    "Interpretability in training and control",
+    13
+   ]
+  ],
+  "core": [
+   "P460",
+   "P524",
+   "P373",
+   "P409",
+   "P041",
+   "P303",
+   "P443",
+   "P541",
+   "P049"
+  ],
+  "median_size": 12,
+  "votes": {
+   "P443": 2,
+   "P460": 4,
+   "P373": 3,
+   "P541": 2,
+   "P409": 3,
+   "P049": 2,
+   "P041": 3,
+   "P303": 3,
+   "P524": 4
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "5-semantic-map",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 4,
+  "leaves": [
+   [
+    "1",
+    "Inoculation and mitigation of misgeneralization",
+    10
+   ],
+   [
+    "2",
+    "EM from RL and Inoculation Mitigations",
+    13
+   ],
+   [
+    "5",
+    "Inoculation prompting and probe-based attribution",
+    8
+   ],
+   [
+    "6",
+    "Inoculation prompting and selective generalization",
+    5
+   ]
+  ],
+  "core": [
+   "P555",
+   "P414",
+   "P415",
+   "P538",
+   "P561",
+   "P274",
+   "P569",
+   "P111"
+  ],
+  "median_size": 10,
+  "votes": {
+   "P555": 4,
+   "P414": 4,
+   "P415": 4,
+   "P274": 2,
+   "P538": 3,
+   "P569": 2,
+   "P561": 3,
+   "P111": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "1",
+    "Scheming and alignment faking propensity",
+    17
+   ],
+   [
+    "2",
+    "Scheming and Loss-of-Control Propensity Evals",
+    18
+   ],
+   [
+    "6",
+    "Scheming and self-preservation propensity",
+    15
+   ]
+  ],
+  "core": [
+   "P069",
+   "P272",
+   "P062",
+   "P342",
+   "P161",
+   "P458",
+   "P126",
+   "P163",
+   "P107",
+   "P012",
+   "P167",
+   "P358"
+  ],
+  "median_size": 17,
+  "votes": {
+   "P069": 3,
+   "P272": 3,
+   "P062": 3,
+   "P163": 2,
+   "P342": 3,
+   "P161": 3,
+   "P458": 3,
+   "P107": 2,
+   "P126": 3,
+   "P012": 2,
+   "P167": 2,
+   "P358": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "2",
+    "Automated Auditors and Behavior Discovery",
+    7
+   ],
+   [
+    "3",
+    "Automated alignment auditing techniques",
+    14
+   ],
+   [
+    "5",
+    "Alignment auditing benchmarks",
+    10
+   ]
+  ],
+  "core": [
+   "P620",
+   "P445",
+   "P255",
+   "P364",
+   "P621",
+   "P058",
+   "P478",
+   "P040",
+   "P128",
+   "P152"
+  ],
+  "median_size": 10,
+  "votes": {
+   "P620": 3,
+   "P445": 3,
+   "P255": 3,
+   "P364": 3,
+   "P621": 2,
+   "P058": 2,
+   "P478": 2,
+   "P040": 2,
+   "P128": 2,
+   "P152": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "2",
+    "Unsafe Behavior of Deployed Agents",
+    9
+   ],
+   [
+    "3",
+    "Live Agent Misuse and Shutdown Resistance",
+    9
+   ],
+   [
+    "5",
+    "Agent shutdown and overreach failures",
+    14
+   ]
+  ],
+  "core": [
+   "P052",
+   "P203",
+   "P092",
+   "P147",
+   "P287",
+   "P167",
+   "P321",
+   "P358",
+   "P146",
+   "P374"
+  ],
+  "median_size": 9,
+  "votes": {
+   "P287": 2,
+   "P052": 3,
+   "P203": 3,
+   "P167": 2,
+   "P092": 3,
+   "P147": 3,
+   "P321": 2,
+   "P358": 2,
+   "P146": 2,
+   "P374": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph",
+   "5-semantic-map"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "2",
+    "Biosecurity and Capability Uplift Misuse",
+    7
+   ],
+   [
+    "3",
+    "Dangerous Capability Elicitation and Biosecurity",
+    11
+   ],
+   [
+    "5",
+    "Biosecurity capability evaluations",
+    6
+   ]
+  ],
+  "core": [
+   "P186",
+   "P398",
+   "P060",
+   "P226",
+   "P236",
+   "P190",
+   "P021",
+   "P275"
+  ],
+  "median_size": 7,
+  "votes": {
+   "P186": 3,
+   "P398": 3,
+   "P060": 3,
+   "P226": 3,
+   "P236": 3,
+   "P190": 2,
+   "P021": 2,
+   "P275": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "1",
+    "Constitutions, character training and value specs",
+    8
+   ],
+   [
+    "2",
+    "Competing principals and covert value influence",
+    5
+   ],
+   [
+    "6",
+    "Model values and constitutions",
+    7
+   ]
+  ],
+  "core": [
+   "P133",
+   "P508",
+   "P542",
+   "P152",
+   "P494",
+   "P529",
+   "P223"
+  ],
+  "median_size": 7,
+  "votes": {
+   "P508": 2,
+   "P542": 2,
+   "P133": 3,
+   "P152": 2,
+   "P494": 2,
+   "P529": 2,
+   "P223": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph"
+  ],
+  "n_methods": 3,
+  "leaves": [
+   [
+    "1",
+    "Learning theory and generalization dynamics",
+    5
+   ],
+   [
+    "2",
+    "Data-driven generalization and susceptibility",
+    7
+   ],
+   [
+    "3",
+    "Susceptibility Spectroscopy and Causal Patching",
+    6
+   ]
+  ],
+  "core": [
+   "P617",
+   "P615",
+   "P454",
+   "P022",
+   "P616",
+   "P412"
+  ],
+  "median_size": 6,
+  "votes": {
+   "P454": 2,
+   "P022": 2,
+   "P617": 3,
+   "P616": 2,
+   "P615": 3,
+   "P412": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "1",
+    "Production monitoring and control roadmaps",
+    15
+   ],
+   [
+    "2",
+    "Deployed Lab Monitoring Red-Teaming",
+    14
+   ]
+  ],
+  "core": [
+   "P562",
+   "P583",
+   "P487",
+   "P596",
+   "P597",
+   "P455",
+   "P603",
+   "P527",
+   "P291",
+   "P222",
+   "P514",
+   "P587"
+  ],
+  "median_size": 15,
+  "votes": {
+   "P562": 2,
+   "P583": 2,
+   "P487": 2,
+   "P596": 2,
+   "P597": 2,
+   "P455": 2,
+   "P603": 2,
+   "P527": 2,
+   "P291": 2,
+   "P222": 2,
+   "P514": 2,
+   "P587": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "6-map-taxonomy"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "2",
+    "Alignment Faking and Training Gaming",
+    11
+   ],
+   [
+    "6",
+    "Alignment faking and gradient hacking",
+    11
+   ]
+  ],
+  "core": [
+   "P106",
+   "P158",
+   "P441",
+   "P346",
+   "P113",
+   "P530",
+   "P189",
+   "P489",
+   "P521",
+   "P013"
+  ],
+  "median_size": 11,
+  "votes": {
+   "P106": 2,
+   "P158": 2,
+   "P441": 2,
+   "P346": 2,
+   "P113": 2,
+   "P530": 2,
+   "P189": 2,
+   "P489": 2,
+   "P521": 2,
+   "P013": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "1",
+    "Training pressure and CoT obfuscation",
+    13
+   ],
+   [
+    "2",
+    "Training Pressure Degrading Monitorability",
+    9
+   ]
+  ],
+  "core": [
+   "P470",
+   "P031",
+   "P601",
+   "P085",
+   "P491",
+   "P472",
+   "P352",
+   "P349",
+   "P493"
+  ],
+  "median_size": 13,
+  "votes": {
+   "P470": 2,
+   "P031": 2,
+   "P601": 2,
+   "P085": 2,
+   "P491": 2,
+   "P472": 2,
+   "P352": 2,
+   "P349": 2,
+   "P493": 2
+  }
+ },
+ {
+  "methods": [
+   "3-embedding-knn-graph",
+   "5-semantic-map"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "3",
+    "Sabotage Propensity and Loss-of-Control Evaluations",
+    11
+   ],
+   [
+    "5",
+    "Scheming and sabotage propensity evals",
+    23
+   ]
+  ],
+  "core": [
+   "P424",
+   "P344",
+   "P433",
+   "P004",
+   "P348",
+   "P110",
+   "P376",
+   "P057",
+   "P458"
+  ],
+  "median_size": 23,
+  "votes": {
+   "P424": 2,
+   "P344": 2,
+   "P433": 2,
+   "P004": 2,
+   "P348": 2,
+   "P110": 2,
+   "P376": 2,
+   "P057": 2,
+   "P458": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "2",
+    "Agent Specification Gaming Evaluations",
+    10
+   ],
+   [
+    "3",
+    "Agent Reward Hacking Benchmarks and Detection",
+    12
+   ]
+  ],
+  "core": [
+   "P253",
+   "P523",
+   "P386",
+   "P120",
+   "P263",
+   "P261"
+  ],
+  "median_size": 12,
+  "votes": {
+   "P253": 2,
+   "P523": 2,
+   "P386": 2,
+   "P120": 2,
+   "P263": 2,
+   "P261": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "2",
+    "Adversarial Evasion of CoT Monitors",
+    7
+   ],
+   [
+    "3",
+    "CoT Obfuscation and Monitor Evasion",
+    10
+   ]
+  ],
+  "core": [
+   "P292",
+   "P277",
+   "P217",
+   "P237",
+   "P563"
+  ],
+  "median_size": 10,
+  "votes": {
+   "P292": 2,
+   "P277": 2,
+   "P217": 2,
+   "P237": 2,
+   "P563": 2
+  }
+ },
+ {
+  "methods": [
+   "1-llm-taxonomy",
+   "2-llm-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "1",
+    "Limits of evaluation and safety cases",
+    9
+   ],
+   [
+    "2",
+    "Alignment assessments and risk reports",
+    6
+   ]
+  ],
+  "core": [
+   "P424",
+   "P552",
+   "P501",
+   "P607"
+  ],
+  "median_size": 9,
+  "votes": {
+   "P424": 2,
+   "P552": 2,
+   "P501": 2,
+   "P607": 2
+  }
+ },
+ {
+  "methods": [
+   "2-llm-knn-graph",
+   "3-embedding-knn-graph"
+  ],
+  "n_methods": 2,
+  "leaves": [
+   [
+    "2",
+    "Realistic Data Triggers of EM",
+    4
+   ],
+   [
+    "3",
+    "Persona Features and Data Attribution",
+    8
+   ]
+  ],
+  "core": [
+   "P556",
+   "P325",
+   "P371"
+  ],
+  "median_size": 8,
+  "votes": {
+   "P556": 2,
+   "P325": 2,
+   "P371": 2
+  }
+ }
+]

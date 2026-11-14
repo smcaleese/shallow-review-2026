@@ -225,7 +225,7 @@ This indicates: re-classified due to obsolete LLM category, appears in 2 categor
 ## Classification Taxonomy
 
 **Ground truth:** `taxonomy.yaml` in `DATA_PATH` (`shallow_review/common.py`), currently `data/taxonomy.yaml`.
-It is hand-written and holds the 2026 taxonomy; `src/enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
+It holds the 2026 taxonomy (the data-driven one since 2026-11-14; the earlier draft is kept as `data/taxonomy-draft-2026-11-03.yaml`); `src/enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it (same content plus `agenda` blocks),
 which export uses when present. A paper's category is always its highest-fit one in `entries.classifier_output.categories`.
 
 The classification taxonomy defines a hierarchical category structure for classifying AI safety/alignment content. Each classified item must be assigned to exactly one **leaf category**.

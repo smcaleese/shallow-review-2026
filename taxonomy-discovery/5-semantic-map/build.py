@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Semantic map of the 502 selected sources: embed, lay out with UMAP, cluster, name, write the site's data.
+"""Semantic map of the review's sources (the same snapshot the methods use): embed, lay out with UMAP, cluster, name, write the site's data.
 
 Each source's title + abstract (or opening text) is embedded locally. UMAP projects the embeddings twice: to 2D for
 the map, and to 10D for clustering, since clustering in 10D keeps more structure than clustering what's drawn. One
@@ -15,7 +15,6 @@ Then serve the site:
 """
 
 import argparse
-import csv
 import hashlib
 import json
 import logging
@@ -31,30 +30,17 @@ import numpy as np
 from pydantic import BaseModel, Field
 
 from shared import llm
-from shared.data import CACHE, FACETS, LIVE_ITEMS_PATH, LIVE_TAGS_PATH, read_jsonl
+from shared.data import CACHE, load_items
+from shared.taxonomy import write_result
 
 log = logging.getLogger("semantic-map")
-SELECTED_PATH = FACETS / "data" / "6-selected.json"
-RANKS_PATH = FACETS / "output" / "selected-sources.csv"
 DEFAULT_EMBEDDER = "BAAI/bge-large-en-v1.5"
 
 
 def load_selected() -> list[dict]:
-    """The selected sources in rank order, with the tagger's one-line summary and 2025 agenda tags."""
-    ids = json.loads(SELECTED_PATH.read_text())["ids"]
-    items = {i["id"]: i for i in read_jsonl(LIVE_ITEMS_PATH)}
-    tags = {t["id"]: t for t in read_jsonl(LIVE_TAGS_PATH)}
-    ranks = {r["id"]: int(r["rank"]) for r in csv.DictReader(RANKS_PATH.open())}
-    out = []
-    for n, id_ in enumerate(ids, 1):
-        item, tag = items[id_], tags.get(id_, {})
-        out.append({
-            "id": id_, "rank": ranks.get(id_, n), "source": item["source"], "title": item["title"].strip(),
-            "text": " ".join(str(item.get("text") or "").split()), "url": item.get("url", ""),
-            "date": item.get("date") or "", "authors": item.get("authors") or "",
-            "summary": tag.get("summary", ""), "agendas": tag.get("agenda") or [],
-        })
-    return out
+    """The sources in the snapshot (shared/data.py), in id order. They have no summaries or agenda tags, so the page
+    shows each item's opening text instead."""
+    return [{**i, "rank": n, "summary": "", "agendas": []} for n, i in enumerate(load_items(), 1)]
 
 
 def embed(items: list[dict], model_name: str) -> np.ndarray:
@@ -198,6 +184,23 @@ def main():
     out = HERE / "site" / "data.js"
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("window.MAP_DATA = " + json.dumps(data, ensure_ascii=False) + ";\n")
+
+    # The same groups and clusters in the shared result format, so compare.py and report.py treat the map like the
+    # other methods. Clusters have no descriptions, so their keywords stand in for one (the score's classifier
+    # sees only names and descriptions).
+    categories, leaf_of_cluster = [], {}
+    for g in meta_groups:
+        gid = f"g{g['id'] + 1}"
+        categories.append({"id": gid, "name": g["name"], "description": g["description"], "parent": None})
+        for c in g["clusters"]:
+            cid = f"{gid}.{c['id'] + 1}"
+            leaf_of_cluster[c["id"]] = cid
+            categories.append({"id": cid, "name": c["name"], "description": "Keywords: " + ", ".join(c["keywords"]),
+                               "parent": gid})
+    write_result(HERE, "5-semantic-map", items, categories,
+                 {it["pid"]: leaf_of_cluster[int(clusters[i])] for i, it in enumerate(items)},
+                 params={"groups": args.groups, "clusters": args.clusters, "seed": args.seed,
+                         "embedder": args.embedder})
     log.info(f"wrote {out.relative_to(HERE.parent)}: {len(points)} points, {len(meta_groups)} groups, "
              f"{len(set(clusters))} clusters")
     for g in meta_groups:
