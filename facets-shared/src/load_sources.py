@@ -3,8 +3,7 @@
 Step 1: load the arXiv shortlist, LW/AF posts, Lenz's org sources and Safety Stack documents into one list of items
 with a common format.
 
-LW posts are Jord's notable list plus the LW_EXTRA highest-karma posts his first-pass scope check marked include
-that the list missed. Org items come from data/1b-lenz-items.jsonl (src/fetch_lenz_pages.py). Safety Stack items
+LW posts are the LessWrong shortlist (scraping-scripts/AF-and-LW-scraper/src/shortlist_forum_posts.py). Org items come from data/1b-lenz-items.jsonl (src/fetch_lenz_pages.py). Safety Stack items
 are the dataset's documents the relevance filter kept (exact duplicate titles dropped).
 
 Usage (from facets-shared/):
@@ -22,10 +21,8 @@ Writes data/1-items.jsonl. Every item has:
 """
 
 import csv
-import json
 
-from common import (ARXIV_SHORTLIST, ITEMS, LENZ_ITEMS, LW_EXTRA, LW_POSTS, LW_RAW, LW_SCOPE_FIRST_PASS, SAFETY_STACK,
-                    base_arxiv_id, norm_title, read_jsonl, write_jsonl)
+from common import ARXIV_SHORTLIST, ITEMS, LENZ_ITEMS, LW_POSTS, SAFETY_STACK, base_arxiv_id, norm_title, read_jsonl, write_jsonl
 
 
 def num(value, cast=float):
@@ -55,7 +52,7 @@ def arxiv_item(row: dict) -> dict:
 
 
 def lw_item(row: dict) -> dict:
-    """One notable LW/AF post in the common format."""
+    """One shortlisted LW/AF post in the common format."""
     af = row.get("af") == "True"
     links = [{"source": "lesswrong", "url": row["url"], "label": "Alignment Forum" if af else "LessWrong"}]
     if row.get("link_url"):
@@ -65,22 +62,11 @@ def lw_item(row: dict) -> dict:
         "date": row["posted"][:10], "url": row["url"], "text": clean(row.get("excerpt")), "links": links,
         "popularity": {"karma": num(row.get("karma"), int), "af_karma": num(row.get("af_karma"), int),
                        "comments": num(row.get("comment_count"), int)},
-        "shortlist_reason": ("Top LW/AF post by " + ", ".join(row["picked_by"].split("|")) if row.get("picked_by")
-                             else "In scope and high karma, but not in the notable list"),
+        "shortlist_reason": clean(row.get("shortlist_reason")),
         "extra": {"post_id": row["id"], "alignment_forum": af, "link_url": row.get("link_url", ""),
                   "forum_tags": row.get("tags", ""), "word_count": num(row.get("word_count"), int),
-                  "scope_first_pass": row.get("scope_first_pass", "")},
+                  "rank": num(row.get("shortlist_rank"), int)},
     }
-
-
-def extra_lw_rows(notable: set[str]) -> list[dict]:
-    """The LW_EXTRA highest-karma posts marked include by the first-pass scope check and not already notable."""
-    scope = {}
-    for line in LW_SCOPE_FIRST_PASS.read_text().splitlines():
-        d = json.loads(line)
-        scope[d["id"]] = d.get("scope")
-    pool = [r for r in csv.DictReader(LW_RAW.open()) if scope.get(r["id"]) == "include" and r["id"] not in notable]
-    return sorted(pool, key=lambda r: -int(r["karma"] or 0))[:LW_EXTRA]
 
 
 def org_item(item: dict) -> dict:
@@ -111,9 +97,7 @@ def safety_stack_items() -> list[dict]:
 
 def main():
     papers = [arxiv_item(r) for r in csv.DictReader(ARXIV_SHORTLIST.open())]
-    notable = list(csv.DictReader(LW_POSTS.open()))
-    extra = extra_lw_rows({r["id"] for r in notable})
-    posts = [lw_item(r) for r in notable + extra]
+    posts = [lw_item(r) for r in csv.DictReader(LW_POSTS.open())]
     orgs = [org_item(i) for i in read_jsonl(LENZ_ITEMS)]
     stack = safety_stack_items()
     items = papers + posts + orgs + stack
@@ -121,7 +105,7 @@ def main():
     assert len(ids) == len(set(ids)), "duplicate ids in the inputs"
     write_jsonl(ITEMS, items)
     print(f"Wrote {ITEMS.relative_to(ITEMS.parent.parent)}: {len(papers)} arXiv papers + {len(posts)} LW/AF posts "
-          f"({len(extra)} beyond the notable list) + {len(orgs)} org sources + {len(stack)} Safety Stack docs")
+          f"+ {len(orgs)} org sources + {len(stack)} Safety Stack docs")
 
 
 if __name__ == "__main__":

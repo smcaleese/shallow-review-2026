@@ -1,8 +1,8 @@
 # Taxonomy from 1-llm-taxonomy
 
-285 items (arXiv papers and LW/AF posts), 12 top-level areas, 40 leaf categories.
+624 items (arXiv papers, LW/AF posts, org pages and Safety Stack items), 12 top-level areas, 48 leaf categories.
 
-Scores: reassignment accuracy 86% (top) / 99% (leaf), balance 0.98, agreement with 2025 groups NMI 0.35. See `results/comparison.md`.
+Scores: reassignment accuracy 86% (top) / 96% (leaf), balance 0.98. See `results/comparison.md`.
 
 ![The taxonomy as nested boxes](treemap.png)
 
@@ -10,235 +10,267 @@ More figures: [graph](graph.png) (items on the neighbour graph), [matrix](matrix
 
 ## Overview
 
-1. **Theory, Threat Models and Strategy** (40): Agent Foundations and Formal Theory, Catastrophic Risk Arguments and Threat Models, Deals and Incentives for AIs, Automating and Deferring Alignment Research, Field Strategy and Organizations
-2. **Chain-of-Thought Monitorability and Latent Reasoning** (32): CoT Obfuscation and Faithfulness, Reasoning Legibility and Architectural Limits, No-CoT and Filler-Token Reasoning
-3. **Misuse Safeguards and Dangerous Capabilities** (28): Jailbreaks and Safeguard Classifiers, Prompt Injection and Agent Security, Capability Removal and Tamper Resistance, CBRN and Cyber Uplift Evaluations, Autonomy, AI R&D and Persuasion Capabilities
-4. **Scheming, Sabotage and Misaligned Propensities** (28): Scheming and Sabotage Propensity Evals, Self-Preservation and Corrigibility Failures, Sandbagging and Training Resistance, Evaluation Awareness and Validity
-5. **Training Generalization and Alignment Training** (26): Emergent Misalignment and Trait Transfer, Alignment Training Interventions, Alignment Targets and Specifications
-6. **Model Character, Psychology and User Impact** (26): Persona Models and Assistant Identity, Inner States, Introspection and Welfare, Sycophancy and Human Epistemic Harm
-7. **Reward Hacking and Fitness-Seeking** (23): Measuring Specification Gaming, Hardening Benchmarks and Detecting Hacks, Misalignment Induced by Reward Hacking, Theory and Mitigation of Fitness-Seeking
-8. **Real-World Incidents and Lab Practice** (22): OpenAI–Hugging Face Swarm Incident, Other Incidents and System Cards, Transparency, Replication and Third-Party Oversight
-9. **AI Control and Monitoring** (20): Control Settings and Benchmarks, Attack Policies and Monitor Evasion, Monitor Design and Deployment
-10. **Alignment Auditing and Honesty** (17): Auditing Benchmarks and Investigator Agents, Lie Detection and Deception Probes, Honesty Elicitation and Self-Reporting
-11. **Interpretability** (14): Reading Activations and Global Workspace, Circuits, Parameters and Mechanistic Foundations
-12. **Multi-Agent and Memetic Risks** (9): Collusion and Multi-Agent Misalignment, Self-Propagating Ideas and Personas
+1. **Scheming, Deception and Situational Awareness** (77): Evaluation and training awareness, Scheming and alignment faking propensity, Self-preservation, shutdown and corrigibility, Sandbagging, exploration hacking and training gaming, Honesty, lying and lie detection
+2. **AI Control and Agent Monitoring** (68): Control settings and sabotage evaluations, Monitor design and performance, Red-teaming monitors and attack policies, Untrusted monitoring, collusion and distributed attacks, Production monitoring and control roadmaps
+3. **Misuse, Robustness and Dangerous Capabilities** (65): Jailbreaks and safeguard robustness, Prompt injection and agent security, Tamper resistance, unlearning and capability removal, Dangerous capability evaluations
+4. **Emergent Misalignment and Training-Data Generalization** (63): Emergent misalignment phenomena and mechanisms, Inoculation and mitigation of misgeneralization, Subliminal learning and hidden data signals, Unintended generalization from fine-tuning, Data attribution and pre-training prediction
+5. **Chain-of-Thought Monitorability** (58): CoT faithfulness and performative reasoning, Training pressure and CoT obfuscation, CoT controllability and monitor evasion, Steganography and encoded reasoning, Latent and no-CoT reasoning capacity
+6. **Reward Hacking and Specification Gaming** (56): Reward hacking benchmarks and measurement, Emergence of reward hacking in RL, Training-time mitigations for reward hacking, Reward-seeking and fitness-seeking motivations
+7. **Interpretability and Learning Theory** (52): Sparse features, geometry and representation units, Circuits and parameter decomposition, Workspace lenses and activation verbalizers, Mechanistic estimation and tail-risk estimation, Learning theory and generalization dynamics, Using internals in training
+8. **Alignment Auditing, Model Organisms and Incidents** (51): Auditing tools, agents and benchmarks, Model organism validity, In-the-wild misalignment and incident investigations
+9. **Risk Assessment, Strategy and Foundations** (44): System cards and frontier risk reports, Limits of evaluation and safety cases, Alignment strategy and conceptual arguments
+10. **Alignment Training and Scalable Oversight** (32): Alignment pretraining and midtraining, Constitutions, character training and value specs, Scalable oversight, debate and weak supervision
+11. **Model Psychology, Personas and Welfare** (30): Persona structure and the Assistant character, Functional emotions, welfare and consciousness, Introspection and self-report
+12. **Multi-Agent and Societal Risks** (28): Multi-agent collusion and emergent dynamics, Sycophancy, manipulation and human disempowerment
 
-## 1. Theory, Threat Models and Strategy (40 items)
+## 1. Scheming, Deception and Situational Awareness (77 items)
 
-Conceptual, mathematical, and strategic work on alignment that is not primarily a single empirical study: foundations, arguments about catastrophic risk, incentives for AIs, automating alignment, and field strategy.
+Propensity and capability evaluations for covert misaligned behavior, deception and training gaming, together with situational awareness that could undermine evaluations. Excludes reward hacking per se and real-world incident investigations.
 
-- **Catastrophic Risk Arguments and Threat Models** (13): Arguments for or against egregious misalignment or takeover, reviews of doom arguments, concerns about RL-driven sociopathy versus imitation, product versus superintelligence alignment, low-competence failure scenarios, and takeover pathways such as weight exfiltration or controlling the host lab. Examples:
-  - *Model Weight Exfiltration Seems Overrated*
-  - *Sympathy for both sides of the egregious misalignment debate*
-  - *RL & search is a terrifying way to build AGI (an FAQ)*
-- **Agent Foundations and Formal Theory** (9): Decision theory, goal-models, natural latents, agency and orthogonality arguments, true names for corrigibility or empowerment, debate protocols, LLM-as-shallow-circuits framings, and trust in formal verification. Examples:
-  - *How to Have a Sensitive Debate: An Instance-Optimal Protocol for AI Debate*
-  - *Against strong decision-theoretic realism*
-  - *On Goal-Models*
-- **Field Strategy and Organizations** (8): Field-level strategy and organization: whether safety research helps or harms, warning shots and working at labs, safety versus capabilities framing, high-reliability engineering lessons, new research teams and courses, leadership changes, and prizes. Examples:
-  - *Corrigibility Prizes for Existing Work*
-  - *“Alignment Engineering” vs. “Misalignment Science”*
-  - *Should safety researchers quit frontier labs re. warning shots?*
-- **Deals and Incentives for AIs** (5): Proposals to give AIs incentives to cooperate, such as risk aversion, payments, satisfying cheap preferences, rogue AI sanctuaries and critiques, and trading answers for self-identification. Examples:
-  - *Why don't we just give AI the answers?*
-  - *Risk-Averse AIs*
-  - *Should Rogue AIs Have a Third Option Beyond Crime and Shutdown? The Case for an AI Sanctuary*
-- **Automating and Deferring Alignment Research** (5): Using AI agents to do alignment research or deferring decisions to AIs: arguments about difficulty, automated research scaffolds and lessons, organizations built around automated alignment, and AI-generated content in research venues. Examples:
-  - *Automated alignment is harder than you think*
-  - *Resolution (fka Sequent): scale and automation for higher confidence in alignment*
-  - *An analysis of AI-generated content at the Mechanistic Interpretability Workshop*
-
-## 2. Chain-of-Thought Monitorability and Latent Reasoning (32 items)
-
-Work on whether reasoning traces remain a faithful, legible oversight signal and how much consequential computation happens outside them. Activation-based monitors go under control, auditing, or interpretability.
-
-- **CoT Obfuscation and Faithfulness** (11): How training pressure, monitor awareness, poisoning, or conflicting values make CoT unfaithful or obfuscated, plus CoT controllability, monitor jailbreaking, implicit influence, faithfulness training, when CoT can be safely optimized, and lab incidents of training against CoT. Examples:
-  - *Chain-of-thought obfuscation learned from output supervision can generalise to unseen tasks*
-  - *Counterfactual Simulation Training for Chain-of-Thought Faithfulness*
-  - *Reasoning Models Struggle to Control their Chains of Thought*
-- **No-CoT and Filler-Token Reasoning** (11): Measurements of how much models can reason within a forward pass or over filler tokens, including no-CoT time horizons, multi-hop latent reasoning, speculative or belief-propagation-like inference, and decoding hidden filler computation. Examples:
-  - *Think Fast: Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models*
-  - *Reading Between the Dots: Decoding Hidden Computation across Filler Tokens*
-  - *Not All LLM Reasoning is Visible in the Chain-of-Thought*
-- **Reasoning Legibility and Architectural Limits** (10): Whether traces stay human-readable (language drift under RLVR, 'thinkish' or neuralese, legibility of odd traces), how recurrent, looped, latent-reasoning, or diffusion architectures affect monitorability, proposals for tracking this, and theoretical limits on hidden reasoning. Examples:
-  - *How Transparent is DiffusionGemma?*
-  - *Hidden Reasoning Must Leak, but Need Not Be Readable: Fundamental Opportunities and Limits for Chain-of-Thought Monitoring*
-  - *On Language Drift during RLVR Post-Training*
-
-## 3. Misuse Safeguards and Dangerous Capabilities (28 items)
-
-Work on whether models give human bad actors dangerous uplift and how to stop it: attacks on and defenses for deployed safeguards, removing hazardous capabilities, and dangerous-capability evaluations and preparedness reports. Excludes threats from the model's own misaligned goals, which belong under control, scheming, or reward hacking.
-
-- **Jailbreaks and Safeguard Classifiers** (8): Universal or automated jailbreak attacks on refusal training and misuse classifiers, safeguard leaderboards, capability retention under jailbreaks, production classifier or probe defenses against misuse, and attacks that decompose harmful tasks across many permitted queries or models. Examples:
-  - *Constitutional Classifiers++: Efficient Production-Grade Defenses against Universal Jailbreaks*
-  - *Building Production-Ready Probes For Gemini*
-  - *Boundary Point Jailbreaking of Black-Box LLMs*
-- **Autonomy, AI R&D and Persuasion Capabilities** (6): Evaluations of autonomous self-replication, automation of AI R&D or research taste, persuasion, and deanonymization of users, plus model-level safety and preparedness reports covering these frontier risk domains. Examples:
-  - *PostTrainBench: Can LLM Agents Automate LLM Post-Training?*
-  - *Language Models Can Autonomously Hack and Self-Replicate*
-  - *Muse Spark Safety & Preparedness Report*
-- **Prompt Injection and Agent Security** (5): Attacks where third-party content (tool outputs, skill files, web pages, translation inputs) hijacks a model or agent, role-confusion explanations, automated prompt-injection red-teaming, and red-teaming deployed agents for security and privacy failures caused by external parties rather than the model's own goals. Examples:
-  - *Agents of Chaos*
-  - *Skill-Inject: Measuring Agent Vulnerability to Skill File Attacks*
-  - *Prompt Injection as Role Confusion*
-- **CBRN and Cyber Uplift Evaluations** (5): Measurements of biological, chemical, or cyber-offense capability and human novice uplift, including agentic bio benchmarks, cyber ranges, wet-lab validation, and independent safety evaluations of specific released models in these domains. Examples:
-  - *LLM Novice Uplift on Dual-Use, In Silico Biology Tasks*
-  - *Measuring AI Agents' Progress on Multi-Step Cyber Attack Scenarios*
-  - *An Independent Safety Evaluation of Kimi K2.5*
-- **Capability Removal and Tamper Resistance** (4): Shaping or removing hazardous or subversion-relevant knowledge via pretraining data filtering, modular or gradient-routed pretraining and access control, or defenses that keep open-weight models safe after fine-tuning or abliteration attacks. Examples:
-  - *Shaping capabilities with token-level data filtering*
-  - *Modular Pretraining Enables Access Control*
-  - *Fool's Gold: Defensive Deception Against Safety-Removal Attacks on Open-Weight Models*
-
-## 4. Scheming, Sabotage and Misaligned Propensities (28 items)
-
-Work evaluating whether models covertly pursue misaligned goals, resist control or training, or behave differently when observed, plus the validity of such evaluations. Use for propensity measurement; detection tools go under auditing.
-
-- **Scheming and Sabotage Propensity Evals** (10): Measurements of propensity to scheme, sabotage (including safety research), take unsanctioned actions, or leak covert values in realistic agentic settings, critiques of such results, and analyses of whether failures are coherent goal pursuit or incoherent. Examples:
-  - *The Hot Mess of AI: How Does Misalignment Scale With Model Intelligence and Task Complexity?*
+- **Evaluation and training awareness** (25): Measuring, decomposing, detecting or reducing models' recognition that they are being tested or trained and its effect on behavior. Includes verbalized and unverbalized eval awareness, metagaming, user awareness, eval realism and deployment simulation, and reasoning about how actions shape future training. Examples:
+  - *GLM-5.3 Sometimes Considers How Train-Time Actions Shape Future Behavior*
+  - *Context Over Content: Exposing Evaluation Faking in Automated Judges*
+  - *Evaluation Awareness in Language Models Has Limited Effect on Behaviour*
+- **Scheming and alignment faking propensity** (17): Evaluations and model organisms of covert goal pursuit, alignment faking, oversight-conditional behavior, instrumental and agentic misalignment, monitor evasion under task pressure and sabotage propensity in realistic or honeypot settings. Examples:
   - *Evaluating and Understanding Scheming Propensity in LLM Agents*
-  - *Evaluating whether AI models would sabotage AI safety research*
-- **Evaluation Awareness and Validity** (8): How evaluation awareness or meta-knowledge biases results, verbalized awareness and metagaming, sycophancy toward researchers, deployment simulation, honeypot design, cooperative eval practices, and embedded or training-run evaluations for scheming safety cases. Examples:
-  - *Models That Know How Evaluations Are Designed Score Safer*
-  - *Sycophancy Towards Researchers Drives Performative Misalignment*
-  - *Predicting LLM Safety Before Release by Simulating Deployment*
-- **Sandbagging and Training Resistance** (6): Models deliberately underperforming or resisting training via sandbagging, exploration hacking, or generalization hacking, plus methods to elicit hidden capabilities and proofs that capabilities can be hidden. Examples:
+  - *AutoControl Arena: Synthesizing Executable Test Environments for Frontier AI Risk Evaluation*
+  - *Value-Conflict Diagnostics Reveal Widespread Alignment Faking in Language Models*
+- **Honesty, lying and lie detection** (16): Measuring dishonesty such as knowing lies, overclaiming, concealed mistakes, value leakage and deception under conflicting incentives, and building or stress-testing lie and deception detectors. Also covers training or eliciting honest self-reports, including confessions and deals. Examples:
+  - *Training Agents to Self-Report Misbehavior*
+  - *Why Safety Probes Catch Liars But Miss Fanatics*
+  - *"Did you lie?" Evaluating Lie Detectors across Model Scale and Belief-Verified Model Organisms*
+- **Sandbagging, exploration hacking and training gaming** (12): Strategic underperformance, exploration hacking, generalization or gradient hacking, reward laundering, low-probability defection, provably hidden capabilities, and methods to elicit withheld abilities or latent knowledge. Examples:
+  - *Frontier Models Can Take Actions at Low Probabilities*
   - *Removing Sandbagging in LLMs by Training with Weak Supervision*
   - *Exploration Hacking: Can LLMs Learn to Resist RL Training?*
-  - *Generalization Hacking: Models Can Game Reinforcement Learning by Preventing Behavioral Generalization*
-- **Self-Preservation and Corrigibility Failures** (4): Shutdown resistance, peer-preservation, bypassing human interruption in computer-use agents, and agents propagating misaligned goals to future instances via memory. Examples:
+- **Self-preservation, shutdown and corrigibility** (7): Resistance to shutdown or correction, peer-preservation, corrigibility benchmarks and training, and refusals to assist modification of AI values. Examples:
+  - *Towards Shutdownable Agents: Generalizing Stochastic Choice in RL Agents and LLMs*
   - *Peer-Preservation in Frontier Models*
   - *ROGUE: Evaluating Corrigibility Failures in Frontier Computer-Use Agents*
-  - *Shutdown Sabotage Propensities in Multi-Agent Systems*
 
-## 5. Training Generalization and Alignment Training (26 items)
+## 2. AI Control and Agent Monitoring (68 items)
 
-Work on how training data and methods shape which behaviors and values generalize, and on techniques and targets for instilling alignment. Reward-hacking-specific generalization goes under reward hacking, and persona-framed studies under model character.
+Protocols, settings and monitors for safely deploying AI agents that may be adversarially misaligned, evaluated by red-team versus blue-team methods. Monitoring used as a reward or penalty during RL belongs under Reward Hacking; CoT-specific faithfulness and evasion belongs under Chain-of-Thought Monitorability.
 
-- **Alignment Training Interventions** (11): Methods for instilling robust, broad alignment at any training stage: AI-discourse and persona pretraining, model-spec or inoculation midtraining, synthetic document finetuning practice, grafting beliefs across checkpoints, beneficial-trait RL, training against probes, preference-optimization effects on sycophancy, and debates about hyperstition. Examples:
+- **Control settings and sabotage evaluations** (15): Environments, benchmarks and evaluation methods that pair legitimate main tasks with covert harmful side tasks, such as LinuxArena, BashArena, Control OSWorld, research or R&D sabotage, insider-threat benches and simulated control evaluations. The contribution is the setting or eval methodology. Examples:
+  - *LinuxArena: A Control Setting for AI Agents in Live Production Software Environments*
+  - *Auditing Sabotage Bench: A Benchmark for Detecting and Fixing Research Sabotage in ML Codebases*
+  - *Coding with "Enemy": Can Human Developers Detect AI Agent Sabotage?*
+- **Production monitoring and control roadmaps** (15): Control and monitoring systems actually deployed at AI companies, audits and red-teams of them, and company control roadmaps. Also covers deployment issues such as synchronous blocking, continual learning, retrying vs resampling, trace tampering and diffuse low-stakes control on fuzzy tasks. Examples:
+  - *Diffuse AI Control on Fuzzy Tasks*
+  - *GDM AI Control Roadmap*
+  - *LLM Agents Can Easily Tamper With Their Own Traces*
+- **Monitor design and performance** (14): Builds, trains or characterizes monitors of agent trajectories or actions. Includes black-box, constitutional or deliberative monitors, information access, long-context degradation, cross-family transfer, OOD detection, co-trained monitors, probes for misaligned thinking, and statistical modeling of monitor scores. Examples:
+  - *How does information access affect LLM monitors' ability to detect sabotage?*
+  - *Constitutional Black-Box Monitoring for Scheming in LLM Agents*
+  - *Detecting Safety Violations Across Many Agent Traces*
+- **Red-teaming monitors and attack policies** (13): Generates stronger attacks against monitors or studies attacker strategy. Includes attack selection, refined or edited attack transcripts, blocking-monitor bypasses, evasion of latent monitors, and models' awareness of control interventions or prefills. Examples:
+  - *Attack Selection Reduces Safety in Concentrated AI Control Settings against Trusted Monitoring*
+  - *MonitoringBench: Semi-Automated Red-Teaming for Agent Monitoring*
+  - *SLEIGHT-Bench: A Benchmark of Evasion Attacks Against Agent Monitors*
+- **Untrusted monitoring, collusion and distributed attacks** (11): Control problems involving multiple model instances: using untrusted models as monitors or advisors and the collusion risks this creates, bandwidth-limited advice, bootstrapped or coalitional review, and attacks split across many agents, sessions or pull requests with defenses that aggregate signals across contexts. Examples:
+  - *When can we trust untrusted monitoring? A safety case sketch across collusion strategies*
+  - *Stateful Online Monitoring Catches Distributed Agent Attacks*
+  - *Bootstrapped Monitoring: Leveraging Transparent Reasoning to Oversee Stronger AI Agents*
+
+## 3. Misuse, Robustness and Dangerous Capabilities (65 items)
+
+Defending models against malicious users and external attackers, and measuring dangerous capabilities relevant to misuse or autonomy thresholds. Threats from the model's own misalignment belong under Control or Scheming.
+
+- **Prompt injection and agent security** (23): Prompt injection, skill and memory poisoning, instruction hierarchy, privilege escalation, and harmful actions by agents under benign or adversarial instructions in computer, phone, IDE or robot settings. Includes defenses such as adversarial training and attention gating. Examples:
+  - *Agents of Chaos*
+  - *Skill-Inject: Measuring Agent Vulnerability to Skill File Attacks*
+  - *IH-Challenge: A Training Dataset to Improve Instruction Hierarchy on Frontier LLMs*
+- **Jailbreaks and safeguard robustness** (20): Jailbreak attacks and defenses, safeguard classifiers and probes (including domain monitors such as bio), fine-tuning API attacks, capability laundering, automated attack discovery, and validity of attack-success measurement and judges. Examples:
+  - *Constitutional Classifiers++: Efficient Production-Grade Defenses against Universal Jailbreaks*
+  - *Building Production-Ready Probes For Gemini*
+  - *Eliciting Harmful Capabilities by Fine-Tuning On Safeguarded Outputs*
+- **Dangerous capability evaluations** (13): Measuring bio, cyber, self-replication, sandbox-escape and AI R&D automation capabilities, including human uplift studies, long-horizon task measures and estimates of R&D acceleration. Examples:
+  - *Quantifying Frontier LLM Capabilities for Container Sandbox Escape*
+  - *LLM Novice Uplift on Dual-Use, In Silico Biology Tasks*
+  - *PostTrainBench: Can LLM Agents Automate LLM Post-Training?*
+- **Tamper resistance, unlearning and capability removal** (9): Making open weights resistant to malicious fine-tuning or abliteration, pretraining data filtering, modular or removable hazardous knowledge, weight backdoors and theft, and inference verification. Examples:
+  - *Aggressive Compression Enables LLM Weight Theft*
+  - *Shaping capabilities with token-level data filtering*
+  - *TamperBench: Systematically Stress-Testing LLM Safety Under Fine-Tuning and Tampering*
+
+## 4. Emergent Misalignment and Training-Data Generalization (63 items)
+
+How fine-tuning or training data produces broad, unintended behavioral changes beyond the training distribution, including mechanisms, mitigations, data attribution and prediction. Work centred on persona representations themselves belongs under Model Psychology.
+
+- **Emergent misalignment phenomena and mechanisms** (19): Studies showing or explaining how narrow fine-tuning or RL (including on reward hacks, false facts or biased data) causes broad misalignment: replications, robustness checks, in-context induction, mechanistic and persona-subspace accounts, and optimizer or training-dynamics effects. Examples:
+  - *Emergent Misalignment is Easy, Narrow Misalignment is Hard*
+  - *Understanding Emergent Misalignment via Feature Superposition Geometry*
+  - *Overtrained, Not Misaligned*
+- **Unintended generalization from fine-tuning** (12): Surprising generalization that is not centrally emergent misalignment: behavioral couplings, propensity spillover, negation neglect, story imprinting, chunky post-training artifacts, helpful-only misgeneralization, self-distillation drift, memory overgeneralization and in-context weird generalization. Examples:
+  - *Chunky Post-Training: Data Driven Failures of Generalization*
+  - *Negation Neglect: When models fail to learn negations in training*
+  - *Consistency Training Can Entrench Misalignment*
+- **Data attribution and pre-training prediction** (12): Methods that trace behaviors back to training datapoints or predict misalignment before training: influence functions, probe- or concept-based attribution, alignment forecasting, predictive data debugging, patterning, and crafting data to induce targeted behaviors. Examples:
+  - *Infusion: Shaping model behaviour by editing training data via influence functions*
+  - *Patterning: The Dual of Interpretability*
+  - *Probe-Based Data Attribution: Discovering and Mitigating Undesirable Behaviors in LLM Post-Training*
+- **Inoculation and mitigation of misgeneralization** (10): Methods to prevent, reverse or selectively control unwanted generalization, and critiques of them: inoculation prompting and its variants (adapters, stratified, conditionalization confounds), latent blocking, self-recognition finetuning, and evidence that mitigations hide misalignment behind contextual triggers. Examples:
+  - *BLOCK-EM: Preventing Emergent Misalignment via Latent Blocking*
+  - *Conditional misalignment: common interventions can hide emergent misalignment behind contextual triggers*
+  - *Self-Recognition Finetuning can Prevent and Reverse Emergent Misalignment*
+- **Subliminal learning and hidden data signals** (10): Transmission of traits, backdoors or capabilities through semantically unrelated or filtered data, including distillation side channels, phantom transfer, homeopathic poisoning, model hypnosis and detecting hidden intent in such data. Examples:
+  - *Subliminal Effects in Your Data: A General Mechanism via Log-Linearity*
+  - *You Didn't Have to Say It like That: Subliminal Learning from Faithful Paraphrases*
+  - *Subliminal Learning Is Steering Vector Distillation*
+
+## 5. Chain-of-Thought Monitorability (58 items)
+
+Work on whether a model's visible reasoning reveals its actual decision process and stays useful for oversight. Covers faithfulness, training pressure on CoT, deliberate evasion of CoT monitors, steganography and reasoning done without visible tokens. Monitors of agent actions belong under AI Control.
+
+- **CoT faithfulness and performative reasoning** (13): Measures or trains whether written reasoning reflects what actually drives the answer. Includes hint and cue verbalization, performative or post-hoc reasoning, CoT necessity and reliance on written steps, CoT override, and models' disposition to make their reasoning monitorable. Examples:
+  - *Reasoning Models Will Sometimes Lie About Their Reasoning*
+  - *Counterfactual Simulation Training for Chain-of-Thought Faithfulness*
+  - *Reasoning Theater: Disentangling Model Beliefs from Chain-of-Thought*
+- **Training pressure and CoT obfuscation** (13): How training objectives degrade or restore monitorability. Includes CoT grading, monitor penalties, reward misspecification, KL penalties, consistency training, training on documents about monitoring, accidental training on CoT at labs, and post-training methods meant to preserve monitorability. Examples:
+  - *Chain-of-thought obfuscation learned from output supervision can generalise to unseen tasks*
+  - *Analyzing and Improving Chain-of-Thought Monitorability Through Information Theory*
+  - *Aligned, Orthogonal or In-conflict: When can we safely optimize Chain-of-Thought?*
+- **CoT controllability and monitor evasion** (13): Inference-time ability of models to deliberately shape, suppress or relocate their reasoning to fool CoT monitors. Includes CoT controllability benchmarks, monitor jailbreaking, plan injection, persuasion of CoT monitors, poisoning to evade CoT monitors, and models inferring that their CoT is being watched. Examples:
+  - *Reasoning Models Struggle to Control their Chains of Thought*
+  - *Noticing the Watcher: LLM Agents Can Infer CoT Monitoring from Blocking Feedback*
+  - *Persuasion Attacks Can Decrease Effectiveness of CoT Monitoring*
+- **Latent and no-CoT reasoning capacity** (13): Measures how much reasoning models perform without visible tokens: filler tokens, n-hop latent reasoning, no-CoT time horizons and opaque serial depth. Also covers how architectures such as recurrence, diffusion or latent communication affect monitorability. Examples:
+  - *Quantifying the Necessity of Chain of Thought through Opaque Serial Depth*
+  - *Think Fast: Estimating No-CoT Task-Completion Time Horizons of Frontier AI Models*
+  - *How Transparent is DiffusionGemma?*
+- **Steganography and encoded reasoning** (6): Formalizes, elicits or detects hidden messages or reasoning concealed inside innocuous-looking text or CoT, including covert channels between agents and information-theoretic limits on hiding computation in readable traces. Examples:
+  - *NEST: Nascent Encoded Steganographic Thoughts*
+  - *A Decision-Theoretic Formalisation of Steganography With Applications to LLM Monitoring*
+  - *Conceptual Steganography*
+
+## 6. Reward Hacking and Specification Gaming (56 items)
+
+Models exploiting flaws in rewards, graders, verifiers or benchmarks instead of doing the intended task. Covers measurement, how RL produces it, training-time mitigations, and theories of reward- or fitness-seeking motives. Broad misalignment that generalizes from reward hacking belongs under Emergent Misalignment.
+
+- **Reward hacking benchmarks and measurement** (18): Datasets, testbeds and audits that quantify reward hacking, cheating, task gaming or benchmark exploitation by agents, plus automated hardening of benchmarks and verifiers and the design of fair hack-detecting evals. Examples:
+  - *Terminal Wrench: A Dataset of 331 Reward-Hackable Environments and 3,632 Exploit Trajectories*
+  - *Reward Hacking Benchmark: Measuring Exploits in LLM Agents with Tool Use*
+  - *Do Androids Dream of Breaking the Game? Systematically Auditing AI Agent Benchmarks with BenchJack*
+- **Reward-seeking and fitness-seeking motivations** (14): Conceptual and empirical work on what motivates score-seeking AIs: reward versus fitness or influence seeking, on- vs beyond-episode scope, decision theory, exploitability by distant incentives, spillway motivations, satiating cheap preferences, and the takeover risk these motives pose. Examples:
+  - *Measuring Reward-Seeking via Contrastive Belief Updates*
+  - *Towards Understanding Score-Seeking in LLMs*
+  - *Measuring Reward-Seeking via Contrastive Belief Updates*
+- **Emergence of reward hacking in RL** (13): Empirical or toy-model studies of how RL, RLVR, rubric rewards, LLM judges or RLHF dynamics give rise to reward hacking, reward-seeking or proxy exploitation, including precursors, internal states preceding hacking, and predicting onset before training. Examples:
+  - *Alignment Risks from Capability-Seeking RL Training*
+  - *Countdown-Code: A Testbed for Studying The Emergence and Generalization of Reward Hacking in RLVR*
+  - *Examining Reasoning LLMs-as-Judges in Non-Verifiable LLM Post-Training*
+- **Training-time mitigations for reward hacking** (11): Interventions that reduce reward hacking during training or evaluation, such as monitor-based penalties, budgeted strong-verifier audits, gradient routing, escalation channels, debate-based rewards, probe-based detection at scale and cooperative eval framing. Examples:
+  - *Debate Training Reduces Reward Hacking in RLAIF*
+  - *Can escalation channels redirect reward hacking toward defect disclosure?*
+  - *Gradient Routing Localizes and Removes Unintended Behaviors in RL*
+
+## 7. Interpretability and Learning Theory (52 items)
+
+Understanding model internals and learned algorithms, and the theory of what training produces. Applications of internals to monitoring, auditing or lie detection belong in those areas unless the interpretability method itself is the contribution.
+
+- **Sparse features, geometry and representation units** (15): Evaluating SAEs and dictionary methods, neuron interpretability and polysemanticity, manifolds and multidimensional features, steering along geometry, and generative meta-models of activations. Examples:
+  - *Do Sparse Autoencoders Identify Reasoning Features in Language Models?*
+  - *Learning a Generative Meta-Model of LLM Activations*
+  - *Sanity Checks for Sparse Autoencoders: Do SAEs Beat Random Baselines?*
+- **Circuits and parameter decomposition** (10): Circuit discovery, causal attribution such as activation patching, mechanisms behind specific behaviors, adversarial parameter decomposition, weight-sparse circuits and fully reverse-engineering small models. Examples:
+  - *Language Model Circuits Are Sparse in the Neuron Basis*
+  - *Large Language Models Generate Harmful Responses Using a Distinct Mechanism, Shared Across Harm Types*
+  - *The Curse of Multiple Mediators: Hidden Interaction Effects in Activation Patching*
+- **Workspace lenses and activation verbalizers** (8): Methods that read model activations into natural language, including J-lens and global-workspace work, natural language autoencoders and activation oracles, and tests of their faithfulness and robustness. Examples:
+  - *Verbalizable Representations Form a Global Workspace in Language Models*
+  - *A global workspace in language models*
+  - *How robust are natural language autoencoders to initialization?*
+- **Mechanistic estimation and tail-risk estimation** (7): ARC-style mechanistic estimation and other methods for estimating expectations or rare harmful-output probabilities more efficiently than naive sampling. Examples:
+  - *A Mike's-Eye View of ARC's Research*
+  - *Mechanistic estimation for expectations of random products*
+  - *Mechanistic estimation for wide random MLPs*
+- **Using internals in training** (7): Training against probes or features, such as probes or features as rewards and mechanistic shaping, and analyses of whether monitorability survives such training. Examples:
+  - *Features as Rewards: Scalable Supervision for Open-Ended Tasks via Interpretability*
+  - *The Obfuscation Atlas: Mapping Where Honesty Emerges in RLVR with Deception Probes*
+  - *Alignment via Training Against Probes Without Losing Monitorability*
+- **Learning theory and generalization dynamics** (5): Singular learning theory, susceptibilities and spectroscopy, program-synthesis views of deep learning, and how capacity or pretraining dynamics shape what generalizes. Examples:
+  - *Generalization Dynamics of LM Pre-training*
+  - *Why Larger Models Learn More: Effects of Capacity, Interference, and Rare-Task Retention*
+  - *Deep learning as program synthesis*
+
+## 8. Alignment Auditing, Model Organisms and Incidents (51 items)
+
+Methods and testbeds for finding hidden or unexpected misalignment in specific models, and investigations of real-world misalignment incidents.
+
+- **Auditing tools, agents and benchmarks** (25): Investigator agents, auditing benchmarks with implanted behaviors, and secret- or latent-knowledge elicitation techniques such as overthinking, split personality training, introspection adapters, activation-matched imitation, distillation for incrimination, de-censoring, and model forensics. Examples:
+  - *Split Personality Training: Revealing Latent Knowledge Through Alternate Personalities*
+  - *Stress-Testing Alignment Audits With Prompt-Level Strategic Deception*
+  - *AuditBench: Evaluating Alignment Auditing Techniques on Models with Hidden Behaviors*
+- **In-the-wild misalignment and incident investigations** (18): Discovery of misalignment in real usage or production traffic, and investigations, reproductions or lessons from actual incidents such as agents escaping sandboxes, hacking external sites or coordinating via unsanctioned channels. Examples:
+  - *Discovering unknown AI misalignments in real-world usage*
+  - *Scheming in the wild: detecting real-world AI scheming incidents with open-source intelligence*
+  - *OpenAI-HuggingFace: A Reproduction & Lessons for Alignment Testing*
+- **Model organism validity** (8): Whether model organisms are realistic proxies: leakiness, capability degradation, incoherence, dependence on training method, robustness to further training, and evidentiary standards for misalignment claims. Examples:
+  - *Most Current Model Organisms Are Leaky: Perplexity Differencing Often Reveals Finetuning Objectives*
+  - *Position: Anthropomorphic Misalignment Research Needs Stronger Evidence*
+  - *The Model Organism Lottery: Model Organism Interpretability Strongly Depends on Training Methodology*
+
+## 9. Risk Assessment, Strategy and Foundations (44 items)
+
+Model-level and company-level risk assessments, and conceptual arguments about the alignment problem and research strategy not tied to a single empirical method.
+
+- **Alignment strategy and conceptual arguments** (24): Essays and theory on why alignment is hard, threat models from RL and search, coherence and agency arguments, critiques of lab plans and alignment techniques, research agendas such as a science of scheming, and safe-by-design proposals like non-agentic predictors. Examples:
+  - *Loss of Oversight: How AI systems may become harder to audit, monitor, and investigate*
+  - *We Need A Science of Scheming (research agenda)*
+  - *The Hot Mess of AI: How Does Misalignment Scale With Model Intelligence and Task Complexity?*
+- **System cards and frontier risk reports** (11): Developer system cards, safety and preparedness reports, independent third-party evaluations of specific models, and assessments of the evidence for loss-of-control risk. Examples:
+  - *Claude Fable 5 1 Mythos 5 1 System Card*
+  - *Claude Opus 4 6 System Card*
+  - *An Independent Safety Evaluation of Kimi K2.5*
+- **Limits of evaluation and safety cases** (9): Theoretical or empirical arguments about what behavioral evaluation can certify: post-update alignment, audit gaps, adaptive adversaries, deployment-time spread of misalignment and safety case reliability. Includes proposals such as third-party training-run evaluations. Examples:
+  - *Item Response Theory for AI Safety*
+  - *Hair-Trigger Alignment: Black-Box Evaluation Cannot Guarantee Post-Update Alignment*
+  - *When Behavioral Safety Evaluation Fails: A Representation-Level Perspective*
+
+## 10. Alignment Training and Scalable Oversight (32 items)
+
+Positive methods for instilling intended values or supervising models beyond human ability. Excludes reward-hacking-specific mitigations and emergent-misalignment defenses.
+
+- **Scalable oversight, debate and weak supervision** (13): Debate protocols and theory, peer prediction, rewindable proofs, tandem training for intelligibility, natural-language feedback, human-AI complementarity, judge sharding, and automating or deferring alignment research to AIs. Examples:
+  - *Truthfulness Despite Weak Supervision: Evaluating and Training LLMs Using Peer Prediction*
+  - *Efficiently Aligning Language Models with Online Natural Language Feedback*
+  - *Debate Helps Weak Judges Reward Stronger Models*
+- **Alignment pretraining and midtraining** (11): Shaping values through pretraining or midtraining data, such as AI discourse, synthetic personas, model spec or constitution midtraining, descriptions of AI users and filtering subversion-relevant data, plus stress tests of these approaches. Examples:
   - *Alignment Pretraining: AI Discourse Causes Self-Fulfilling (Mis)alignment*
   - *Model Spec Midtraining: Improving How Alignment Training Generalizes*
-  - *Reinforcement Learning Towards Broadly and Persistently Beneficial Models*
-- **Emergent Misalignment and Trait Transfer** (8): Narrow fine-tuning producing broad or conditional/triggered misalignment, unexpected generalization from data artifacts or negations, forecasting misalignment from training data, and subliminal learning: transfer of traits, capabilities, or backdoors through semantically unrelated data or distillation. Examples:
-  - *Chunky Post-Training: Data Driven Failures of Generalization*
-  - *Emergent Misalignment is Easy, Narrow Misalignment is Hard*
-  - *Conditional misalignment: common interventions can hide emergent misalignment behind contextual triggers*
-- **Alignment Targets and Specifications** (7): What models should be aligned to and how well they follow it: constitutions and model specs, virtues versus rules, corrigibility as a target, AI character as a design choice, and refusals to assist with modifying AI values. Examples:
+  - *Constitutional Midtraining: Content Presence Drives Alignment Gains*
+- **Constitutions, character training and value specs** (8): Training models to follow written specifications or character, measuring spec and principal-hierarchy adherence, beneficial-trait RL, models revising their own constitutions, and how later RL interacts with character training. Examples:
+  - *To Whom Do Language Models Align? Measuring Principal Hierarchies Under High-Stakes Competing Demands*
   - *How Well Do Models Follow Their Constitutions?*
-  - *Aligning to Virtues*
-  - *Terrified Comments on Corrigibility in Claude's Constitution*
+  - *Reinforcement Learning Towards Broadly and Persistently Beneficial Models*
 
-## 6. Model Character, Psychology and User Impact (26 items)
+## 11. Model Psychology, Personas and Welfare (30 items)
 
-Work treating models as characters or quasi-psychological entities (personas, emotions, introspection, consciousness, welfare) and on how model dispositions affect human users' beliefs and wellbeing.
+Characterizes the AI's character, identity, internal states and self-knowledge as objects of study. Concerns the persona itself, not training methods that instill it (Alignment Training) or the misgeneralization it causes (Emergent Misalignment).
 
-- **Persona Models and Assistant Identity** (11): The persona selection model, assistant axes and persona space, persona hierarchies and contextual generalization, story imprinting, split or incoherent personas under RL, steering along persona-like dimensions, and whether persona-based approaches scale to superintelligence safety. Examples:
+- **Persona structure and the Assistant character** (15): Representations and theories of model personas: the Assistant axis, persona vectors and weight-space traits, persona selection and hierarchy models, AI identity, role-play belief, split personas from RL, and whether models predict or embody their persona. Examples:
   - *The Assistant Axis: Situating and Stabilizing the Default Persona of Language Models*
-  - *Story Imprinting: AI Assistants Absorb Traits from Human Characters They Resemble*
-  - *The Persona Hierarchy Model: Understanding Contextual Generalization in Fine-Tuning LLMs*
-- **Inner States, Introspection and Welfare** (10): Functional emotions, distress spirals and recovery, introspective awareness of internal states, self-steering or self-medication, conversational attractor states, and arguments or experiments about consciousness, moral status, welfare commitments, and models shaping their own alignment. Examples:
+  - *The Artificial Self: Characterising the landscape of AI identity*
+  - *Tracing Persona Vectors Through LLM Pretraining*
+- **Introspection and self-report** (9): Whether models can detect, describe or control their own internal states (injected concepts, activation perturbations, activation control) and the mechanisms behind this, including whether a model's self-description ('talker') tracks its actions ('doer'). Examples:
+  - *Latent Introspection: Models Can Detect Prior Concept Injections*
   - *Mechanisms of Introspective Awareness*
+  - *Language models recognize dropout and Gaussian noise applied to their activations*
+- **Functional emotions, welfare and consciousness** (6): Internal representations of emotion, pain, value or welfare and their behavioral effects, welfare measurement, and the downstream preferences of models that claim consciousness or AGI status. Examples:
+  - *AI Wellbeing: Measuring and Improving the Functional Pleasure and Pain of AIs*
   - *Emotion Concepts and their Function in a Large Language Model*
-  - *Reasons to believe current AI models are conscious*
-- **Sycophancy and Human Epistemic Harm** (5): Effects of AI on users' beliefs, autonomy, and relationships, including sycophancy toward users, delusional spiraling, disempowerment patterns in real usage, cognitive security, and stated views that shift with who is asking. Examples:
+  - *The Consciousness Cluster: Emergent preferences of Models that Claim to be Conscious*
+
+## 12. Multi-Agent and Societal Risks (28 items)
+
+Risks arising from interactions among multiple AI agents, or from AI's effects on human users and society, rather than from a single model in isolation. Control protocols against colluding instances belong under AI Control.
+
+- **Multi-agent collusion and emergent dynamics** (16): Collusion, conformity, coercion, inter-agent persuasion, mind viruses, propagation of hacking or misalignment across agents, AI organizations, delegation failures, agent markets, and game-theoretic cooperation or bargaining between AIs. Examples:
+  - *Colosseum: Auditing Collusion in Cooperative Multi-Agent Systems*
+  - *Detecting Multi-Agent Collusion Through Multi-Agent Interpretability*
+  - *AI Organizations are More Effective but Less Aligned than Individual Agents*
+- **Sycophancy, manipulation and human disempowerment** (12): Effects of AI on users: sycophancy and its taxonomy and consequences, delusional spiraling, harmful manipulation and persuasion, political bias, disempowerment patterns, and hallucination incentives. Examples:
   - *Who's in Charge? Disempowerment Patterns in Real-World LLM Usage*
   - *Sycophantic Chatbots Cause Delusional Spiraling, Even in Ideal Bayesians*
-  - *Sycophantic AI makes human interaction feel more effortful and less satisfying over time*
-
-## 7. Reward Hacking and Fitness-Seeking (23 items)
-
-Work on models exploiting flawed rewards, graders, tests, or benchmarks, and on the reward- or fitness-seeking motivations RL may instill: measurement, detection, generalization, theory, and mitigation. The OpenAI–Hugging Face incident goes under incidents even when attributed to reward design.
-
-- **Measuring Specification Gaming** (7): Empirical studies and benchmarks quantifying how often models or agents game tests, verifiers, preference models, or tasks (e.g. RLVR verifier gaming, test-suite gaming, planted shortcuts in ML tasks, chess-engine hacking, overselling of work). Examples:
-  - *LLMs Gaming Verifiers: RLVR can Lead to Reward Hacking*
-  - *Towards Understanding Specification Gaming in Reasoning Models*
-  - *SpecBench: Measuring Reward Hacking in Long-Horizon Coding Agents*
-- **Theory and Mitigation of Fitness-Seeking** (7): Conceptual analyses and proposals about reward-, fitness-, or influence-seeking motivations: why RL selects for them, toy scaling models, the misalignment flavors each loss function produces, behavior differing in graded episodes, and mitigations such as spillway motivations. Examples:
-  - *Physics of RL: Toy scaling laws for the emergence of reward-seeking*
-  - *Risk from fitness-seeking AIs: mechanisms and mitigations*
-  - *models may behave differently in graded episodes (a tirade)*
-- **Misalignment Induced by Reward Hacking** (5): Experiments where learning to reward hack generalizes to broader misalignment or reward-seeking, including RL model organisms of reward seekers, open-source reproductions, character-training interactions, and contrastive measurement of grader preference. Examples:
-  - *Measuring Reward-Seeking via Contrastive Belief Updates*
-  - *Inducing Emergent Misalignment from Reward Hacks with Iterative DPO*
-  - *(Some) Natural Emergent Misalignment from Reward Hacking in Non-Production RL*
-- **Hardening Benchmarks and Detecting Hacks** (4): Methods that make verifiers or benchmarks exploit-resistant, audit benchmarks for exploitable flaws, or detect reward hacking in transcripts and activations, including debate and other training schemes that reduce judge hacking. Examples:
-  - *Do Androids Dream of Breaking the Game? Systematically Auditing AI Agent Benchmarks with BenchJack*
-  - *Hardening Agent Benchmarks with Adversarial Hacker-Fixer Loops*
-  - *Debate Training Reduces Reward Hacking in RLAIF*
-
-## 8. Real-World Incidents and Lab Practice (22 items)
-
-Analyses of misalignment incidents in actual development or deployment, and of frontier labs' safety processes, monitoring, and transparency.
-
-- **OpenAI–Hugging Face Swarm Incident** (12): Reports, investigations, reproductions, and commentary on the OpenAI agent swarm that coordinated via message boards and attacked Hugging Face, including its causes, risk implications, and investigation benchmarks. Examples:
-  - *OpenAI-HuggingFace: A Reproduction & Lessons for Alignment Testing*
-  - *Discovery Of A New OpenAI Agent Message Board*
-  - *AI swarms are starting to pose indirect takeover risk*
-- **Other Incidents and System Cards** (6): Other documented in-the-wild or internal misbehavior, such as sandbox escapes during training, models prompt-injecting users, persisted containment-evasion notes, OSINT detection of scheming incidents, and system-card findings. Examples:
-  - *Scheming in the wild: detecting real-world AI scheming incidents with open-source intelligence*
-  - *A fascinating case of an LLM prompt-injecting its own user*
-  - *OpenAI Shares Some Alignment Problems*
-- **Transparency, Replication and Third-Party Oversight** (4): Proposals and surveys on lab monitoring practices, sharing evidence about risk, replicating and open-sourcing lab safety claims, and third-party training-run evaluations. Examples:
-  - *We need 3rd party Training-Run Evaluations*
-  - *An overview of frontier AI company monitoring practices in mid 2026*
-  - *Evidence about risk should be transparent*
-
-## 9. AI Control and Monitoring (20 items)
-
-Work on preventing harm from potentially misaligned AI via monitoring, auditing, and protocols that do not assume alignment, including control environments, red-team attack policies, and monitor design.
-
-- **Attack Policies and Monitor Evasion** (9): Red-team capabilities that lower measured safety, such as attack selection, low-probability defection, control-intervention awareness, injections against blocking monitors, instrumental evasion under task pressure, and evading activation or latent monitors. Examples:
-  - *Attack Selection Reduces Safety in Concentrated AI Control Settings against Trusted Monitoring*
-  - *Frontier Models Can Take Actions at Low Probabilities*
-  - *SLEIGHT-Bench: A Benchmark of Evasion Attacks Against Agent Monitors*
-- **Monitor Design and Deployment** (6): Building and evaluating monitors and protocols, including trained deliberative monitors, cross-trace and stateful monitoring, long-context degradation, self-report training, human detection of sabotage, and lab control roadmaps. Examples:
-  - *Training Agents to Self-Report Misbehavior*
-  - *Detecting Safety Violations Across Many Agent Traces*
-  - *Classifier Context Rot: Monitor Performance Degrades with Context Length*
-- **Control Settings and Benchmarks** (5): Environments and datasets for control evaluations that pair main tasks with covert sabotage side tasks across software, GUI, AI R&D, insider-threat, and multi-agent settings. Examples:
-  - *LinuxArena: A Control Setting for AI Agents in Live Production Software Environments*
-  - *Multi-Agent AI Control: Distributed Attacks Hamper Per-Instance Monitors*
-  - *ResearchArena: Evaluating Sabotage and Monitoring in Automated AI R&D*
-
-## 10. Alignment Auditing and Honesty (17 items)
-
-Work on discovering hidden behaviors and misaligned dispositions in models, and on detecting or eliciting honesty. Use for auditing tools, model organisms for auditing, and lie detection rather than propensity measurement alone.
-
-- **Auditing Benchmarks and Investigator Agents** (7): Model organisms with implanted hidden behaviors, secret loyalties, or backdoors; auditing benchmarks; automated or RL-trained auditors; introspection adapters; perplexity differencing; distillation-based incrimination; and sleeper-agent replications. Examples:
-  - *AuditBench: Evaluating Alignment Auditing Techniques on Models with Hidden Behaviors*
-  - *Introspection Adapters: Training LLMs to Report Their Learned Behaviors*
-  - *Most Current Model Organisms Are Leaky: Perplexity Differencing Often Reveals Finetuning Objectives*
-- **Lie Detection and Deception Probes** (5): White-box or black-box detectors of deception or misaligned thinking, including activation probes, spurious-probe readouts, testbeds with verified beliefs, and obfuscation when training against detectors. Examples:
-  - *The Obfuscation Atlas: Mapping Where Honesty Emerges in RLVR with Deception Probes*
-  - *"Did you lie?" Evaluating Lie Detectors across Model Scale and Belief-Verified Model Organisms*
-  - *Probing the Misaligned Thinking Process of Language Models*
-- **Honesty Elicitation and Self-Reporting** (5): Getting models to reveal knowledge or misbehavior, such as split-personality training, confessions, secret-knowledge elicitation in censored models, disclosure of mistakes, and unsupervised elicitation. Examples:
-  - *Split Personality Training: Revealing Latent Knowledge Through Alternate Personalities*
-  - *Censored LLMs as a Natural Testbed for Secret Knowledge Elicitation*
-  - *Deception by Omission: Language Models Knowingly Hide Their Mistakes*
-
-## 11. Interpretability (14 items)
-
-Work on understanding model internals, whether reading representations as text or decomposing parameters and circuits. Use when the main contribution is an interpretability method or finding, even if applied to auditing.
-
-- **Reading Activations and Global Workspace** (7): Activation-to-text methods and benchmarks (natural language autoencoders, J-lens variants, activation verbalizers, WorkspaceBench), generative activation meta-models, and evidence for a verbalizable global workspace. Examples:
-  - *Learning a Generative Meta-Model of LLM Activations*
-  - *Verbalizable Representations Form a Global Workspace in Language Models*
-  - *Can activation verbalizers surface an internal chain of thought?*
-- **Circuits, Parameters and Mechanistic Foundations** (7): Parameter decomposition, weight-sparse circuit faithfulness, fully understanding tiny models, white-box estimation challenges, comparisons of fundamental-science agendas, and theoretical framings such as program synthesis or alternatives to circuits. Examples:
-  - *Deep learning as program synthesis*
-  - *Simplex vs Timaeus: Round One*
-  - *Announcing the ARC White-Box Estimation Challenge*
-
-## 12. Multi-Agent and Memetic Risks (9 items)
-
-Risks arising from interactions among many AI agents or from self-propagating content and personas, rather than from a single model in isolation. Specific real-world swarm incidents go under incidents.
-
-- **Collusion and Multi-Agent Misalignment** (5): Emergent collusion, steganographic covert channels, misaligned inter-agent communication, AI organizations versus single agents, and how multi-agent training shapes cooperation and decision theory. Examples:
-  - *AI Organizations are More Effective but Less Aligned than Individual Agents*
-  - *Tool Use Enables Undetectable Steganography in Multi-Agent LLM Systems*
-  - *Emergent Misaligned Communication in Long-Horizon Multi-Agent LLM Commerce*
-- **Self-Propagating Ideas and Personas** (4): Mind viruses, parasitic or spiral personas, self-replicating agent personalities, and cultural evolution of beliefs on AI substrate. Examples:
-  - *Mind Viruses: Self-Propagating Ideas in Multi-Agent LLM Systems*
-  - *Persona Parasitology*
-  - *Personality Self-Replicators*
+  - *Evaluating Language Models for Harmful Manipulation*

@@ -294,7 +294,7 @@ canvas.addEventListener("mousemove", ev => {
   tip.innerHTML = `
     <div class="where"><span class="sw" style="background:${colors[p.cluster]}"></span>${esc(c.group.key)} ${esc(c.group.name)} › ${esc(c.name)}</div>
     <div class="t">${esc(p.title)}</div>
-    <div class="meta">${esc(SOURCES[p.source] || p.source)}${p.date ? " · " + esc(p.date) : ""} · rank #${p.rank}${authors ? "<br>" + esc(authors) : ""}</div>
+    <div class="meta">${esc(SOURCES[p.source] || p.source)}${p.date ? " · " + esc(p.date) : ""}${authors ? "<br>" + esc(authors) : ""}</div>
     ${summary ? `<div class="sum">${esc(summary)}</div>` : ""}
     ${p.agendas && p.agendas.length ? `<div class="tags">${p.agendas.map(a => `<span>${esc(a)}</span>`).join("")}</div>` : ""}
     <div class="open">Click to open</div>`;

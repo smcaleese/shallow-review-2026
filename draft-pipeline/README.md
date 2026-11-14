@@ -55,7 +55,8 @@ URL lists ──add──▶ entries table
    ranks each category's items by importance and keeps those with importance ≥ 0.5, at most 10 (either option also
    works alone). Entries with equal importance are ranked by their category fit, since the importance scores take only a
    few distinct values. Each
-   category gets empty agenda fields (summary, theory of change, key people, ...) for editors to fill in.
+   category gets its agenda fields (summary, theory of change, key people, ...) from `taxonomy-enriched.yaml`, or
+   empty ones for editors to fill in if that file doesn't exist.
 7. **Process the edited draft.** After people edit the draft, `process_draft.py parse` splits it into agendas and
    papers, fills paper metadata from the database and uses an LLM to extract agenda attributes. Then
    `process_draft.py format` renders the parsed JSON with `draft_template.md` (or a template in `templates/`).
@@ -68,8 +69,10 @@ URL lists ──add──▶ entries table
 - **Taxonomy:** `taxonomy.yaml` in the data folder (`DATA_PATH`, see "Things to watch for"). It's a tree of `id`, `name`, `description` and `children`, and only leaves
   can be assigned. Leaves may also have `examples`, and nodes may have `sr2024` (context from the 2024 review), which
   export prints. Optional top-level `year` and `agenda_fields` set the draft's year and the agenda fields printed
-  under each category (see `docs/DATA.md`). It is the only hand-written
-  taxonomy file (it holds the 2026 taxonomy); `enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to it.
+  under each category (see `docs/DATA.md`). It holds the 2026 taxonomy: since 2026-11-14 the data-driven one from
+  `../taxonomy-discovery/data-driven-taxonomy.md` (4 areas, 15 agendas). The earlier hand-written draft is kept as
+  `taxonomy-draft-2026-11-03.yaml` (and its enriched copy as `taxonomy-enriched-draft-2026-11-03.yaml`); the scripts
+  don't read those. `enrich_taxonomy.py` writes `taxonomy-enriched.yaml` next to `taxonomy.yaml`.
 
 ## Setup
 
@@ -89,15 +92,7 @@ Run the scripts from this folder with `uv run python ...`. The pipeline has four
 ### Phase 1: Taxonomy
 
 1. **Write the taxonomy.** Edit `data/taxonomy.yaml`: a tree of categories with an `id`, `name` and `description`, where only the leaves receive entries.
-   Its format is described under "Inputs" and in `docs/DATA.md`.
-2. **Enrich it.** An LLM writes each category's agenda fields (summary, theory of change, key people, ...) into a copy of the taxonomy:
-
-| Task | Command | Output |
-|---|---|---|
-| Write each category's agenda fields | `uv run python src/enrich_taxonomy.py [--only id1,id2] [--overwrite]` | `data/taxonomy-enriched.yaml` (`taxonomy.yaml` is not modified) |
-
-The agendas are written from each category's classified entries, so before phase 3 the fields are left empty. Rerun this
-after phase 3 to fill them in; agendas already in the file are kept unless you pass `--overwrite` or `--only`.
+   Its format is described under "Inputs" and in `docs/DATA.md`. Its agenda fields are filled in later, in phase 4.
 
 ### Phase 2: Add the sources
 
@@ -105,7 +100,7 @@ One URL list per source goes into the `entries` table, labelled with the file's 
 
 | Task | Command | Output |
 |---|---|---|
-| Queue URLs | `uv run python src/add_entries.py data/sources-links/facets-arxiv-2026.txt` | rows in `data/data.db`, labelled `facets-arxiv-2026` (override with `--source`) |
+| Queue URLs | `uv run python src/add_entries.py data/sources-links/shortlist-arxiv-2026.txt` | rows in `data/data.db`, labelled `shortlist-arxiv-2026` (override with `--source`) |
 | Show the number of entries in the `entries` table, and its first rows | `uv run python src/show_info.py [--source X] [--rows N]` | entries by status (`New`, `Done`, `Scrape Errors`, `Classify Errors`); after adding, all are `New`. Then the first 10 rows (`--rows N` for more; the columns are described under "The entries table"). `--source` limits both to one source. Also prints the paths and histograms of the scores |
 
 ### Phase 3: Classify and score the sources
@@ -177,8 +172,13 @@ command to retry it.
 The draft is a single markdown file with one section per taxonomy category, listing the classified entries filed under
 it (with `--top N`, only the N most important). If `taxonomy-enriched.yaml` exists, its agenda fields are used.
 
+First enrich the taxonomy: an LLM writes each category's agenda fields (summary, theory of change, key people, ...)
+from the entries classified into it, so run this after phase 3. A category with no classified entries is skipped and
+its fields are left empty. Agendas already in the file are kept unless you pass `--overwrite` or `--only`.
+
 | Task | Command | Output |
 |---|---|---|
+| Write each category's agenda fields | `uv run python src/enrich_taxonomy.py --workers 4 [--only id1,id2] [--overwrite]` | `data/taxonomy-enriched.yaml` (`taxonomy.yaml` is not modified) |
 | Import human feedback (optional; columns `URL,CATEGORY_ID,PAPER_ID,LINK_TEXT`) | `uv run python src/import_feedback.py feedback.csv --source <label>` | include / exclude / reclassify decisions applied at export |
 | Export the draft | `uv run python src/export_draft.py -o draft.md` | `draft.md`, every classified entry, best category fit first (`--source` limits it to some sources) |
 | Export the pruned draft: each category's 10 most important entries | `uv run python src/export_draft.py --top 10 -o draft.md` | most important first; fails if an entry has no importance score (run `score_entries.py` first) |
@@ -211,18 +211,18 @@ to be redone.
 
 ## Running on the 2026 selected sources
 
-`data/sources-links/facets-{arxiv,lw,org,safetystack}-2026.txt` hold the 502 sources on the facets site (240 arXiv,
-140 LessWrong, 80 org pages, 42 Safety Stack). `facets-shared/src/export_for_pipeline.py` writes them from
-`facets-shared/output/selected-sources.csv`; rerun it if the selection changes.
+`data/sources-links/` holds the 2026 sources: `shortlist-arxiv-2026.txt` and `shortlist-lw-2026.txt` (the arXiv and
+LessWrong shortlists, written by `scraping-scripts/export_for_pipeline.py`), plus `facets-org-2026.txt` (80 org pages)
+and `facets-safetystack-2026.txt` (42 Safety Stack items). URLs already in the database are skipped.
 
 ```bash
-for s in arxiv lw org safetystack; do
-  uv run python src/add_entries.py data/sources-links/facets-$s-2026.txt
+for f in data/sources-links/*.txt; do
+  uv run python src/add_entries.py "$f"
 done
-uv run python src/classify_entries.py --limit 600 --workers 4
-uv run python src/score_entries.py --limit 600 --workers 12
+uv run python src/classify_entries.py --limit 700 --workers 4
+uv run python src/score_entries.py --limit 700 --workers 12
 uv run python src/export_draft.py --top 10 \
-  --source facets-arxiv-2026,facets-lw-2026,facets-org-2026,facets-safetystack-2026 -o draft-2026-facets.md
+  -o draft-2026.md
 ```
 
 - `classify_entries.py` has no source filter, so it processes everything still queued.
@@ -237,7 +237,7 @@ One row per URL in `data/data.db`. The full schema is in `docs/DATA.md`; `show_i
 | Column | Written by | In `show_info.py` | Meaning |
 |---|---|---|---|
 | `url` | `add_entries.py` | URL | The page (primary key) |
-| `source` | `add_entries.py` | Source | Label of the URL list it came from, e.g. `facets-arxiv-2026` |
+| `source` | `add_entries.py` | Source | Label of the URL list it came from, e.g. `shortlist-arxiv-2026` |
 | `status` | `add_entries.py`, `classify_entries.py` | Status | `new` (queued), `done` (classified), `scrape_error` or `classify_error` (see `classify_error_message`) |
 | `added_at` | `add_entries.py` | Added | When it was queued (ISO 8601, UTC) |
 | `classified_at` | `classify_entries.py` | | When it was classified (ISO 8601, UTC) |

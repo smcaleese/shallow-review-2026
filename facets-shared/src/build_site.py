@@ -151,10 +151,11 @@ def main():
     tagged = [i for i in items if i["id"] in tags]
     shown = [i for i in tagged if tags[i["id"]]["scope"] != "exclude"]
     n_excluded = len(tagged) - len(shown)
-    if SELECTED.exists():  # the review's budget (src/select_budget.py); without it every in-scope item is shown
+    if SELECTED.exists():  # the review's sources (src/select_budget.py), scoped out or not; without it every in-scope item
         selected = set(json.loads(SELECTED.read_text())["ids"])
-        print(f"  {len(shown) - sum(i['id'] in selected for i in shown)} in-scope items outside the budget are left out")
-        shown = [i for i in shown if i["id"] in selected]
+        shown = [i for i in tagged if i["id"] in selected]
+        n_excluded = 0
+        print(f"  {len(tagged) - len(shown)} loaded items aren't in the source lists and are left out")
     pct = popularity_percentiles(shown)
     records = [item_record(i, tags[i["id"]], pct.get(i["id"], 0), tree) for i in shown]
 

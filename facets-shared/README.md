@@ -1,19 +1,20 @@
 # Shared facets: the Shallow Review 2026 sources
 
-Tags the review's candidate sources with **one vocabulary**, ranks them, keeps a fixed **budget of ~500**, and builds
-**one site** where they appear together. Four sources, each badged on the site:
+Tags the review's sources with **one vocabulary**, ranks them, and builds **one site** where they appear together. The
+site shows exactly the sources in draft-pipeline's source lists (`draft-pipeline/data/sources-links/`), so it matches
+what the draft is built from. Four sources, each badged on the site:
 
-| Source | Candidates | Budget | Notes |
-|---|---|---|---|
-| arXiv | the top-20% shortlist (303) | 240 | plus papers promoted because a LW post writes them up |
-| LessWrong / Alignment Forum | Jord's notable list + the 60 highest-karma in-scope posts it missed | 140 | |
-| Org (Lenz's list) | links from 15 AI safety organisations' research pages (`input/lenz-org-sources.md`) | 80 | |
-| Safety Stack | dataset documents none of the scrapes had, rated relevant (`../safety-stack`) | 40 | covers Oct 10 onwards, after the scrapes stopped |
+| Source | Where it comes from | Sources (13 Nov) |
+|---|---|---|
+| arXiv | the arXiv shortlist: Opus's top 20% of each month's filtered papers (`shortlist-arxiv-2026.txt`) | 356 |
+| LessWrong / Alignment Forum | the LW shortlist: Opus's top ~12% of each month's highly relevant posts (`shortlist-lw-2026.txt`) | 160 |
+| Org (Lenz's list) | links from 15 AI safety organisations' research pages, as selected earlier by this pipeline (`facets-org-2026.txt`) | 80 |
+| Safety Stack | dataset documents none of the scrapes had, as selected earlier by this pipeline (`facets-safetystack-2026.txt`) | 29 |
 
-Budgets live in `BUDGET` in `src/common.py`. The goal is as many sources as help build the taxonomy, but few enough that
-someone could read every source the review includes. Items that are both an arXiv paper and a LW post count as arXiv;
-an org or Safety Stack item that duplicates an earlier source is merged into it (badged `+Org` / `+SS`).
-`budget-overrides.json` keeps or drops items by hand on top of the budget (it keeps the three main system cards).
+The lists are named in `SOURCE_LIST_NAMES` in `src/common.py`. An LW post that writes up an arXiv paper is merged into
+the paper (badged arXiv+LW), and an org or Safety Stack item that duplicates an earlier source is merged into it, so
+the 625 listed sources show as 576 items. The pipeline still loads every org and Safety Stack candidate (for dedupe
+and ranking), but only listed ones are shown. `budget-overrides.json` and the per-source budgets are no longer used.
 
 This folder sits alongside `taxonomy/` (arXiv only) and `jord-facets/` (LW only), which keep working unchanged. It
 reads their outputs; the duplicated tagging and site code can be removed once this site covers both.
@@ -48,9 +49,9 @@ and open http://localhost:8767. Reruns are cheap: every Claude step skips items 
 | 4 | `src/tag.py` | Sonnet, once per item | Tags every facet in `vocab.yaml` → `data/3-tags-raw.jsonl` |
 | 5 | `src/postprocess.py` | – | Enforces rules the tagger doesn't follow reliably, logging each change → `data/4-tags-final.jsonl` |
 | 6 | `src/rank.py` | Opus, 2 passes per item | Scores impact, novelty and interest against the whole set, plus popularity → `output/rankings.csv`, `output/top-papers.md` |
-| 7 | `src/select_budget.py` | – | Keeps the top `BUDGET` items of each source → `data/6-selected.json`, `output/selected-sources.csv` |
+| 7 | `src/select_budget.py` | – | Keeps the items in draft-pipeline's source lists (matched on any of an item's links) → `data/6-selected.json`, `output/selected-sources.csv` |
 | 8 | `src/build_site.py` | – | Writes `site/data.js` (read by `site/index.html`) and `output/items-tagged.csv`, for the selected items only |
-| 9 | `src/export_for_pipeline.py` | – | Writes the selected items as URL lists for `draft-pipeline` (`data/sources-links/facets-<source>-2026.txt`); not run by `run_pipeline.sh` |
+| 9 | `src/export_for_pipeline.py` | – | Old: wrote the budget's items as `draft-pipeline` URL lists. Don't run it now that the selection comes from those lists; it would recreate `facets-arxiv-2026.txt` and `facets-lw-2026.txt` |
 
 `PRINT_PROMPT=1 uv run python src/tag.py` prints the tagging prompt and one example message without calling the API.
 
@@ -60,12 +61,11 @@ The pipeline only reads `input/`, so every site is built from a known snapshot. 
 
 | File | From |
 |---|---|
-| `arxiv-papers-shortlisted.csv` | `scraping-scripts/arxiv-scraper/results/shortlisted-20/2026/` (the top-20% shortlist) |
+| `arxiv-papers-shortlisted.csv` | `scraping-scripts/arxiv-scraper/results/shortlisted/2026/` (the 20% shortlist) |
 | `arxiv-papers-filtered/<month>.csv` | `scraping-scripts/arxiv-scraper/results/filtered/2026/` (all relevant papers, for dedupe) |
-| `lw-notable-posts.csv` | `jord-facets/data/2-notable-posts.csv` |
+| `lw-posts-shortlisted.csv` | `scraping-scripts/AF-and-LW-scraper/results/shortlisted/2026/` (the LW shortlist) |
 | `lw-scope-overrides.json` | `jord-facets/scope_overrides.json` (reviewer scope decisions) |
 | `lw-roster.json` | `jord-facets/roster.json` (author → org) |
-| `lw-posts-raw.csv`, `lw-scope-first-pass.jsonl` | `scraping-scripts/AF-and-LW-scraper/results/1-lw-posts-raw.csv`, `jord-facets/data/1-scope-first-pass.jsonl` (for the extra LW candidates) |
 | `safety-stack-filtered.csv` | `safety-stack/output/filtered-sources.csv` |
 | `lenz-org-sources.md` | added by hand; `lenz-org-sources.csv` is made from it |
 | `taxonomy-2025.yaml` | `taxonomy/input/taxonomy-2025.yaml` (last year's agendas) |

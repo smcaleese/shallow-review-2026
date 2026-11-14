@@ -38,8 +38,8 @@ FALLBACK_BETAS = ["server-side-fallback-2026-07-01"]
 DEFAULT_OUTPUT_DIR = "results/shortlisted"
 SHORTLISTED_FILENAME = "arxiv-papers-shortlisted.csv"
 DEFAULT_MODEL = "claude-opus-5-5"
-DEFAULT_EFFORT = "high"  # Comparing a whole month of papers is worth the extra thinking
-DEFAULT_SHARE = 0.09  # Share of each month's filtered papers to shortlist (~140 of ~1,500 a year)
+DEFAULT_EFFORT = "medium"  # Comparing a whole month of papers is worth the extra thinking
+DEFAULT_SHARE = 0.2  # Share of each month's filtered papers to shortlist (~350 of ~1,800 a year)
 MAX_TOKENS = 16000
 MAX_PARALLEL_MONTHS = 12  # Months are independent, so their calls run at the same time
 
@@ -50,14 +50,15 @@ Every paper you will see has already been judged relevant to AI safety and align
 How the papers reached you, to calibrate how selective to be:
 - Each month, an arXiv keyword search finds roughly 1,000-1,800 candidate papers (about 12,000 across the year).
 - A first filter rated each one alone and kept the 10-15% that are clearly relevant, so you will receive roughly 100-270 papers per month.
-- You pick about 9% of those: typically 10-25 papers per month, and only 100-150 for the whole year.
-So the bar is high: a paper belongs on your list only if it is plausibly among the 100-150 most important AI safety papers of the year. Most of the papers you see are solid work that should not make the cut.
+- You pick about 20% of those: typically 20-55 papers per month, and only 300-400 for the whole year.
+So the bar is high: a paper belongs on your list only if it is plausibly among the 300-400 most important AI safety papers of the year. Most of the papers you see are solid work that should not make the cut.
 
 Prefer papers that:
-- Report a novel and important finding, technique, or phenomenon, rather than an incremental improvement on an existing method
+- Report a novel and important finding, technique, or phenomenon, rather than an incremental improvement on an existing method (surveys are judged differently, see below)
 - Show results on frontier or large open-weight models rather than toy settings
 - Open or substantially move forward a research direction, or release a benchmark, dataset, or tool others are likely to build on
 - Are likely to be widely discussed or cited (citations, venue, and well-known authors are tie-breakers, never requirements)
+- Are high-quality literature reviews or surveys of an area of AI safety (e.g. the state of mechanistic interpretability, scalable oversight, or AI control): a careful, comprehensive survey that maps an area's methods, results and open problems is valuable to the review's readers even though it reports no new results. Pick at most the best one or two surveys of any one area, and skip short, shallow or mostly derivative ones
 
 Treat dangerous-capability evaluations (e.g. cyber offense, biosecurity uplift) and the science of frontier model behaviour as core safety work, alongside alignment, interpretability, oversight and control, and misuse defences.
 

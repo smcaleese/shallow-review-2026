@@ -53,8 +53,8 @@ or venue.
 able to put each item in the right place, and tell neighbouring categories apart."""
 
 PROPOSE_SYSTEM = """You design the taxonomy for the Shallow Review of Technical AI Safety, a map of the field \
-read by expert researchers. Below are all {n} items in this year's review (arXiv papers and LessWrong / Alignment \
-Forum posts).
+read by expert researchers. Below are all {n} items in this year's review (arXiv papers, LessWrong / \
+Alignment Forum posts, and research pages from AI safety organisations).
 
 Propose a two-level taxonomy that covers these items well.
 

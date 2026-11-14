@@ -14,11 +14,9 @@ SITE = ROOT / "site"
 # Inputs (copied in by sync_inputs.sh)
 ARXIV_SHORTLIST = INPUT / "arxiv-papers-shortlisted.csv"
 ARXIV_FILTERED_DIR = INPUT / "arxiv-papers-filtered"
-LW_POSTS = INPUT / "lw-notable-posts.csv"
+LW_POSTS = INPUT / "lw-posts-shortlisted.csv"
 LW_SCOPE_OVERRIDES = INPUT / "lw-scope-overrides.json"
 LW_ROSTER = INPUT / "lw-roster.json"
-LW_RAW = INPUT / "lw-posts-raw.csv"                    # every scraped 2026 post, for extra candidates
-LW_SCOPE_FIRST_PASS = INPUT / "lw-scope-first-pass.jsonl"
 LENZ_SOURCES = INPUT / "lenz-org-sources.csv"          # made from lenz-org-sources.md by src/parse_lenz_orgs.py
 SAFETY_STACK = INPUT / "safety-stack-filtered.csv"     # Safety Stack docs rated relevant (safety-stack/ pipeline)
 TAXONOMY_2025 = INPUT / "taxonomy-2025.yaml"
@@ -27,12 +25,9 @@ TAXONOMY_2025 = INPUT / "taxonomy-2025.yaml"
 VOCAB = ROOT / "vocab.yaml"
 DEDUPE_OVERRIDES = ROOT / "dedupe-overrides.json"
 
-# How many items of each source the review keeps (src/select_budget.py). Items that are both an arXiv paper and a
-# LW post count as arXiv. More candidates than this are loaded and ranked, so the weakest are the ones cut.
-# "org" is Lenz's list of AI safety organisations' research pages.
-BUDGET = {"arxiv": 240, "lesswrong": 140, "org": 80, "safety_stack": 40}
-BUDGET_OVERRIDES = ROOT / "budget-overrides.json"  # hand-picked ids kept regardless of rank (on top of the budget)
-LW_EXTRA = 60  # in-scope posts beyond Jord's notable list, by karma, added as LW candidates
+# The review's sources: the site shows exactly the items in draft-pipeline's source lists (src/select_budget.py).
+SOURCE_LISTS = ROOT.parent / "draft-pipeline" / "data" / "sources-links"
+SOURCE_LIST_NAMES = ["shortlist-arxiv-2026", "shortlist-lw-2026", "facets-org-2026", "facets-safetystack-2026"]
 
 # Pipeline outputs, in order
 LENZ_ITEMS = DATA / "1b-lenz-items.jsonl"      # Lenz's org sources with their page text (src/fetch_lenz_pages.py)
@@ -44,7 +39,7 @@ DEDUPE_REPORT = DATA / "2-dedupe-report.csv"
 TAGS_RAW = DATA / "3-tags-raw.jsonl"
 TAGS_FINAL = DATA / "4-tags-final.jsonl"
 RANKINGS_CSV = OUTPUT / "rankings.csv"
-SELECTED = DATA / "6-selected.json"             # ids of the items within the budget, read by build_site.py
+SELECTED = DATA / "6-selected.json"             # ids of the items in the source lists, read by build_site.py
 ITEMS_CSV = OUTPUT / "items-tagged.csv"
 SITE_DATA = SITE / "data.js"
 
@@ -71,3 +66,14 @@ def norm_title(title: str) -> str:
     """Lowercase, drop punctuation and a leading '[Paper]'-style tag, collapse spaces."""
     t = re.sub(r"^\s*\[[^\]]*\]\s*", "", str(title).lower())
     return " ".join(re.sub(r"[^a-z0-9]+", " ", t).split())
+
+
+def source_key(url: str) -> str:
+    """One key per work, to match items against URL lists: the arXiv ID, the LessWrong post ID, or the bare URL."""
+    m = ARXIV_ID.search(url)
+    if m:
+        return f"arxiv:{m.group(1)}"
+    m = re.search(r"(?:lesswrong\.com|alignmentforum\.org)/posts/(\w+)", url)
+    if m:
+        return f"lw:{m.group(1)}"
+    return re.sub(r"^https?://(www\.)?", "", url.strip()).rstrip("/")

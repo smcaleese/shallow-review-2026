@@ -121,7 +121,7 @@ class ClusterName(BaseModel):
     subclusters: list[SubName]
 
 
-NAME_SYSTEM = """You name clusters of AI safety research (arXiv papers and LessWrong / Alignment Forum posts) for the \
+NAME_SYSTEM = """You name clusters of AI safety research (arXiv papers, LessWrong / Alignment Forum posts, and research pages from AI safety organisations) for the \
 Shallow Review of Technical AI Safety. A clustering algorithm grouped the items; you only name and describe the \
 groups, you don't move items.
 

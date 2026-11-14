@@ -1,9 +1,7 @@
-"""Score one result: does each item fit its category, are categories distinct, and how does it compare to 2025?"""
+"""Score one result: does each item fit its category, and are categories distinct?"""
 
 import math
 from collections import Counter
-
-from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
 
 from shared import llm
 from shared.taxonomy import OTHER, assign_items, leaf_categories, level_assignments, top_categories
@@ -19,7 +17,7 @@ def balance(assignments: dict[str, str]) -> float:
     return entropy / math.log(len(sizes))
 
 
-def score_result(result: dict, items: list[dict], refs: dict[str, str], model: str = llm.DEFAULT_MODEL) -> dict:
+def score_result(result: dict, items: list[dict], model: str = llm.DEFAULT_MODEL) -> dict:
     names = {c["id"]: c["name"] for c in result["categories"]} | {OTHER: "other"}
     scores = {"method": result["method"], "n_items": len(items), "levels": {}}
 
@@ -45,10 +43,4 @@ def score_result(result: dict, items: list[dict], refs: dict[str, str], model: s
             "reassigned": reassigned,
         }
 
-    top = level_assignments(result, "top")
-    pids = [i["pid"] for i in items]
-    scores["vs_2025"] = {
-        "nmi": round(normalized_mutual_info_score([refs[p] for p in pids], [top[p] for p in pids]), 3),
-        "ari": round(adjusted_rand_score([refs[p] for p in pids], [top[p] for p in pids]), 3),
-    }
     return scores
