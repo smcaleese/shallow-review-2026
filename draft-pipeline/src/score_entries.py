@@ -40,7 +40,7 @@ from shallow_review.data_db import data_db_locked
 from shallow_review.llm import get_completion
 from shallow_review.scrape import open_scraped
 from shallow_review.stats import stats_context
-from shallow_review.utils import WORKERS_HELP, preprocess_html, run_parallel
+from shallow_review.utils import WORKERS_HELP, preprocess_html, run_parallel, truncate_tokens
 from terminal import console, run
 
 logger = logging.getLogger(__name__)
@@ -218,13 +218,15 @@ def select_entries(limit: int, rescore: bool) -> list[str]:
     return [row["url"] for row in rows]
 
 
-def score_entry(url: str, prompts: dict, model: str, max_html_tokens: int) -> ImportanceResult:
+def score_entry(url: str, prompts: dict, model: str, max_html_tokens: int, truncate: int = 0) -> ImportanceResult:
     """Score one entry from its cached page and attention, and save the result."""
     with data_db_locked() as db:
         row = db.execute("SELECT classifier_output, citation_count, lw_karma FROM entries WHERE url = ?", (url,)).fetchone()
     with open_scraped(url, "rt", encoding="utf-8") as f:
         content, preprocessing_stats = preprocess_html(f.read(), model)
     tokens = preprocessing_stats["tokens_after"]
+    if truncate and tokens > truncate:
+        content, tokens = truncate_tokens(content, truncate), truncate
     if tokens > max_html_tokens:
         raise RuntimeError(f"HTML exceeds max_html_tokens limit: {tokens} > {max_html_tokens}")
 
@@ -257,6 +259,7 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=1, help=WORKERS_HELP)
     parser.add_argument("--model", default="claude-sonnet-5-5", help="LLM model to use")
     parser.add_argument("--max-tokens", type=int, default=100000, help="Max HTML tokens before error")
+    parser.add_argument("--truncate-tokens", type=int, default=20000, help="Keep only the first N tokens of each page (default: 20000; 0 = no limit). Saves cost on long pages")
     parser.add_argument("--rescore", action="store_true", help="Also score entries that already have a score")
     args = parser.parse_args()
 
@@ -285,7 +288,7 @@ def main() -> None:
     with stats_context(commandline=f"score_entries --limit {args.limit}") as stats:
         run_parallel(
             urls,
-            lambda url: score_entry(url, prompts, args.model, args.max_tokens),
+            lambda url: score_entry(url, prompts, args.model, args.max_tokens, args.truncate_tokens),
             args.workers,
             on_done,
             on_error,

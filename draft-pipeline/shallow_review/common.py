@@ -54,6 +54,9 @@ class RunClassifyConfig(BaseModel):
     max_html_tokens: int = Field(
         default=100000, ge=1000, description="Max tokens in HTML before error"
     )
+    truncate_tokens: int = Field(
+        default=20000, ge=0, description="Keep only the first N tokens of each page (0 = no limit)"
+    )
 
 
 # Common base models (extend as needed)

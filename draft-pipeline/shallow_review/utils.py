@@ -461,6 +461,16 @@ def count_tokens(text: str, model: str = "gpt-4") -> int:
         return len(text) // 4
 
 
+def truncate_tokens(text: str, max_tokens: int) -> str:
+    """Keeps the first max_tokens tokens of text (cl100k_base, as in count_tokens) and marks the cut."""
+    marker = f"\n\n[... page truncated after the first {max_tokens} tokens ...]"
+    if not _tiktoken_available:
+        return text if len(text) <= 4 * max_tokens else text[: 4 * max_tokens] + marker
+    encoding = tiktoken.get_encoding("cl100k_base")
+    tokens = encoding.encode(text)
+    return text if len(tokens) <= max_tokens else encoding.decode(tokens[:max_tokens]) + marker
+
+
 def preprocess_html(html: str, model: str = "gpt-4") -> tuple[str, dict[str, int]]:
     """
     Preprocess HTML for LLM consumption by removing unnecessary elements.

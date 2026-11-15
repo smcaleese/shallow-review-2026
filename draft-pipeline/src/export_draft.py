@@ -14,6 +14,7 @@ Reads taxonomy-enriched.yaml from the data folder if it exists, otherwise taxono
 
 import argparse
 import json
+import re
 import sys
 from collections import defaultdict
 from datetime import date, datetime
@@ -113,6 +114,12 @@ def in_review_window(item: dict, review_year: int) -> bool:
         return True  # Undated or invalid date: include
 
 
+def title_key(title: str) -> str:
+    """Normalized title for spotting the same work under several URLs."""
+    title = re.sub(r"^\s*(\[?linkpost\]?:?)\s*", "", title.lower())
+    return re.sub(r"[^a-z0-9]+", " ", title).strip()
+
+
 def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int) -> tuple[dict, dict]:
     """Returns ({category id: items, best fit first}, counts of what the feedback changed)."""
     items_by_category = defaultdict(list)
@@ -161,10 +168,25 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
             "needs_recategorization": needs_recategorization,
             "obsolete_llm_category": obsolete_llm,
             "category_count": len(category_ids),
+            "included": bool(feedback and feedback["has_include"]),
         }
         if in_review_window(item, review_year):
             for category_id in category_ids:
                 items_by_category[category_id].append(item)
+
+    # The same work often arrives twice (arXiv paper and LessWrong linkpost, two arXiv versions): keep only the
+    # most important copy of each title, so the top-N slots go to distinct works
+    best = {}
+    for items in items_by_category.values():
+        for item in items:
+            key = title_key(item["title"])
+            rank = (item["included"], item["importance"] or 0, item["fit"])
+            if key not in best or rank > best[key][0]:
+                best[key] = (rank, item["url"])
+    for category_id, items in items_by_category.items():
+        before = len(items)
+        items[:] = [item for item in items if best[title_key(item["title"])][1] == item["url"]]
+        counts["duplicates"] += before - len(items)
 
     for category_id, items in items_by_category.items():
         if args.top or args.min_importance is not None:
@@ -175,10 +197,14 @@ def group_by_category(rows: list, feedback_by_url: dict, args, review_year: int)
             keep = len(items)
             if args.min_importance is not None:
                 keep = sum(1 for item in items if item["importance"] >= args.min_importance)
+            if args.min_per_category:  # thin categories still show their best few items
+                keep = max(keep, min(args.min_per_category, len(items)))
             if args.top:
                 keep = min(keep, args.top)
-            counts["pruned"] += len(items) - keep
-            del items[keep:]
+            # Items a human marked "include" survive the cut
+            before = len(items)
+            items[:] = items[:keep] + [item for item in items[keep:] if item["included"]]
+            counts["pruned"] += before - len(items)
         else:
             items.sort(key=lambda item: item["fit"], reverse=True)
     return items_by_category, counts
@@ -224,7 +250,10 @@ def render_header(args, sources: set[str], counts: dict, items_by_category: dict
     if args.top or args.min_importance is not None:
         rule = [f"importance at least {args.min_importance}"] if args.min_importance is not None else []
         rule += [f"at most the {args.top} most important"] if args.top else []
+        rule += [f"at least {args.min_per_category} per category"] if args.min_per_category else []
         lines.append(f"**Kept per category:** {', '.join(rule)} ({counts['pruned']} pruned)")
+    if counts["duplicates"]:
+        lines.append(f"**Duplicates dropped (same title, another URL):** {counts['duplicates']}")
     if args.respect_feedback:
         for key, label in [
             ("excluded", "Excluded by feedback"),
@@ -365,6 +394,17 @@ def main() -> None:
         help="Keep only items with at least this importance, most important first (needs score_entries.py); "
         "with --top, also at most N per category",
     )
+    parser.add_argument(
+        "--image",
+        help="Image to show at the top of the draft, as a path or URL relative to the draft file "
+        "(e.g. ../taxonomy-discovery/results/agenda-bubbles-combined-classified.png)",
+    )
+    parser.add_argument(
+        "--min-per-category",
+        type=int,
+        default=0,
+        help="With --min-importance, still keep each category's N most important items even if they score lower",
+    )
     parser.add_argument("--strict", action="store_true", help="Fail if any agenda field of a printed category is empty")
     args = parser.parse_args()
 
@@ -386,7 +426,10 @@ def main() -> None:
 
     items_by_category, counts = group_by_category(rows, feedback_by_url, args, taxonomy.year)
 
-    lines = render_taxonomy(taxonomy, items_by_category) + render_header(args, sources, counts, items_by_category, taxonomy.year)
+    lines = render_taxonomy(taxonomy, items_by_category)
+    if args.image:  # a picture of the taxonomy under the outline's heading
+        lines[1:1] = ["", f"![{taxonomy.year} taxonomy]({args.image})"]
+    lines += render_header(args, sources, counts, items_by_category, taxonomy.year)
     empty_fields: list[str] = []  # "category_id: field", for --strict
     for top_category in taxonomy.taxonomy:
         render_category(top_category, 1, taxonomy, items_by_category, lines, empty_fields, args.details)
