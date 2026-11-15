@@ -18,11 +18,12 @@
 
 ## 1. Summary
 
-- **Structure.** 5 parts, then 15 areas, then 53 agendas. The 2025 review also had three levels: area, sub-area, agenda.
-  - The **parts** are Draft 2's grouping, extended from 4 to 5. It's data-backed and gives a short table of contents.
+- **Structure.** 6 parts, then 14 areas, then 51 agendas. The 2025 review also had three levels: area, sub-area, agenda.
+  - The **parts** start from Draft 2's grouping: training, then understanding, then deployment, then the wider picture. *Make AI solve it* and *Theory & safety by construction* are parts of their own, each a single area.
+  - **Changed after draft 3:** *Model characterization* and *Formal methods, guarantees & impossibility results* were dropped (weak and largely inactive; their entries were reclassified, and they're in the graveyard in section 10). *Theory & foundations* and *Safety by construction* were merged, with Scientist AI kept as its own agenda (11.6).
   - The **areas** are mostly Draft 1's, named after recognisable research fields.
   - The **agendas** are Draft 1's, except where the method data or your notes argue for a split or merge.
-  - The parts are optional: the 15 areas also work as the top level.
+  - The parts are optional: the 14 areas also work as the top level.
 - **Taken from Draft 1:**
   - Field-named areas.
   - Finer splits of CoT, evaluations, control and security.
@@ -51,7 +52,7 @@
    - A probe used as an RL reward goes to training signals.
    - Only a new probe *method* goes to interpretability.
 2. **Readable.**
-   - Each part has 3 areas, and each area 1–5 agendas.
+   - Parts I–III and VI have 3 areas each; parts IV–V are one area each. Each area has 1–5 agendas.
    - Each agenda gets a one-sentence description that says what's in it and, where it's ambiguous, what isn't.
    - Areas use names readers already know (Interpretability, Evaluations, Monitoring & control). The more abstract names are kept to the part level.
 3. **Comprehensive.** Every 2025 agenda with 2026 activity maps to an agenda (section 6). Topics that grew in 2026 get their own agenda:
@@ -71,7 +72,7 @@
 
 ## 3. The taxonomy
 
-### Part I. Shaping models: how training determines what models learn, want and are
+### Part I. Training aligned models: how training determines what models learn, want and are
 
 **1. Training data & generalization.** How training data shapes behaviour, and why training generalizes the way it does.
 - **1.1 Data filtering & alignment pretraining.** Choosing, filtering and generating pretraining and midtraining data to shape what models know and become: filtering hazardous or subversion-relevant content, alignment pretraining and hyperstition (how AI discourse in the corpus shapes models), synthetic data for alignment.
@@ -97,11 +98,10 @@
 - **2.4 Internals & monitors as training signals.** Using probes, features or monitors as training rewards or penalties, and the risk that models learn to fool them (obfuscation) instead of changing their behaviour.
 
 **3. Model character, values & welfare.** What models are like as characters, what we want them to value, and whether they matter morally.
-- **3.1 Persona science.** Models of LLMs as characters that training selects and strengthens (persona selection, the Assistant persona, split personas, identity), and how training changes which persona a model takes on.
+- **3.1 Persona science.** Models of LLMs as characters that training selects and strengthens (persona selection, the Assistant persona, split personas, identity), how training changes which persona a model takes on, and the values and preferences current models express.
 - **3.2 Model specs, constitutions & character training.** Writing down the target character (constitutions, model specs), instilling it (character training, spec and constitution midtraining), and checking whether models follow it.
 - **3.3 Whose values: pluralistic & social-choice alignment.** Aligning to many people rather than one principal: pluralism, social choice and preference aggregation, and representing disagreement.
-- **3.4 Model characterization.** The values, preferences, drives and self-models of current models, measured outside specific threat scenarios.
-- **3.5 Model welfare & moral status.** Model welfare, moral status, and functional emotions, pleasure and pain.
+- **3.4 Model welfare & moral status.** Model welfare, moral status, and functional emotions, pleasure and pain.
 
 ### Part II. Understanding models: finding out what a model is, knows and would do
 
@@ -158,7 +158,7 @@
 - **9.4 Data poisoning & backdoors.** Planting behaviours through training data or weights (backdoors, sleeper agents, trojan neurons); results that hidden capabilities can be provably hard to detect; detecting and removing them.
 - **9.5 Weight & infrastructure security.** Protecting model weights and the inference and agent infrastructure from theft or tampering.
 
-### Part IV. Scaling alignment: AI-assisted oversight, theory and guarantees for systems we can't check directly
+### Part IV. Make AI solve it
 
 **10. Make AI solve it.** Using AI to supervise AI and to do alignment research.
 - **10.1 Scalable oversight: debate, weak-to-strong & interactive proofs.** Protocols that let weaker overseers give reliable signals for stronger models:
@@ -167,6 +167,8 @@
   - rewinding;
   - complexity-theoretic oversight such as interactive proofs.
 - **10.2 Automated alignment research.** Using AI agents to do safety research, how much uplift they give, and how to defer to them safely.
+
+### Part V. Theory & safety by construction
 
 **11. Theory & foundations.** Theoretical agendas aimed at understanding agents and safety from first principles.
 - **11.1 Agent foundations & decision theory.** Formal models of agency, goals and decision-making:
@@ -178,24 +180,22 @@
 - **11.2 Corrigibility theory.** What corrigibility and shutdownability are and whether they can be achieved: formal and conceptual work, and arguments about instrumental convergence.
 - **11.3 Natural abstractions.** Whether minds converge on shared abstractions, and how to formalize them (natural latents, condensation).
 - **11.4 Heuristic explanations & mechanistic estimation.** ARC's agenda of explaining and estimating model behaviour from the weights, without sampling.
+- **11.5 Brain-like AGI safety.** Safety for AGI built from brain-like RL, including alignment through human-like social drives. The 2025 review put it under safety by construction, but it's conceptual work on a possible future design, not a design with guarantees.
 
-**12. Safety by construction.** Systems whose safety follows from their design or from proofs.
-- **12.1 Formal methods, guarantees & impossibility results.** Proofs, formal verification and certified guarantees (including certified interpretability and runtime enforcement), and results on what can't be guaranteed.
-- **12.2 Scientist AI & non-agentic AI.** Non-agentic predictors as a safer design (LawZero's Scientist AI), and how to verify them.
-- **12.3 Brain-like AGI safety.** Safety for AGI built from brain-like RL, including alignment through human-like social drives.
+- **11.6 Scientist AI & non-agentic AI.** Non-agentic predictors as a safer design (LawZero's Scientist AI), and how to verify them.
 
-### Part V. The wider picture: interacting agents, real-world evidence and strategy
+### Part VI. The wider picture: interacting agents, real-world evidence and strategy
 
-**13. Multi-agent safety.** A single agenda, as in Draft 1. Failures that come from AI agents interacting (collusion, behaviours spreading between agents, collective misalignment, AI organisations), and cooperative AI and game theory for agents.
+**12. Multi-agent safety.** A single agenda, as in Draft 1. Failures that come from AI agents interacting (collusion, behaviours spreading between agents, collective misalignment, AI organisations), and cooperative AI and game theory for agents.
 
-**14. Real-world evidence.** Evidence from deployments and from labs' own disclosures, rather than controlled experiments.
-- **14.1 Incidents & case studies.** Real-world AI incidents and their investigation, such as the OpenAI–Hugging Face incident and rogue-agent activity found in the wild.
-- **14.2 Effects on users & society.** Sycophancy, delusion, dependence, manipulation and disempowerment, in real use and in user studies.
-- **14.3 Lab disclosures: system cards & risk reports.** System cards, alignment assessments and risk reports, and what they do or don't show.
+**13. Real-world evidence.** Evidence from deployments and from labs' own disclosures, rather than controlled experiments.
+- **13.1 Incidents & case studies.** Real-world AI incidents and their investigation, such as the OpenAI–Hugging Face incident and rogue-agent activity found in the wild.
+- **13.2 Effects on users & society.** Sycophancy, delusion, dependence, manipulation and disempowerment, in real use and in user studies.
+- **13.3 Lab disclosures: system cards & risk reports.** System cards, alignment assessments and risk reports, and what they do or don't show.
 
-**15. Threat models & strategy.** Arguments about how AI could go wrong and what the field should do about it.
-- **15.1 Misalignment arguments & failure scenarios.** Arguments for and against egregious misalignment, superintelligence-alignment arguments, and scenarios for how risk plays out.
-- **15.2 Research strategy, lab plans & deals with AIs.** Prioritizing between agendas, critiques of lab plans, and proposals for making deals with AIs.
+**14. Threat models & strategy.** Arguments about how AI could go wrong and what the field should do about it.
+- **14.1 Misalignment arguments & failure scenarios.** Arguments for and against egregious misalignment, superintelligence-alignment arguments, and scenarios for how risk plays out.
+- **14.2 Research strategy, lab plans & deals with AIs.** Prioritizing between agendas, critiques of lab plans, and proposals for making deals with AIs.
 
 ---
 
@@ -225,8 +225,7 @@ The size columns are evidence, not predictions:
 | 3.1 | Persona science | D1 1.3 | 13 | in 36 | 17 (5/6) | ok |
 | 3.2 | Model specs, constitutions & character training | split from D1 1.9 | part of 11 | in 36 | 7–10 alone in 3/6 methods | ok with adds |
 | 3.3 | Whose values: pluralistic & social-choice alignment | new (2025 "multi-agent first") | – | – | – | new; thin (0 in pipeline, about a dozen arXiv papers in pool) |
-| 3.4 | Model characterization | D1 3.3 (moved) | 7 | in 36 | – | ok (small) |
-| 3.5 | Model welfare & moral status | D1 12 | 2 | in 36 | 6 (5/6) | thin |
+| 3.4 | Model welfare & moral status | D1 12 | 2 | in 36 | 6 (5/6) | thin |
 | 4.1 | Interpretability methods & tools | D1 6.1 | 25 (with steering) | 53 (whole area) | 28 (6/6, whole area) | ok |
 | 4.2 | Science of representations | D1 6.2 | 12 | – | – | ok |
 | 4.3 | Steering & activation engineering | split from D1 6.1 | part | – | – | new split; thin (~60 arXiv titles in pool, 9 pipeline mentions) |
@@ -238,7 +237,7 @@ The size columns are evidence, not predictions:
 | 6.1 | Auditing methods & agents | D1 3.7, D2 | 13 | 50 (with organisms and incidents) | 28 (5/6, with organisms) | ok |
 | 6.2 | Model organisms & testbeds | D1 3.8 | 11 | in 50 | in 28 | ok |
 | 6.3 | Lie detection & deception probes | D2 (part) | – | 36 (with self-report) | 18 (5/6) | new to D1 |
-| 6.4 | Introspection, confessions & self-report | D1 3.5, D2 | 6 | in 36 | 21 (5/6; verbalizers go to 4.1) | ok |
+| 6.4 | Introspection, confessions & self-report | D1 3.4, D2 | 6 | in 36 | 21 (5/6; verbalizers go to 4.1) | ok |
 | 7.1 | Latent reasoning & new architectures | D1 2.1 | 18 | 58 (whole area) | 60 (6/6, whole area) | ok with adds |
 | 7.2 | CoT control, obfuscation & steganography | D1 2.2 | 10 | in 58 | in 60 | ok |
 | 7.3 | How training affects monitorability | D1 2.3 | 10 | in 58 | in 60 | ok |
@@ -257,15 +256,15 @@ The size columns are evidence, not predictions:
 | 11.2 | Corrigibility theory | split from D1 10.1 | part | – | – | new split; thin |
 | 11.3 | Natural abstractions | new (2025 "ontology identification") | – | – | – | new; thin (0 in pipeline) |
 | 11.4 | Heuristic explanations & mechanistic estimation | D1 10.2 | 7 | in interp | – | ok (small) |
-| 12.1 | Formal methods, guarantees & impossibility results | D1 10.3 | 2 | – | – | thin |
-| 12.2 | Scientist AI & non-agentic AI | new (your note: Bengio) | – | – | – | new; thin (1 in pipeline) |
-| 12.3 | Brain-like AGI safety | new (2025 agenda) | – | – | – | new; thin (1 in pipeline) |
-| 13 | Multi-agent safety | D1 8, D2 | 10 | 17 | 18 (5/6) | ok |
-| 14.1 | Incidents & case studies | D1 7.1 | 16 | in auditing | 21 (6/6) | ok |
-| 14.2 | Effects on users & society | D1 7.2 | 5 | in character | 11 (5/6) | ok |
-| 14.3 | Lab disclosures: system cards & risk reports | D1 7.3 | 5 | in strategy | 17 (5/6) | ok |
-| 15.1 | Misalignment arguments & failure scenarios | D1 11.2 | 22 | 35 (whole area) | 30 (6/6, whole area) | ok with adds |
-| 15.2 | Research strategy, lab plans & deals with AIs | D1 11.3 | 13 | in 35 | in 30 | ok |
+| 11.5 | Brain-like AGI safety | new (2025 agenda, under safety by construction) | – | – | – | new; thin (1 in pipeline) |
+| 11.6 | Scientist AI & non-agentic AI | new (your note: Bengio) | – | – | – | new; thin (1 in pipeline) |
+
+| 12 | Multi-agent safety | D1 8, D2 | 10 | 17 | 18 (5/6) | ok |
+| 13.1 | Incidents & case studies | D1 7.1 | 16 | in auditing | 21 (6/6) | ok |
+| 13.2 | Effects on users & society | D1 7.2 | 5 | in character | 11 (5/6) | ok |
+| 13.3 | Lab disclosures: system cards & risk reports | D1 7.3 | 5 | in strategy | 17 (5/6) | ok |
+| 14.1 | Misalignment arguments & failure scenarios | D1 11.2 | 22 | 35 (whole area) | 30 (6/6, whole area) | ok with adds |
+| 14.2 | Research strategy, lab plans & deals with AIs | D1 11.3 | 13 | in 35 | in 30 | ok |
 
 With `--top 10`, the draft holds at most 530 entries. Without the section 9 additions, the thin agendas hold well under 10 each, so expect roughly 420. The 2025 review linked about 820 outputs.
 
@@ -284,7 +283,7 @@ With `--top 10`, the draft holds at most 530 entries. Without the section 9 addi
 | Scalable oversight and debate could go in a "Make AI solve it" agenda | **Area 10 "Make AI solve it"**, with 10.1 Scalable oversight and 10.2 Automated alignment research. This brings back the 2025 area name. |
 | "Inspection" is basically evals | Part II has **5 Evaluations** (capabilities, scheming, awareness, validity) and **6 Alignment auditing & honesty** (auditing, model organisms, lie detection, introspection), plus 4 Interpretability. The name "Inspection" is gone. |
 | Missing: singular learning theory | **4.4 Developmental interpretability & singular learning theory.** It's named explicitly, and placement rule 20 sends SLT work here rather than to Theory. Timaeus's patterning and spectroscopy papers are already in the pipeline; section 9 adds *Interpreting Reinforcement Learning Agents with Susceptibilities* (Elliott, Urdshals, Quarel, Murfet). |
-| Missing: Bengio's work | **12.2 Scientist AI & non-agentic AI.** *Safety from Honesty in a Disinterested AI Predictor* is in the pipeline; section 9 adds *How to Verify Probabilistic Consistency of Predictive Models* (Paradise, Richardson, Bengio). |
+| Missing: Bengio's work | **11.6 Scientist AI & non-agentic AI.** *Safety from Honesty in a Disinterested AI Predictor* is in the pipeline; section 9 adds *How to Verify Probabilistic Consistency of Predictive Models* (Paradise, Richardson, Bengio). |
 | Missing: much of the agent foundations work on LessWrong | **Area 11 with four agendas**, and 30 LessWrong posts and 8 arXiv papers to add (section 9). For example: Resolution's new agent foundations team, Ngo ×2, Kosoy ×3, jessicata on FDT, Hebbar, Rosas ×2, the natural-latent posts, the Corrigibility Research Fund, and the decision-theory-in-LLMs studies. The LessWrong shortlist cut them: it kept 160 of the 1,338 posts rated highly relevant. |
 | Add sections for new orgs and agendas, and a graveyard | **Section 10.** It covers Labs, New in 2026, Orgs without public outputs, the Graveyard and a watch list, each with initial candidates from the data. |
 
@@ -297,18 +296,18 @@ Every 2025 agenda, and where it goes. "Graveyard?" means there's almost no 2026 
 | 2025 area | 2025 agendas → combined agenda |
 |---|---|
 | Black-box safety: iterative alignment | Pretrain-time → 1.1. Post-train-time → 2.1. Black-box make-AI-solve-it → 10.2. Inoculation prompting → 1.4. Inference-time in-context learning → 1.5 (about 1 item). Inference-time steering → 4.3. Unlearning → 9.3. Control → 8. Safeguards → 9.1 / 8.2. CoT monitoring → 7. |
-| Model psychology | Model values and preferences → 3.4. Character training and persona steering → 3.1 / 3.2. Emergent misalignment → 1.3. Model specs and constitutions → 3.2. Model psychopathology → 3.4. |
+| Model psychology | Model values and preferences → 3.1. Character training and persona steering → 3.1 / 3.2. Emergent misalignment → 1.3. Model specs and constitutions → 3.2. Model psychopathology → 3.4. |
 | Better data | Data filtering, hyperstition, synthetic data, data quality → 1.1. Data poisoning defence → 9.4. |
 | Goal robustness | RL safety → 2.2 and 1.5 (about 5 classic-RL papers). Harm reduction for open weights → 9.3. **Mild optimisation → graveyard?** (3 incidental items in the pool). **Assistance games → graveyard?** (one arXiv paper extends CIRL and goes in 11.1; 3 passing LessWrong mentions). **"Neglected approaches" (AE Studio) → graveyard?** (2 low-karma self-other-overlap posts). |
 | White-box safety | Reverse engineering, sparse coding, other interpretability → 4.1 / 4.2. Representation geometry → 4.2. Learning dynamics and developmental interpretability → 4.4. Model diffing → 4.1 (about 14 in the pool, 1 in the pipeline). Causal abstractions → 4.1 (3 arXiv papers). Data attribution → 1.2. Pragmatic interpretability → 4.1 / 8.2. Extracting latent knowledge → 6.3 / 6.4. Lie and deception detectors → 6.3. Monitoring concepts → 8.2. Activation engineering → 4.3. **Human inductive biases → graveyard?** (about 3 arXiv papers; otherwise 4.2). |
-| Safety by construction | Guaranteed-safe AI → 12.1. Scientist AI → 12.2. Brain-like AGI safety → 12.3. |
+| Safety by construction | Guaranteed-safe AI → graveyard (formal methods dropped after draft 3). Scientist AI → 11.6. Brain-like AGI safety → 11.5 (moved to theory). |
 | Make AI solve it | Weak-to-strong, debate → 10.1. Supervising AIs improving AIs → 10.2. AI explanations of AIs → 4.1. LLM introspection training → 6.4. |
 | Theory | Agent foundations, learning-theoretic agenda → 11.1. Asymptotic guarantees and heuristic explanations → 11.4. Corrigibility (behaviour alignment theory, other) → 11.2. Natural abstractions → 11.3. **Tiling agents → graveyard?** (one 18-karma LessWrong post). **High-actuation spaces → graveyard?** (none found). |
 | Multi-agent first | Aligning to context, aligning to the social contract, aligned to who?, aligning what? → 3.3. Theory and tools for aligning multiple AIs → 13. |
 | Evals | AGI metrics, capability, autonomy, WMD and self-replication evals → 5.1. Situational awareness → 5.3. Steganography → 7.2. Deception → 5.2 / 6.3. Scheming, sandbagging → 5.2. Various red-teams → 9.1 / 8.3. Other evals → 5. |
 | Labs | Front matter (section 10). |
 
-Agendas that are new in 2026, or grew enough to need their own place: 7.1, 2.3, 2.4, 14.1, 3.5 and 10.2. Section 10 discusses them.
+Agendas that are new in 2026, or grew enough to need their own place: 7.1, 2.3, 2.4, 13.1, 3.4 and 10.2. Section 10 discusses them.
 
 ---
 
@@ -330,9 +329,9 @@ Agendas that are new in 2026, or grew enough to need their own place: 7.1, 2.3, 
 | 2.1–2.4 CoT agendas | 7.1–7.4 (7.1 renamed to name the new architectures) |
 | 3.1 Capability evals | 5.1 |
 | 3.2 Propensity evals | 5.2 (reward-hacking benchmarks → 2.2) |
-| 3.3 Model characterization | 3.4 |
+| 3.3 Model characterization | 3.1 (agenda dropped after draft 3) |
 | 3.4 Situational & evaluation awareness | 5.3 |
-| 3.5 Introspection & self-report | 6.4 |
+| 3.4 Introspection & self-report | 6.4 |
 | 3.6 Eval science & validity | 5.4 |
 | 3.7 Alignment auditing: methods | 6.1 |
 | 3.8 Alignment auditing: testbeds & model organisms | 6.2 |
@@ -342,16 +341,16 @@ Agendas that are new in 2026, or grew enough to need their own place: 7.1, 2.3, 
 | 6.1 Interpretability methods & tools | 4.1; steering → 4.3 |
 | 6.2 Science of representations | 4.2 |
 | 6.3 Learning dynamics & devinterp | 4.4 (singular learning theory named) |
-| 7.1–7.3 Real-world evidence | 14.1–14.3 |
+| 7.1–7.3 Real-world evidence | 13.1–13.3 |
 | 8 Multi-agent safety | 13 |
 | 9 Scalable oversight & automated alignment | 10.1 + 10.2 |
 | 10.1 Agent foundations | 11.1 + 11.2; plus new 11.3 Natural abstractions |
 | 10.2 Heuristic explanations | 11.4 |
-| 10.3 Formal methods & GSAI | 12.1; plus new 12.2 Scientist AI and 12.3 Brain-like AGI |
+| 10.3 Formal methods & GSAI | dropped after draft 3 (graveyard); plus new 11.6 Scientist AI; brain-like AGI goes to 11.5 |
 | 11.1 Reward-seeking threat models | 2.3 (moved next to reward hacking; now includes measurement) |
-| 11.2 Misalignment arguments | 15.1 |
-| 11.3 Research strategy & deals | 15.2 |
-| 12 Model welfare | 3.5 |
+| 11.2 Misalignment arguments | 14.1 |
+| 11.3 Research strategy & deals | 14.2 |
+| 12 Model welfare | 3.4 |
 
 **Draft 2 → combined**
 
@@ -360,18 +359,18 @@ Agendas that are new in 2026, or grew enough to need their own place: 7.1, 2.3, 
 | Reward hacking and reward-seeking | 2.2 + 2.3 |
 | Emergent misalignment and training generalization | 1.3 + 1.4 + 1.5; persona items → 3.1; method papers → 2.1 |
 | Training-data effects | 1.2 (poisoning-attack papers → 9.4) |
-| Model character and values | 3.1, 3.2, 3.4, 3.5; alignment pretraining → 1.1; sycophancy and user effects → 14.2 |
+| Model character and values | 3.1, 3.2, 3.4; alignment pretraining → 1.1; sycophancy and user effects → 13.2 |
 | Scalable oversight and debate | 10.1 |
 | Scheming and training gaming | 5.2 |
 | Evaluation awareness and eval validity | 5.3 + 5.4 |
 | Honesty, lie detection and self-report | 6.3 + 6.4; activation verbalizers → 4.1 |
-| Alignment auditing, model organisms and incidents | 6.1 + 6.2; incidents → 14.1 |
+| Alignment auditing, model organisms and incidents | 6.1 + 6.2; incidents → 13.1 |
 | Interpretability foundations | 4.1–4.4; mechanistic estimation → 11.4 |
 | Chain-of-thought monitorability | 7.1–7.4 |
 | AI control and agent monitoring | 8.1–8.3; automated-research platforms → 10.2 |
 | Misuse, adversarial robustness and dangerous capabilities | 9.1–9.5; dangerous-capability evals → 5.1 |
 | Multi-agent risks | 13 |
-| Strategy, threat models and frontier risk reporting | 15.1 + 15.2; system cards → 14.3 |
+| Strategy, threat models and frontier risk reporting | 14.1 + 14.2; system cards → 13.3 |
 
 ---
 
@@ -386,7 +385,7 @@ These are the hard cases. The classifier sees only names, descriptions and examp
    - As misuse classifiers → 9.1.
    - As training rewards or penalties → 2.4.
    - New probe architectures in general → 4.1.
-3. **Scheming.** Whether models scheme → 5.2. A tool or benchmark for finding hidden behaviours → 6.1. A lab's overall assessment → 14.3.
+3. **Scheming.** Whether models scheme → 5.2. A tool or benchmark for finding hidden behaviours → 6.1. A lab's overall assessment → 13.3.
 4. **Emergent misalignment.** Broad misalignment from narrow training → 1.3, even when it comes from reward hacking or the mechanism is a persona. The hack itself → 2.2. Which persona a model adopts → 3.1.
 5. **Generalization that isn't about misalignment** → 1.5, including goal misgeneralization in RL agents.
 6. **Inoculation.** Inoculation and its variants (adapters, stratified inoculation, comparisons with preventative steering) → 1.4.
@@ -407,20 +406,20 @@ These are the hard cases. The classifier sees only names, descriptions and examp
 14. **Sabotage of automated safety research.** Settings and monitors → 8. Propensity results → 5.2. Agents and platforms that do research → 10.2.
 15. **AI R&D automation benchmarks** → 5.1.
 16. **Reward-seeking.** Reward- and fitness-seeker threat models and measurements → 2.3.
-17. **Sycophancy.** Sycophancy and manipulation as effects on users → 14.2. How training produces sycophancy → the matching Part I agenda.
-18. **Real-world incidents.** Investigations of real incidents → 14.1, including evals built to investigate one.
+17. **Sycophancy.** Sycophancy and manipulation as effects on users → 13.2. How training produces sycophancy → the matching Part I agenda.
+18. **Real-world incidents.** Investigations of real incidents → 13.1, including evals built to investigate one.
 19. **Unsafe deployed agents.**
     - Shutdown resistance → 5.2.
-    - Incident write-ups → 14.1.
+    - Incident write-ups → 13.1.
     - Agent security failures → 9.2.
 20. **Theory placements.**
     - Mechanistic estimation (ARC) → 11.4.
     - Singular learning theory and susceptibilities → 4.4.
     - Decision theory, including measurements of LLMs' decision-theoretic behaviour → 11.1.
-21. **Formal guarantees.** A proof or certificate about a system → 12.1. A formal model of agents in general → 11.1.
+21. **Formal guarantees.** There is no formal-methods agenda any more: a proof about a system goes to the agenda of the question it answers (e.g. limits of evaluation → 5.4). A formal model of agents in general → 11.1.
 22. **Multi-agent.** Multi-agent control (distributed attacks, monitor–policy collusion) → 8.1. Collusion and contagion among agents in general → 13.
 23. **Latent reasoning.** Recurrent, diffusion and other latent-reasoning architectures → 7.1. For example, *How Transparent is DiffusionGemma?* is currently filed under CoT monitorability as a whole.
-24. **Deals and welfare.** Deals with AIs → 15.2. Welfare and functional emotions → 3.5, but emotion representations as an interpretability finding → 4.2.
+24. **Deals and welfare.** Deals with AIs → 14.2. Welfare and functional emotions → 3.4, but emotion representations as an interpretability finding → 4.2.
 
 ---
 
@@ -477,7 +476,13 @@ These are from the filtered arXiv and LessWrong data and aren't in the pipeline 
 **11.4 Heuristic explanations**
 - [Announcing the ARC White-Box Estimation Challenge](https://lesswrong.com/posts/Kben8CzS4awCwNw5c/announcing-the-arc-white-box-estimation-challenge) (168)
 
-**12.1 Formal methods, guarantees & impossibility results**
+**11.5 Brain-like AGI safety** (all Byrnes)
+- [New version of "Intro to Brain-Like-AGI Safety"](https://lesswrong.com/posts/rreDwHXgnhEDKxkro/new-version-of-intro-to-brain-like-agi-safety) (63)
+- [Notes on technical alignment via human-like social drives](https://lesswrong.com/posts/rKdS7i4StaMmFzYRo/notes-on-technical-alignment-via-human-like-social-drives) (74)
+- [In (highly contingent!) defense of interpretability-in-the-loop ML training](https://lesswrong.com/posts/ArXAyzHkidxwoeZsL/in-highly-contingent-defense-of-interpretability-in-the-loop) (87)
+- *(in)* [RL & search is a terrifying way to build AGI](https://lesswrong.com/posts/KHyBocZncAmtu4Jbc/rl-and-search-is-a-terrifying-way-to-build-agi-an-faq) (151)
+
+**Formal methods, guarantees & impossibility results** (agenda dropped after draft 3; these were added and then reclassified)
 - [Fundamental Impossibility Results in AI Safety](https://arxiv.org/abs/2610.27373)
 - [What Can Be Enforced? A Theory of Certified Runtime Safety for Tool-Using Agents](https://arxiv.org/abs/2607.22868)
 - [Formal Mechanistic Interpretability: Automated Circuit Discovery with Provable Guarantees](https://arxiv.org/abs/2602.16823)
@@ -487,16 +492,11 @@ These are from the filtered arXiv and LessWrong data and aren't in the pipeline 
 - *(in)* [Hair-Trigger Alignment](https://arxiv.org/abs/2601.22313)
 - *(in)* [AI Models Can Provably Hide Arbitrary Capabilities](https://arxiv.org/abs/2610.13928) (better in 9.4)
 
-**12.2 Scientist AI**
+**11.6 Scientist AI**
 - [How to Verify Probabilistic Consistency of Predictive Models](https://arxiv.org/abs/2608.11181) (Paradise, Richardson, Bengio)
 - [Some Thoughts on Bengio's Scientist AI](https://lesswrong.com/posts/382m7ATXELt5eBgr3/some-thoughts-on-bengio-s-scientist-ai) (23)
 - *(in)* [Safety from Honesty in a Disinterested AI Predictor](https://arxiv.org/abs/2606.29657)
 
-**12.3 Brain-like AGI safety** (all Byrnes)
-- [New version of "Intro to Brain-Like-AGI Safety"](https://lesswrong.com/posts/rreDwHXgnhEDKxkro/new-version-of-intro-to-brain-like-agi-safety) (63)
-- [Notes on technical alignment via human-like social drives](https://lesswrong.com/posts/rKdS7i4StaMmFzYRo/notes-on-technical-alignment-via-human-like-social-drives) (74)
-- [In (highly contingent!) defense of interpretability-in-the-loop ML training](https://lesswrong.com/posts/ArXAyzHkidxwoeZsL/in-highly-contingent-defense-of-interpretability-in-the-loop) (87)
-- *(in)* [RL & search is a terrifying way to build AGI](https://lesswrong.com/posts/KHyBocZncAmtu4Jbc/rl-and-search-is-a-terrifying-way-to-build-agi-an-faq) (151)
 
 **10.1 Scalable oversight (complexity-theoretic work)**
 - [Debate is efficient with your time](https://arxiv.org/abs/2602.08630) (Brown-Cohen, Irving)
@@ -557,7 +557,7 @@ There are about 60 filtered arXiv papers on steering; these are representative.
   - [Character Training for Risk-Averse Agents](https://arxiv.org/abs/2609.38093)
 - *(in)* [Character training can mitigate reward hacking, but can also make it harder to detect](https://lesswrong.com/posts/2maYXkEgnfJHPAkxh/character-training-can-mitigate-reward-hacking-but-can-also) (146)
 
-**3.5 Model welfare**
+**3.4 Model welfare**
 - [Machinic Psychopharmacology: Do LLMs Self-Medicate?](https://lesswrong.com/posts/cNDJuXNZ8MrkPZNzj/machinic-psychopharmacology-do-llms-self-medicate-3) (UK AISI, 139; models given steering vectors as tools to change their own states)
 - [Claude Opus 5: Model Welfare](https://lesswrong.com/posts/bBXBpsyKAvJ5CqPzA/claude-opus-5-model-welfare) (Zvi, 61)
 - [What's up with GPT's welfare?](https://lesswrong.com/posts/JBGxCBiDWmX48cYry/what-s-up-with-gpt-s-welfare) (14)
@@ -569,14 +569,14 @@ There are about 60 filtered arXiv papers on steering; these are representative.
 - [Empirical safety claims from frontier labs should be replicated, scrutinized, and open-sourced](https://lesswrong.com/posts/MmfzfGcQ3h3p6N9pD/empirical-safety-claims-from-frontier-labs-should-be-1) (104)
 - [I don't think Claude is misaligned in 'Agentic Misalignment Summer 2026 - Motivated Mislabeling'](https://lesswrong.com/posts/xh6a6RbvzhP3CCmGm/i-don-t-think-claude-is-misaligned-in-agentic-misalignment) (225; argues the scenarios test obedience to a corrupted principal)
 
-**15.1 Misalignment arguments**
+**14.1 Misalignment arguments**
 - [Irretrievability; or, Murphy's Curse of Oneshotness upon ASI](https://lesswrong.com/posts/fbrz9xhKpEeTKw5zL/irretrievability-or-murphy-s-curse-of-oneshotness-upon-asi) (Yudkowsky, 370; the highest-karma post rated highly relevant that isn't in the pipeline)
 - [Product Alignment is not Superintelligence Alignment](https://lesswrong.com/posts/mrwYCNocXCP2hrWt8/product-alignment-is-not-superintelligence-alignment-and-we) (178)
 - [Reevaluating "AGI Ruin: A List of Lethalities" in 2026](https://lesswrong.com/posts/PgJYwnN7fZKipgMz4/reevaluating-agi-ruin-a-list-of-lethalities-in-2026) (175)
 - [Why I'm scared of RL](https://lesswrong.com/posts/LcQ9x72eNji2gpS9b/why-i-m-scared-of-rl) (119)
 - [Why AIs aren't power-seeking yet](https://lesswrong.com/posts/7ZH4oppNnTGtq4xXu/why-ais-aren-t-power-seeking-yet) (105)
 
-**15.2 Research strategy**
+**14.2 Research strategy**
 
 These three, rated "moderately relevant" by the filter, are among the highest-karma posts outside the pipeline.
 - [What just happened? A retrospective of AI alignment](https://lesswrong.com/posts/9RL9MuGZjzm4q3gKG/what-just-happened-a-retrospective-of-ai-alignment) (Ngo, 661)
@@ -622,9 +622,9 @@ These three, rated "moderately relevant" by the filter, are among the highest-ka
   - latent reasoning architectures (7.1)
   - reward- and fitness-seeking (2.3)
   - training against internals (2.4)
-  - real-world incidents, led by the OpenAI–Hugging Face case (14.1)
-  - model welfare as its own agenda (3.5)
-  - deals with AIs (15.2)
+  - real-world incidents, led by the OpenAI–Hugging Face case (13.1)
+  - model welfare as its own agenda (3.4)
+  - deals with AIs (14.2)
   - eval science and replication (5.4). Apollo's "Science of Evals" was in the 2025 graveyard; the topic is active again, through other groups.
 
 **Orgs without public outputs.** These carry over from 2025. The scrape (arXiv, LessWrong, org pages) found no 2026 technical output for:
@@ -645,6 +645,7 @@ These three, rated "moderately relevant" by the filter, are among the highest-ka
   - assistance games (one paper)
   - human inductive biases
   - AE Studio's self-other overlap (two low-karma posts)
+  - **Dropped after draft 3:** formal methods, guarantees & impossibility results (12 entries, none scoring above 0.55; the guaranteed-safe AI agenda of 2025), and model characterization as a separate agenda (5 entries; folded into persona science).
 
   Confirm each by hand; the scrape doesn't cover every venue.
 
@@ -664,7 +665,7 @@ These three, rated "moderately relevant" by the filter, are among the highest-ka
 - Placement rules in YAML comments aren't seen by the classifier. Rules that matter have to go into the descriptions.
 
 **Decisions still open**
-- Use the parts as the top level, or a flat list of 15 areas.
+- Use the 6 parts as the top level, or a flat list of 14 areas. Two parts are a single area, so the flat list loses little.
 - Keep subliminal learning together with data attribution in 1.2, or split them.
 - Keep inoculation as its own agenda.
 - Training gaming merged into 5.2 (Draft 1 had it under training).

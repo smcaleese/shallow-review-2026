@@ -26,6 +26,7 @@ from shallow_review.utils import (
     WORKERS_HELP,
     format_error,
     preprocess_html,
+    truncate_tokens,
     run_parallel,
 )
 from terminal import console, run
@@ -165,8 +166,11 @@ def compute_classify(url: str, config: RunClassifyConfig, force_recompute: bool 
 
         raise RuntimeError(f"Preprocessing error: {e}") from e
 
-    # Step 3: Check token limit
+    # Step 3: Truncate long pages (the full length is still recorded in tokens_stripped), then check the limit
     tokens_after = preprocessing_stats["tokens_after"]
+    if config.truncate_tokens and tokens_after > config.truncate_tokens:
+        cleaned_html = truncate_tokens(cleaned_html, config.truncate_tokens)
+        tokens_after = config.truncate_tokens
     if tokens_after > config.max_html_tokens:
         error_msg = (
             f"HTML exceeds max_html_tokens limit: {tokens_after} > {config.max_html_tokens}"
@@ -365,6 +369,7 @@ def main() -> None:
     parser.add_argument("--workers", type=int, default=1, help=WORKERS_HELP)
     parser.add_argument("--model", default="claude-sonnet-5-5", help="LLM model to use")
     parser.add_argument("--max-tokens", type=int, default=100000, help="Max HTML tokens before error")
+    parser.add_argument("--truncate-tokens", type=int, default=20000, help="Keep only the first N tokens of each page (default: 20000; 0 = no limit). Saves cost on long pages")
     parser.add_argument(
         "--retry-errors", action="store_true", help="Retry candidates with classify_error status"
     )
@@ -375,6 +380,7 @@ def main() -> None:
         workers=args.workers,
         model=args.model,
         max_html_tokens=args.max_tokens,
+        truncate_tokens=args.truncate_tokens,
     )
 
     console.print("[bold]Starting classification phase...[/bold]\n")
